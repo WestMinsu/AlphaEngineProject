@@ -4,10 +4,13 @@
 
 참고 게임 목록
 - Frontline
-- Choose your weapon
+https://mclover.hateblo.jp/FrontLine
 
-차별화 요소
-- .
+- Choose your weapon
+https://vidkidz.tistory.com/3794
+
+참고 게임들과 다른 차별화 요소
+- 보스 존재
 
 핵심 플레이 루프
 - 공격/스킬
