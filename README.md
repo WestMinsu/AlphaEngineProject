@@ -1,6 +1,7 @@
 # AlphaEngineProject
 설명
-- 적들을 다 죽이고 맵 끝에 도착
+- 적을 모두 제거하고 맵 끝에 도착
+- 높은 점수를 얻는 것이 목표
 
 참고 게임 목록
 - Frontline
@@ -20,3 +21,6 @@ https://vidkidz.tistory.com/3794
 
 타겟 유저층
 - 일정 수준 이상의 난이도의 게임에 도전 정신을 가지고 즐기는 게이머
+  
+Daily Log 
+https://docs.google.com/spreadsheets/d/1_rd4efAFq6yj2rB4g8uc9z1E7zXegBNbUHBqKwO996M/edit?pli=1&gid=0#gid=0
