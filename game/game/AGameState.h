@@ -1,5 +1,11 @@
 #pragma once
 
+enum class GameState
+{
+	Intro,
+	MainMenu,
+	MainGame
+};
 
 class AGameState
 {
