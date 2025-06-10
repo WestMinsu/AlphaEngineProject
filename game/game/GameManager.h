@@ -1,6 +1,10 @@
 #pragma once
+#include <memory>
 #include "AEEngine.h"
 #include "AGameState.h"
+#include "IntroState.h"
+#include "MainMenuState.h"
+#include "MainGameState.h"
 
 class GameManager
 {
@@ -20,16 +24,19 @@ public:
 	static s32 m_heightWindow;
 
 	// GameState variables to change
-	static GameState m_currentState; 
 	static GameState m_nextState;
 
 	// Game Font
 	static s8 m_font;
 
 	// static function
-	static void ChangeState();
+	// Change m_nextState
+	static void ChangeState(GameState newGameState);
 
 private:
-	bool isGameRunning;
+	bool m_isGameRunning;
+	const char* m_kTextTitle;
+
+	std::unique_ptr<AGameState> m_GameState;
 
 };

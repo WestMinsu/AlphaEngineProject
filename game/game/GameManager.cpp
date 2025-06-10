@@ -1,0 +1,75 @@
+#include "GameManager.h"
+
+
+s32 GameManager::m_widthWindow;
+s32 GameManager::m_heightWindow;
+GameState GameManager::m_nextState = GameState::None;
+s8 GameManager::m_font;
+
+GameManager::GameManager()
+{
+	m_isGameRunning = TRUE;
+	m_widthWindow = 1600;
+	m_heightWindow = 900;
+	m_kTextTitle = "Title";
+
+	m_GameState = nullptr;
+}
+
+GameManager::~GameManager()
+{
+	AEGfxDestroyFont(m_font);
+}
+
+void GameManager::Init()
+{
+	AESysSetWindowTitle(m_kTextTitle);
+	
+	m_GameState = std::move(std::make_unique<IntroState>());
+	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72.f);
+
+	AESysReset();
+}
+
+void GameManager::Update()
+{
+	while (m_isGameRunning)
+	{
+		if (GameManager::m_nextState != GameState::NONE)
+		{
+			m_GameState->Exit();
+
+			switch (GameManager::m_nextState)
+			{
+			case GameState::INTRO:
+				m_GameState = std::move(std::make_unique<IntroState>());
+				break;
+			case GameState::MAINMENU:
+				m_GameState = std::move(std::make_unique<MainMenuState>());
+				break;
+			case GameState::MAINNGAME:
+				m_GameState = std::move(std::make_unique<MainGameState>());
+				break;
+			}
+
+			m_GameState->Init();
+			GameManager::m_nextState = GameState::NONE;
+		}
+		AESysFrameStart();
+
+		m_GameState->Update();
+		m_GameState->Draw();
+
+		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+			m_isGameRunning = FALSE;
+		}
+		AESysFrameEnd();
+	}
+	m_GameState->Exit();
+	return;
+}
+
+void GameManager::ChangeState(GameState newGameState)
+{
+	GameManager::m_nextState = newGameState;
+}
