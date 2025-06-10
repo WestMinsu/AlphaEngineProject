@@ -20,8 +20,8 @@ public:
 	static s32 m_heightWindow;
 
 	// GameState variables to change
-	static AGameState* m_currentState; 
-	static AGameState* m_nextState;
+	static GameState m_currentState; 
+	static GameState m_nextState;
 
 	// Game Font
 	static s8 m_font;
