@@ -9,7 +9,7 @@ public:
 
 	// Override Functions
 	void Init() override;
-	void Update() override;
+	void Update(f32 dt) override;
 	void Draw() override;
 	void Exit() override;
 

@@ -16,12 +16,10 @@ public:
 	~GameManager();
 
 	void Init();
-	void Update();
+	void Update(f32 dt);
 
 	//static member variable
-	// width & height of the window
-	static s32 m_widthWindow;
-	static s32 m_heightWindow;
+
 
 	// GameState variables to change
 	static GameState m_nextState;

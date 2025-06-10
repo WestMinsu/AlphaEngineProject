@@ -1,3 +1,5 @@
+#include "AGameState.h"
+#include "GameManager.h"
 #include "MainGameState.h"
 
 MainGameState::MainGameState()
@@ -15,7 +17,7 @@ void MainGameState::Init()
 
 }
 
-void MainGameState::Update()
+void MainGameState::Update(f32 dt)
 {
 
 }

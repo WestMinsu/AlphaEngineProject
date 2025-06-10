@@ -4,7 +4,7 @@
 #include <crtdbg.h> // To check for memory leaks
 #include "AEEngine.h"
 #include "GameManager.h"
-
+#include "Constants.h"
 
 // ---------------------------------------------------------------------------
 // main
@@ -19,15 +19,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// Initialization of your own variables go here
-
+	AESysInit(hInstance, nCmdShow, kWindowWidth, kWindowHeight, 1, 60, false, NULL);
 	GameManager gameManager;
 	gameManager.Init();
 
-	// Using custom window procedure
-	AESysInit(hInstance, nCmdShow, gameManager.m_widthWindow, gameManager.m_heightWindow, 1, 60, false, NULL);
-
-	gameManager.Update();
+	gameManager.Update(static_cast<f32>(AEFrameRateControllerGetFrameTime()));
 
 	// free the system
 	AESysExit();

@@ -1,16 +1,12 @@
 #include "GameManager.h"
 
-
-s32 GameManager::m_widthWindow;
-s32 GameManager::m_heightWindow;
-GameState GameManager::m_nextState = GameState::None;
+GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
 
 GameManager::GameManager()
 {
 	m_isGameRunning = TRUE;
-	m_widthWindow = 1600;
-	m_heightWindow = 900;
+
 	m_kTextTitle = "Title";
 
 	m_GameState = nullptr;
@@ -31,7 +27,7 @@ void GameManager::Init()
 	AESysReset();
 }
 
-void GameManager::Update()
+void GameManager::Update(f32 dt)
 {
 	while (m_isGameRunning)
 	{
@@ -44,10 +40,10 @@ void GameManager::Update()
 			case GameState::INTRO:
 				m_GameState = std::move(std::make_unique<IntroState>());
 				break;
-			case GameState::MAINMENU:
+			case GameState::MAIN_MENU:
 				m_GameState = std::move(std::make_unique<MainMenuState>());
 				break;
-			case GameState::MAINNGAME:
+			case GameState::MAIN_GAME:
 				m_GameState = std::move(std::make_unique<MainGameState>());
 				break;
 			}
@@ -57,7 +53,7 @@ void GameManager::Update()
 		}
 		AESysFrameStart();
 
-		m_GameState->Update();
+		m_GameState->Update(dt);
 		m_GameState->Draw();
 
 		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
