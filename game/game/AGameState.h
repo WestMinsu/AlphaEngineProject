@@ -2,9 +2,10 @@
 
 enum class GameState
 {
-	Intro,
-	MainMenu,
-	MainGame
+	NONE,
+	INTRO,
+	MAINMENU,
+	MAINNGAME
 };
 
 class AGameState
