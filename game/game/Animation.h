@@ -9,9 +9,14 @@ public:
 	~Animation();
 
 	void Init();
-	void Update(f32 dt);
-	void Draw();
+	void Update(CharacterAnimationState currentAnimState, f32 dt);
+	void ChangeAnimState(CharacterAnimationState newAnimState);
+	void Draw(AEMtx33 transform);
 	void Destroy();
+
+	bool getAnimationFinished();
+	void UpdateDeathTime(f32 dt);
+	bool isRestartAnimDeathtoIDLE();
 
 private:
 	AEGfxVertexList* m_mesh;
