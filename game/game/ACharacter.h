@@ -9,6 +9,7 @@ public:
 	virtual void Update() = 0;
 	virtual void Move() = 0;
 	virtual void Attack() = 0;
+	virtual void Draw() = 0;
 
 private:
 	AEVec2 m_position;
