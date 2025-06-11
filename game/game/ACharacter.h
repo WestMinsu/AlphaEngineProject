@@ -22,7 +22,7 @@ public:
 	~ACharacter() {};
 	virtual void Init(AEVec2 position) = 0;
 	virtual void Update(f32 dt) = 0;
-	virtual void Move() = 0;
+	virtual void Move(f32 dt) = 0;
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
 	virtual void Destroy() = 0;
