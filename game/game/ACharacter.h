@@ -1,23 +1,38 @@
 #pragma once
 #include "AEEngine.h"
-#include "MainGameState.h"
+
+enum class CharacterAnimationState
+{
+	IDLE,
+	WALK,
+	JUMP,
+	DEATH
+};
+
+enum class CharacterDirection
+{
+	LEFT,
+	RIGHT
+};
+
 
 class ACharacter
 {
 public:
 	~ACharacter() {};
 	virtual void Init(AEVec2 position) = 0;
-	virtual void Update() = 0;
+	virtual void Update(f32 dt) = 0;
 	virtual void Move() = 0;
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
+	virtual void Destroy() = 0;
 
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
 
-	int m_healthPoint;
-	f32 m_characterSpeed = 300.0f;
+	s32 m_healthPoint;
+	f32 m_characterSpeed;
 
 	CharacterDirection m_currentDirection;
 };
