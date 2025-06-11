@@ -16,6 +16,4 @@ public:
 	void Exit() override;
 
 private:
-
-	bool StartMainGame();
 };

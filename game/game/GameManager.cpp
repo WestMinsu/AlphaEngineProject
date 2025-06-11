@@ -2,11 +2,10 @@
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
+bool GameManager::m_isGameRunning = true;
 
 GameManager::GameManager()
 {
-	m_isGameRunning = TRUE;
-
 	m_kTextTitle = "Title";
 
 	m_GameState = nullptr;

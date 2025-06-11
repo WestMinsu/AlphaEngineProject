@@ -1,5 +1,6 @@
 #include "AEEngine.h"
 #include "Utility.h"
+#include "Constants.h"
 AEGfxVertexList* mesh = nullptr;
 void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AEGfxTexture* pTex)
 {
@@ -44,4 +45,12 @@ void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AE
     AEGfxSetTransform(transform.m);
 
     AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+}
+
+AEVec2 GetNormalizedCoords(f32 x, f32 y)
+{
+    AEVec2 ndcCoord;
+    ndcCoord.x = (2.0f * x / kWindowWidth);
+    ndcCoord.y = (2.0f * y / kWindowHeight);
+    return ndcCoord;
 }

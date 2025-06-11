@@ -31,8 +31,8 @@ public:
 	// Change m_nextState
 	static void ChangeState(GameState newGameState);
 
+	static bool m_isGameRunning;
 private:
-	bool m_isGameRunning;
 	const char* m_kTextTitle;
 
 	std::unique_ptr<AGameState> m_GameState;
