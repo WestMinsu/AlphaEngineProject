@@ -43,7 +43,7 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_currentAnimState == CharacterAnimationState::JUMP && m_animation.getAnimationFinished())
 	{
 		m_currentAnimState = CharacterAnimationState::IDLE;
-		m_animation.ChangeAnimState(CharacterAnimationState::IDLE);
+		m_animation.ChangeAnimState(m_currentAnimState);
 	}
 
 	if (m_currentAnimState != CharacterAnimationState::JUMP &&
