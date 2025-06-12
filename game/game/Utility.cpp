@@ -4,19 +4,17 @@
 AEGfxVertexList* mesh = nullptr;
 void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AEGfxTexture* pTex)
 {
-    if (mesh == nullptr)
-    {
-        AEGfxMeshStart();
-        AEGfxTriAdd(
-            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
-            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-        AEGfxTriAdd(
-            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-       mesh = AEGfxMeshEnd();
-    }
+    AEGfxMeshStart();
+    AEGfxTriAdd(
+        -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
+        0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    AEGfxTriAdd(
+        0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+        0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    mesh = AEGfxMeshEnd();
+   
     AEMtx33 scale = { 0 };
     AEMtx33Scale(&scale, w, h);
 
@@ -45,6 +43,41 @@ void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AE
     AEGfxSetTransform(transform.m);
 
     AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+}
+
+void DrawHollowRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a)
+{
+    AEGfxMeshStart();
+    AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
+    AEGfxVertexAdd(0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
+    AEGfxVertexAdd(0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
+    AEGfxVertexAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    mesh = AEGfxMeshEnd();
+    
+    AEMtx33 scale = { 0 };
+    AEMtx33Scale(&scale, w, h);
+
+    AEMtx33 rotate = { 0 };
+    AEMtx33Rot(&rotate, 0);
+
+    AEMtx33 translate = { 0 };
+    AEMtx33Trans(&translate, x, y);
+
+    AEMtx33 transform = { 0 };
+    AEMtx33Concat(&transform, &rotate, &scale);
+    AEMtx33Concat(&transform, &translate, &transform);
+
+   AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+
+    AEGfxSetColorToMultiply(r, g, b, a);
+
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+
+    AEGfxSetTransform(transform.m);
+
+    AEGfxMeshDraw(mesh, AE_GFX_MDM_LINES_STRIP);
 }
 
 AEVec2 GetNormalizedCoords(f32 x, f32 y)

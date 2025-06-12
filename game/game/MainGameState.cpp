@@ -2,6 +2,7 @@
 #include "GameManager.h"
 #include "MainGameState.h"
 #include "Constants.h"
+#include "Utility.h"
 MainGameState::MainGameState()
 {
 }
@@ -233,6 +234,8 @@ void MainGameState::Draw()
 
 	AEGfxSetTransform(transform.m);
 	AEGfxMeshDraw(m_mesh, AE_GFX_MDM_TRIANGLES);
+
+	DrawHollowRect(m_characterPosition.x, m_characterPosition.y, characterWidth, characterHeight, 0.f, 1.f, 0.f);
 }
 
 void MainGameState::Exit()
