@@ -2,8 +2,6 @@
 #include "GameManager.h"
 #include "MainGameState.h"
 #include "Constants.h"
-#include "Utility.h"
-
 MainGameState::MainGameState()
 {
 }

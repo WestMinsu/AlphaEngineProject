@@ -1,5 +1,6 @@
 #include "CharacterPlayer.h"
 #include "Constants.h"
+#include "Utility.h"
 
 CharacterPlayer::CharacterPlayer()
 {
@@ -52,7 +53,7 @@ void CharacterPlayer::Update(f32 dt)
 		Move(dt);
 	}
 		
-	m_animation.Update(m_currentAnimState, dt);
+	m_animation.Update(dt);
 
 	const f32 characterHalfWidth = m_size.x / 2.0f;
 	const f32 characterHalfHeight = m_size.y / 2.0f;
@@ -112,7 +113,6 @@ void CharacterPlayer::Move(f32 dt)
 
 void CharacterPlayer::Attack()
 {
-
 }
 
 void CharacterPlayer::Draw()
@@ -134,6 +134,7 @@ void CharacterPlayer::Draw()
 	AEMtx33Concat(&transform, &translate, &transform);
 
 	m_animation.Draw(transform);
+	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.f, 1.f, 0.f);
 }
 
 void CharacterPlayer::Destroy()
