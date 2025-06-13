@@ -3,9 +3,10 @@
 #include "IntroState.h"
 #include "Constants.h"
 #include "Utility.h"
+#include "AssetManager.h"
 
 IntroState::IntroState(): 
-m_pTex{AEGfxTextureLoad("Assets/Digipen_logo.png")}, 
+m_pTex{assetManager.LoadImageAsset("Assets/Digipen_logo.png")}, 
 m_alphaTime{ 0.0f },
 m_alphaSpeed{ 1.0f },
 m_currentAlpha{ 0.0f }

@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include "AssetManager.h"
 
 Animation::Animation()
 {
