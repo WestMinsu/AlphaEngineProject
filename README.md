@@ -25,3 +25,6 @@ https://vidkidz.tistory.com/3794
   
 Daily Log 
 https://docs.google.com/spreadsheets/d/1_rd4efAFq6yj2rB4g8uc9z1E7zXegBNbUHBqKwO996M/edit?pli=1&gid=0#gid=0
+
+1주차 영상
+https://drive.google.com/file/d/11PfgaqduD3h8pQlVvXl4tRaPJUkzD9Bo/view?usp=sharing

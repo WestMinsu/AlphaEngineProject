@@ -21,4 +21,3 @@ private:
 
 	Animation m_animation;
 };
-
