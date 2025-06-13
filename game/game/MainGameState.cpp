@@ -2,7 +2,6 @@
 #include "GameManager.h"
 #include "MainGameState.h"
 #include "Constants.h"
-
 MainGameState::MainGameState()
 {
 }

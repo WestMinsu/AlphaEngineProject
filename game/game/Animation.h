@@ -1,6 +1,21 @@
 #pragma once
 #include <AEEngine.h>
 #include "ACharacter.h"
+#include <map>
+
+enum class SpriteSheetOrientation
+{
+	HORIZONTAL, 
+	VERTICAL   
+};
+
+struct AnimData
+{
+	AEGfxTexture* pTexture = nullptr;
+	s32 frameCount = 0;
+	SpriteSheetOrientation orientation = SpriteSheetOrientation::VERTICAL;
+	f32 frameDuration = 0.1f;
+};
 
 class Animation
 {
@@ -9,7 +24,7 @@ public:
 	~Animation();
 
 	void Init();
-	void Update(CharacterAnimationState currentAnimState, f32 dt);
+	void Update(f32 dt);
 	void ChangeAnimState(CharacterAnimationState newAnimState);
 	void Draw(AEMtx33 transform);
 	void Destroy();
@@ -21,20 +36,12 @@ public:
 private:
 	AEGfxVertexList* m_mesh;
 
-	AEGfxTexture* m_pTexIdle;
-	AEGfxTexture* m_pTexWalk;
-	AEGfxTexture* m_pTexJump;
-	AEGfxTexture* m_pTexDeath;
-	AEGfxTexture* m_currentPTex;
+	std::map<CharacterAnimationState, AnimData> m_animDataMap;
+	CharacterAnimationState m_currentAnimState; 
 
 	s32 m_subImageIndex;
 	f32 m_offset;
 	f32 m_elapsedTime;
-
-	s32 m_idleFrames = 8;
-	s32 m_walkFrames = 8;
-	s32 m_jumpFrames = 8;
-	s32 m_deathFrames = 8;
 
 	bool m_animationFinished = false;
 	f32 m_deathTimer;
