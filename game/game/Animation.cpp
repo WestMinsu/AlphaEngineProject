@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include "AssetManager.h"
 
 Animation::Animation()
 {
@@ -24,10 +25,10 @@ void Animation::Init()
 
 	m_mesh = AEGfxMeshEnd();
 
-	m_pTexIdle = AEGfxTextureLoad("Assets/idle_right_down.png");
-	m_pTexWalk = AEGfxTextureLoad("Assets/walk_right_down.png");
-	m_pTexJump = AEGfxTextureLoad("Assets/Jump_Right_Down.png");
-	m_pTexDeath = AEGfxTextureLoad("Assets/death_normal_right_down.png");
+	m_pTexIdle = assetManager.LoadImageAsset("Assets/idle_right_down.png");
+	m_pTexWalk = assetManager.LoadImageAsset("Assets/walk_right_down.png");
+	m_pTexJump = assetManager.LoadImageAsset("Assets/Jump_Right_Down.png");
+	m_pTexDeath = assetManager.LoadImageAsset("Assets/death_normal_right_down.png");
 
 	m_currentPTex = m_pTexIdle;
 	m_subImageIndex = 0;
