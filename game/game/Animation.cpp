@@ -35,13 +35,13 @@ void Animation::Init()
 	m_mesh = AEGfxMeshEnd();
 
 	m_animDataMap[CharacterAnimationState::IDLE] = {
-		  AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
+		  assetManager.LoadImageAsset("Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
 	};
 	m_animDataMap[CharacterAnimationState::WALK] = {
-		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png"), 10, SpriteSheetOrientation::VERTICAL, 0.08f
+		assetManager.LoadImageAsset("Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png"), 10, SpriteSheetOrientation::VERTICAL, 0.08f
 	};
 	m_animDataMap[CharacterAnimationState::JUMP] = {
-		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
+		assetManager.LoadImageAsset("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
 	};
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
