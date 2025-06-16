@@ -1,20 +1,52 @@
 #include "AEEngine.h"
 #include "Utility.h"
 #include "Constants.h"
-AEGfxVertexList* mesh = nullptr;
-void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AEGfxTexture* pTex)
+AEGfxVertexList* rectMesh = nullptr;      
+AEGfxVertexList* hollowRectMesh = nullptr;
+
+void InitUtilityMeshes()
 {
-    AEGfxMeshStart();
-    AEGfxTriAdd(
-        -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
-        0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-    AEGfxTriAdd(
-        0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
-        0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-    mesh = AEGfxMeshEnd();
-   
+    if (rectMesh == nullptr)
+    {
+        AEGfxMeshStart();
+        AEGfxTriAdd(
+            -0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        AEGfxTriAdd(
+            0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+            0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
+            -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        rectMesh = AEGfxMeshEnd();
+    }
+
+    if (hollowRectMesh == nullptr)
+    {
+        AEGfxMeshStart();
+        AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        AEGfxVertexAdd(0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        AEGfxVertexAdd(0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        AEGfxVertexAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+        hollowRectMesh = AEGfxMeshEnd();
+    }
+}
+
+void FreeUtilityMeshes()
+{
+    if (rectMesh)
+    {
+        AEGfxMeshFree(rectMesh);
+    }
+    if (hollowRectMesh)
+    {
+        AEGfxMeshFree(hollowRectMesh);
+    }
+}
+
+
+void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AEGfxTexture* pTex)
+{ 
     AEMtx33 scale = { 0 };
     AEMtx33Scale(&scale, w, h);
 
@@ -42,19 +74,11 @@ void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AE
 
     AEGfxSetTransform(transform.m);
 
-    AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+    AEGfxMeshDraw(rectMesh, AE_GFX_MDM_TRIANGLES);
 }
 
 void DrawHollowRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a)
-{
-    AEGfxMeshStart();
-    AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
-    AEGfxVertexAdd(0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
-    AEGfxVertexAdd(0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f); 
-    AEGfxVertexAdd(-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-    AEGfxVertexAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-    mesh = AEGfxMeshEnd();
-    
+{  
     AEMtx33 scale = { 0 };
     AEMtx33Scale(&scale, w, h);
 
@@ -68,7 +92,7 @@ void DrawHollowRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float
     AEMtx33Concat(&transform, &rotate, &scale);
     AEMtx33Concat(&transform, &translate, &transform);
 
-   AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 
     AEGfxSetColorToMultiply(r, g, b, a);
 
@@ -77,7 +101,7 @@ void DrawHollowRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float
 
     AEGfxSetTransform(transform.m);
 
-    AEGfxMeshDraw(mesh, AE_GFX_MDM_LINES_STRIP);
+    AEGfxMeshDraw(hollowRectMesh, AE_GFX_MDM_LINES_STRIP);
 }
 
 AEVec2 GetNormalizedCoords(f32 x, f32 y)

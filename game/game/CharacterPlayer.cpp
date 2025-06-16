@@ -1,7 +1,6 @@
 #include "CharacterPlayer.h"
 #include "Constants.h"
 #include "Utility.h"
-
 CharacterPlayer::CharacterPlayer()
 {
 	// TO DO change 
@@ -28,7 +27,6 @@ void CharacterPlayer::Init(AEVec2 position)
 
 void CharacterPlayer::Update(f32 dt)
 {
-	
 	if (m_currentAnimState == CharacterAnimationState::DEATH && m_animation.getAnimationFinished())
 	{
 		m_animation.UpdateDeathTime(dt);

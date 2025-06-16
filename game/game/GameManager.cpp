@@ -1,4 +1,5 @@
 #include "GameManager.h"
+#include "Utility.h"
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
@@ -13,6 +14,7 @@ GameManager::GameManager()
 
 GameManager::~GameManager()
 {
+	FreeUtilityMeshes();
 	AEGfxDestroyFont(m_font);
 }
 
@@ -22,7 +24,7 @@ void GameManager::Init()
 	
 	m_GameState = std::move(std::make_unique<IntroState>());
 	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
-
+	InitUtilityMeshes();
 	AESysReset();
 }
 

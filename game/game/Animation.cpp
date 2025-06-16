@@ -1,6 +1,5 @@
 #include "Animation.h"
 #include "AssetManager.h"
-
 Animation::Animation()
 {
 }
@@ -11,28 +10,7 @@ Animation::~Animation()
 
 void Animation::Init()
 {
-	AEGfxMeshStart();
-
-	//AEGfxTriAdd(
-	//	-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
-	//	0.5f, -0.5f, 0xFFFFFFFF, 0.125f, 1.0f,
-	//	-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-
-	//AEGfxTriAdd(
-	//	0.5f, -0.5f, 0xFFFFFFFF, 0.125f, 1.0f,
-	//	0.5f, 0.5f, 0xFFFFFFFF, 0.125f, 0.0f,
-	//	-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-
-	AEGfxTriAdd(
-		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.125f, 
-		0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.125f,
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-
-	AEGfxTriAdd(
-		0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 0.125f,
-		0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
-	m_mesh = AEGfxMeshEnd();
+	m_mesh = nullptr;
 
 	m_animDataMap[CharacterAnimationState::IDLE] = {
 		  AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
@@ -43,11 +21,11 @@ void Animation::Init()
 	m_animDataMap[CharacterAnimationState::JUMP] = {
 		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
 	};
+	m_animDataMap[CharacterAnimationState::DEATH] = {
+	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
+	};
 
-	m_currentAnimState = CharacterAnimationState::IDLE;
-	m_subImageIndex = 0;
-	m_offset = 0.0f;
-	m_elapsedTime = 0.0f;
+	ChangeAnimState(CharacterAnimationState::IDLE);
 }
 
 void Animation::Update(f32 dt)
@@ -80,6 +58,11 @@ void Animation::ChangeAnimState(CharacterAnimationState newAnimState)
 	m_offset = 0.0f;
 	m_elapsedTime = 0.0f;
 	m_animationFinished = false;
+
+	if (newAnimState == CharacterAnimationState::DEATH)
+	{
+		m_deathTimer = 0.0f;
+	}
 
 	if (m_mesh)
 	{
