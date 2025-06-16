@@ -9,14 +9,16 @@ CharacterPlayer::CharacterPlayer()
 	m_size = { 500.f, 500.f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
+	m_airAcceleration = 1000.f;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_currentDirection = CharacterDirection::RIGHT;
 
+	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
-	m_gravity = -1200.0f;  
-	m_jumpStrength = 600.0f; 
-	m_isGrounded = true;     
-	m_groundLevel = 0.0f;    
+	m_gravity = -1200.0f;
+	m_jumpStrength = 600.0f;
+	m_isGrounded = true;
+	m_groundLevel = 0.0f;
 }
 
 
@@ -34,15 +36,25 @@ void CharacterPlayer::Update(f32 dt)
 {
 	if (!m_isGrounded)
 	{
-		m_velocityY += m_gravity * dt;     
-		m_position.y += m_velocityY * dt; 
+		m_velocityY += m_gravity * dt;
 	}
+
+	m_position.x += m_velocityX * dt;
+	m_position.y += m_velocityY * dt;
 
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{
-		m_position.y = m_groundLevel; 
+		m_position.y = m_groundLevel;
 		m_velocityY = 0.0f;
-		m_isGrounded = true;
+
+		if (!m_isGrounded)
+		{
+			m_isGrounded = true;
+			if (!AEInputCheckCurr(AEVK_A) && !AEInputCheckCurr(AEVK_D))
+			{
+				m_velocityX = 0.0f;
+			}
+		}
 
 		if (m_currentAnimState == CharacterAnimationState::JUMP)
 		{
@@ -50,7 +62,6 @@ void CharacterPlayer::Update(f32 dt)
 			m_animation.ChangeAnimState(m_currentAnimState);
 		}
 	}
-
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		if (m_animation.getAnimationFinished())
@@ -64,7 +75,7 @@ void CharacterPlayer::Update(f32 dt)
 			}
 		}
 	}
-	else 
+	else
 	{
 		if (m_currentAnimState == CharacterAnimationState::JUMP && m_animation.getAnimationFinished())
 		{
@@ -97,21 +108,44 @@ void CharacterPlayer::Update(f32 dt)
 
 void CharacterPlayer::Move(f32 dt)
 {
-	bool isMoving = false;
-	if (AEInputCheckCurr(AEVK_LEFT))
+	if (m_isGrounded)
 	{
-		m_position.x -= m_characterSpeed * dt;
-		m_currentDirection = CharacterDirection::LEFT;
-		isMoving = true;
+		if (AEInputCheckCurr(AEVK_LEFT))
+		{
+			m_velocityX = -m_characterSpeed;
+			m_currentDirection = CharacterDirection::LEFT;
+		}
+		else if (AEInputCheckCurr(AEVK_RIGHT))
+		{
+			m_velocityX = m_characterSpeed;
+			m_currentDirection = CharacterDirection::RIGHT;
+		}
+		else
+		{
+			m_velocityX = 0.0f;
+		}
 	}
-
-	else if (AEInputCheckCurr(AEVK_RIGHT))
+	else 
 	{
-		m_position.x += m_characterSpeed * dt;
-		m_currentDirection = CharacterDirection::RIGHT;
-		isMoving = true;
+		if (AEInputCheckCurr(AEVK_LEFT))
+		{
+			m_velocityX -= m_airAcceleration * dt; 
+			if (m_velocityX < -m_characterSpeed)
+			{
+				m_velocityX = -m_characterSpeed;
+			}
+			m_currentDirection = CharacterDirection::LEFT;
+		}
+		else if (AEInputCheckCurr(AEVK_RIGHT))
+		{
+			m_velocityX += m_airAcceleration * dt; 
+			if (m_velocityX > m_characterSpeed)
+			{
+				m_velocityX = m_characterSpeed;
+			}
+			m_currentDirection = CharacterDirection::RIGHT;
+		}
 	}
-
 	if (AEInputCheckTriggered(AEVK_SPACE))
 	{
 		if (m_isGrounded)
@@ -124,9 +158,9 @@ void CharacterPlayer::Move(f32 dt)
 		}
 	}
 
-	if (m_currentAnimState != CharacterAnimationState::JUMP && m_currentAnimState != CharacterAnimationState::DEATH)
+	if (m_isGrounded && m_currentAnimState != CharacterAnimationState::DEATH)
 	{
-		if (isMoving)
+		if (m_velocityX != 0.0f)
 		{
 			if (m_currentAnimState != CharacterAnimationState::WALK)
 			{

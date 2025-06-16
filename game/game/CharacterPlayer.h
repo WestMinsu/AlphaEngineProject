@@ -21,6 +21,7 @@ private:
 
 	Animation m_animation;
 
+	f32 m_velocityX;
 	f32 m_velocityY;     
 	f32 m_gravity;        
 	f32 m_jumpStrength; 

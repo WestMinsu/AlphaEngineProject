@@ -34,6 +34,7 @@ protected:
 
 	s32 m_healthPoint;
 	f32 m_characterSpeed;
+	f32 m_airAcceleration;
 
 	CharacterDirection m_currentDirection;
 };
