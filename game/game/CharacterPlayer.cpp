@@ -1,17 +1,17 @@
 #include "CharacterPlayer.h"
 #include "Constants.h"
 #include "Utility.h"
+#include <iostream>
+
 CharacterPlayer::CharacterPlayer()
 {
-	// TO DO change 
-	// Maybe in Constants
 	m_position = { 0,0 };
 	m_size = { 500.f, 500.f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
-	m_airAcceleration = 1000.f;
-	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
+	m_currentAnimState = CharacterAnimationState::IDLE;
 
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
@@ -20,21 +20,24 @@ CharacterPlayer::CharacterPlayer()
 	m_isGrounded = true;
 	m_groundLevel = 0.0f;
 
-	m_isAttacking = false; 
+	m_isAttacking = false;
 	m_attackTimer = 0.0f;
+	m_isAttackHitboxActive = false;
+	m_hasHitEnemyThisAttack = false;
+
+	m_isDashing = false;
+	m_dashTimer = 0.0f;
+	m_dashSpeed = 800.0f;
 }
 
-
-CharacterPlayer::~CharacterPlayer()
-{
-}
+CharacterPlayer::~CharacterPlayer() {}
 
 void CharacterPlayer::Init(AEVec2 position)
 {
 	m_position = position;
 	m_animation.Init();
+	m_animation.ChangeAnimState(m_currentAnimState);
 }
- 
 
 void CharacterPlayer::Update(f32 dt)
 {
@@ -54,43 +57,65 @@ void CharacterPlayer::Update(f32 dt)
 		return;
 	}
 
-	if (AEInputCheckTriggered(AEVK_A) && !m_isAttacking)
+	if (AEInputCheckTriggered(AEVK_A) && !m_isAttacking && !m_isDashing)
 	{
 		bool canAttack = !m_isGrounded || (m_isGrounded && m_velocityX == 0.0f);
-
 		if (canAttack)
 		{
 			m_isAttacking = true;
-			m_attackTimer = 0.0f; 
+			m_attackTimer = 0.0f;
+			m_hasHitEnemyThisAttack = false;
 		}
 	}
-	if (m_isAttacking)
+	if (AEInputCheckTriggered(AEVK_LSHIFT) && m_isGrounded && !m_isAttacking && !m_isDashing)
 	{
-		m_attackTimer += dt;
-		const float attackDuration = m_animation.GetAnimationDuration(CharacterAnimationState::ATTACK);
-		if (attackDuration > 0.0f && m_attackTimer >= attackDuration)
-		{
-			m_isAttacking = false; 
-		}
+		m_isDashing = true;
+		m_dashTimer = 0.0f;
 	}
-
-	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !m_isAttacking)
+	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !m_isAttacking && !m_isDashing)
 	{
 		m_isGrounded = false;
 		m_velocityY = m_jumpStrength;
 	}
 
-	Move(dt);
-	 
-	if (m_isGrounded && m_isAttacking)
+	if (m_isAttacking)
 	{
-		m_velocityX = 0.0f;
+		m_attackTimer += dt;
+		const float attackAnimDuration = m_animation.GetAnimationDuration(CharacterAnimationState::ATTACK);
+		const float frameDuration = 0.1f;
+		const float hitboxActiveTime = 3 * frameDuration;
+		if (m_attackTimer >= hitboxActiveTime)
+		{
+			m_isAttackHitboxActive = true;
+		}
+		if (attackAnimDuration > 0.0f && m_attackTimer >= attackAnimDuration)
+		{
+			m_isAttacking = false;
+			m_isAttackHitboxActive = false;
+		}
+	}
+	else
+	{
+		m_isAttackHitboxActive = false;
+	}
+	if (m_isDashing)
+	{
+		m_dashTimer += dt;
+		const float dashDuration = m_animation.GetAnimationDuration(CharacterAnimationState::DASH);
+		if (dashDuration > 0.0f && m_dashTimer >= dashDuration)
+		{
+			m_isDashing = false;
+		}
 	}
 
-	if (!m_isGrounded)
+	Move(dt);
+	if (m_isGrounded && m_isAttacking) { m_velocityX = 0.0f; }
+	if (m_isDashing)
 	{
-		m_velocityY += m_gravity * dt;
+		m_velocityX = (m_currentDirection == CharacterDirection::RIGHT) ? m_dashSpeed : -m_dashSpeed;
 	}
+
+	if (!m_isGrounded) { m_velocityY += m_gravity * dt; }
 	m_position.x += m_velocityX * dt;
 	m_position.y += m_velocityY * dt;
 
@@ -109,22 +134,14 @@ void CharacterPlayer::Update(f32 dt)
 	}
 
 	CharacterAnimationState desiredState;
-	if (m_isAttacking)
-	{
-		desiredState = CharacterAnimationState::ATTACK;
-	}
-	else if (!m_isGrounded)
-	{
-		desiredState = CharacterAnimationState::JUMP;
-	}
+	if (m_isDashing) { desiredState = CharacterAnimationState::DASH; }
+	else if (m_isAttacking) { desiredState = CharacterAnimationState::ATTACK; }
+	else if (!m_isGrounded) { desiredState = CharacterAnimationState::JUMP; }
 	else
 	{
-		if (m_velocityX == 0.0f)
-			desiredState = CharacterAnimationState::IDLE;
-		else
-			desiredState = CharacterAnimationState::WALK;
+		if (m_velocityX == 0.0f) desiredState = CharacterAnimationState::IDLE;
+		else desiredState = CharacterAnimationState::WALK;
 	}
-
 	if (m_currentAnimState != desiredState)
 	{
 		m_currentAnimState = desiredState;
@@ -133,54 +150,65 @@ void CharacterPlayer::Update(f32 dt)
 
 	const f32 halfCharWidth = m_size.x / 2.0f;
 	const f32 halfCharHeight = m_size.y / 2.0f;
-
-	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
-	{
-		m_position.x = -kHalfWindowWidth + halfCharWidth;
-	}
-	if (m_position.x > kHalfWindowWidth - halfCharWidth)
-	{
-		m_position.x = kHalfWindowWidth - halfCharWidth;
-	}
-	if (m_position.y > kHalfWindowHeight - halfCharHeight)
-	{
-		m_position.y = kHalfWindowHeight - halfCharHeight;
-		m_velocityY = 0;
-	}
+	if (m_position.x < -kHalfWindowWidth + halfCharWidth) { m_position.x = -kHalfWindowWidth + halfCharWidth; }
+	if (m_position.x > kHalfWindowWidth - halfCharWidth) { m_position.x = kHalfWindowWidth - halfCharWidth; }
+	if (m_position.y > kHalfWindowHeight - halfCharHeight) { m_position.y = kHalfWindowHeight - halfCharHeight; m_velocityY = 0; }
 
 	m_animation.Update(dt);
 }
 
 void CharacterPlayer::Move(f32 dt)
 {
-	if (AEInputCheckCurr(AEVK_LEFT))
+	if (m_isGrounded)
 	{
-		m_velocityX = -m_characterSpeed;
-		if (!m_isAttacking)
+		// --- 지상 이동: 즉시 최대 속도로 변경 ---
+		if (AEInputCheckCurr(AEVK_LEFT))
 		{
-			m_currentDirection = CharacterDirection::LEFT;
+			m_velocityX = -m_characterSpeed;
 		}
-	}
-	else if (AEInputCheckCurr(AEVK_RIGHT))
-	{
-		m_velocityX = m_characterSpeed;
-		if (!m_isAttacking)
+		else if (AEInputCheckCurr(AEVK_RIGHT))
 		{
-			m_currentDirection = CharacterDirection::RIGHT;
+			m_velocityX = m_characterSpeed;
 		}
-	}
-	else
-	{
-		if (m_isGrounded)
+		else
 		{
 			m_velocityX = 0.0f;
 		}
 	}
-}
 
-void CharacterPlayer::Attack()
-{
+	else 
+	{
+		if (AEInputCheckCurr(AEVK_LEFT))
+		{
+			m_velocityX -= m_airAcceleration * dt;
+		}
+		else if (AEInputCheckCurr(AEVK_RIGHT))
+		{
+			m_velocityX += m_airAcceleration * dt;
+		}
+	}
 
+	if (m_velocityX > m_characterSpeed)
+	{
+		m_velocityX = m_characterSpeed;
+	}
+
+	if (m_velocityX < -m_characterSpeed)
+	{
+		m_velocityX = -m_characterSpeed;
+	}
+
+	if (!m_isAttacking)
+	{
+		if (AEInputCheckCurr(AEVK_LEFT))
+		{
+			m_currentDirection = CharacterDirection::LEFT;
+		}
+		else if (AEInputCheckCurr(AEVK_RIGHT))
+		{
+			m_currentDirection = CharacterDirection::RIGHT;
+		}
+	}
 }
 
 void CharacterPlayer::Draw()
@@ -210,3 +238,11 @@ void CharacterPlayer::Destroy()
 	m_animation.Destroy();
 }
 
+void CharacterPlayer::Attack()
+{
+}
+
+void CharacterPlayer::TakeDamage(s32 damage)
+{
+	m_healthPoint -= damage;
+}

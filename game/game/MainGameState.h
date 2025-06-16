@@ -1,6 +1,7 @@
 #pragma once
 #include "AGameState.h"
 #include "CharacterPlayer.h"
+#include "CharacterEnemy.h"
 
 class MainGameState : public AGameState
 {
@@ -17,5 +18,5 @@ public:
 
 private:
 	CharacterPlayer m_Player;
-
+	CharacterEnemy m_Enemy;
 };

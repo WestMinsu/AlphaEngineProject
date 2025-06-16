@@ -23,6 +23,9 @@ void Animation::Init()
 	};
 	m_animDataMap[CharacterAnimationState::ATTACK] = {
 	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
+	};	
+	m_animDataMap[CharacterAnimationState::DASH] = {
+	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png"), 7, SpriteSheetOrientation::VERTICAL, 0.11f
 	};
 	m_animDataMap[CharacterAnimationState::DEATH] = {
 	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png"), 12, SpriteSheetOrientation::VERTICAL, 0.065f
