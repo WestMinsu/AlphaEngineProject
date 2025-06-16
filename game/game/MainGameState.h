@@ -17,5 +17,6 @@ public:
 
 private:
 	CharacterPlayer m_Player;
-
+	AEGfxTexture* m_tileSet;
+	SparseTileMap m_TileMap;
 };
