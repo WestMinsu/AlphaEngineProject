@@ -12,6 +12,11 @@ CharacterPlayer::CharacterPlayer()
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_currentDirection = CharacterDirection::RIGHT;
 
+	m_velocityY = 0.0f;
+	m_gravity = -1200.0f;  
+	m_jumpStrength = 600.0f; 
+	m_isGrounded = true;     
+	m_groundLevel = 0.0f;    
 }
 
 
@@ -27,71 +32,119 @@ void CharacterPlayer::Init(AEVec2 position)
 
 void CharacterPlayer::Update(f32 dt)
 {
-	if (m_currentAnimState == CharacterAnimationState::DEATH && m_animation.getAnimationFinished())
+	if (!m_isGrounded)
 	{
-		m_animation.UpdateDeathTime(dt);
-		if (m_animation.isRestartAnimDeathtoIDLE())
+		m_velocityY += m_gravity * dt;     
+		m_position.y += m_velocityY * dt; 
+	}
+
+	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
+	{
+		m_position.y = m_groundLevel; 
+		m_velocityY = 0.0f;
+		m_isGrounded = true;
+
+		if (m_currentAnimState == CharacterAnimationState::JUMP)
 		{
 			m_currentAnimState = CharacterAnimationState::IDLE;
 			m_animation.ChangeAnimState(m_currentAnimState);
-			m_currentDirection = CharacterDirection::RIGHT;
 		}
-		return;
 	}
 
-	if (m_currentAnimState == CharacterAnimationState::JUMP && m_animation.getAnimationFinished())
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
-		m_currentAnimState = CharacterAnimationState::IDLE;
-		m_animation.ChangeAnimState(m_currentAnimState);
+		if (m_animation.getAnimationFinished())
+		{
+			m_animation.UpdateDeathTime(dt);
+			if (m_animation.isRestartAnimDeathtoIDLE())
+			{
+				m_currentAnimState = CharacterAnimationState::IDLE;
+				m_animation.ChangeAnimState(m_currentAnimState);
+				m_currentDirection = CharacterDirection::RIGHT;
+			}
+		}
 	}
-
-	if (m_currentAnimState != CharacterAnimationState::JUMP &&
-		m_currentAnimState != CharacterAnimationState::DEATH)
+	else 
 	{
+		if (m_currentAnimState == CharacterAnimationState::JUMP && m_animation.getAnimationFinished())
+		{
+			m_currentAnimState = CharacterAnimationState::IDLE;
+			m_animation.ChangeAnimState(m_currentAnimState);
+		}
 		Move(dt);
 	}
-		
-	m_animation.Update(dt);
+	const f32 halfCharWidth = m_size.x / 2.0f;
+	const f32 halfCharHeight = m_size.y / 2.0f;
 
-	const f32 characterHalfWidth = m_size.x / 2.0f;
-	const f32 characterHalfHeight = m_size.y / 2.0f;
-	m_position.x = AEClamp(m_position.x, -kWindowWidth / 2.0f + characterHalfWidth, kWindowWidth / 2.0f - characterHalfWidth);
+	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
+	{
+		m_position.x = -kHalfWindowWidth + halfCharWidth;
+	}
+
+	if (m_position.x > kHalfWindowWidth - halfCharWidth)
+	{
+		m_position.x = kHalfWindowWidth - halfCharWidth;
+	}
+
+	if (m_position.y > kHalfWindowHeight - halfCharHeight)
+	{
+		m_position.y = kHalfWindowHeight - halfCharHeight;
+		m_velocityY = 0;
+	}
+
+	m_animation.Update(dt);
 }
 
 void CharacterPlayer::Move(f32 dt)
 {
-	if (!AEInputCheckCurr(AEVK_LEFT) && AEInputCheckCurr(AEVK_RIGHT))
+	bool isMoving = false;
+	if (AEInputCheckCurr(AEVK_LEFT))
 	{
-		if (m_currentAnimState != CharacterAnimationState::WALK)
-		{
-			m_currentAnimState = CharacterAnimationState::WALK;
-			m_animation.ChangeAnimState(m_currentAnimState);
-
-		}
-		m_currentDirection = CharacterDirection::RIGHT;
-		m_position.x += m_characterSpeed * dt;
-	}
-	else if (!AEInputCheckCurr(AEVK_RIGHT) && AEInputCheckCurr(AEVK_LEFT))
-	{
-		if (m_currentAnimState != CharacterAnimationState::WALK)
-		{
-			m_currentAnimState = CharacterAnimationState::WALK;
-			m_animation.ChangeAnimState(m_currentAnimState);
-		}
-		m_currentDirection = CharacterDirection::LEFT;
 		m_position.x -= m_characterSpeed * dt;
+		m_currentDirection = CharacterDirection::LEFT;
+		isMoving = true;
 	}
-	else if (AEInputCheckTriggered(AEVK_SPACE))
+
+	else if (AEInputCheckCurr(AEVK_RIGHT))
 	{
-		if (m_currentAnimState != CharacterAnimationState::JUMP)
+		m_position.x += m_characterSpeed * dt;
+		m_currentDirection = CharacterDirection::RIGHT;
+		isMoving = true;
+	}
+
+	if (AEInputCheckTriggered(AEVK_SPACE))
+	{
+		if (m_isGrounded)
 		{
+			m_isGrounded = false;
+			m_velocityY = m_jumpStrength;
+
 			m_currentAnimState = CharacterAnimationState::JUMP;
 			m_animation.ChangeAnimState(m_currentAnimState);
-
 		}
-		//AEAudioPlay(gameManager->m_jumpSound, gameManager->m_sfxGroup, 1.0f, 1.0f, 0);
 	}
-	else if (AEInputCheckTriggered(AEVK_K))
+
+	if (m_currentAnimState != CharacterAnimationState::JUMP && m_currentAnimState != CharacterAnimationState::DEATH)
+	{
+		if (isMoving)
+		{
+			if (m_currentAnimState != CharacterAnimationState::WALK)
+			{
+				m_currentAnimState = CharacterAnimationState::WALK;
+				m_animation.ChangeAnimState(m_currentAnimState);
+			}
+		}
+		else
+		{
+			if (m_currentAnimState != CharacterAnimationState::IDLE)
+			{
+				m_currentAnimState = CharacterAnimationState::IDLE;
+				m_animation.ChangeAnimState(m_currentAnimState);
+			}
+		}
+	}
+
+	if (AEInputCheckTriggered(AEVK_K))
 	{
 		if (m_currentAnimState != CharacterAnimationState::DEATH)
 		{
@@ -99,18 +152,11 @@ void CharacterPlayer::Move(f32 dt)
 			m_animation.ChangeAnimState(m_currentAnimState);
 		}
 	}
-	else
-	{
-		if (m_currentAnimState != CharacterAnimationState::IDLE)
-		{
-			m_currentAnimState = CharacterAnimationState::IDLE;
-			m_animation.ChangeAnimState(m_currentAnimState);
-		}
-	}
 }
 
 void CharacterPlayer::Attack()
 {
+
 }
 
 void CharacterPlayer::Draw()

@@ -20,4 +20,10 @@ private:
 	CharacterAnimationState m_currentAnimState;
 
 	Animation m_animation;
+
+	f32 m_velocityY;     
+	f32 m_gravity;        
+	f32 m_jumpStrength; 
+	bool m_isGrounded;    
+	f32 m_groundLevel;   
 };

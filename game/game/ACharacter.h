@@ -6,6 +6,7 @@ enum class CharacterAnimationState
 	IDLE,
 	WALK,
 	JUMP,
+	ATTACK,
 	DEATH
 };
 
