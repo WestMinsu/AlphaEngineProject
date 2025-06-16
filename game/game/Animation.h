@@ -29,6 +29,7 @@ public:
 	void Draw(AEMtx33 transform);
 	void Destroy();
 
+	float GetAnimationDuration(CharacterAnimationState state) const;
 	bool getAnimationFinished();
 	void UpdateDeathTime(f32 dt);
 	bool isRestartAnimDeathtoIDLE();
@@ -43,7 +44,7 @@ private:
 	f32 m_offset;
 	f32 m_elapsedTime;
 
-	bool m_animationFinished = false;
+	bool m_animationFinished;
 	f32 m_deathTimer;
 	const f32 m_restartDelay = 3.0f;
 };

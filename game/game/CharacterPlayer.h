@@ -27,4 +27,7 @@ private:
 	f32 m_jumpStrength; 
 	bool m_isGrounded;    
 	f32 m_groundLevel;   
+
+	bool m_isAttacking;
+	f32 m_attackTimer;
 };

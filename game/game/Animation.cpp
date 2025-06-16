@@ -19,10 +19,13 @@ void Animation::Init()
 		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png"), 10, SpriteSheetOrientation::VERTICAL, 0.08f
 	};
 	m_animDataMap[CharacterAnimationState::JUMP] = {
-		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
+		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.08f
+	};
+	m_animDataMap[CharacterAnimationState::ATTACK] = {
+	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
 	};
 	m_animDataMap[CharacterAnimationState::DEATH] = {
-	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png"), 12, SpriteSheetOrientation::VERTICAL, 0.1f
+	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png"), 12, SpriteSheetOrientation::VERTICAL, 0.065f
 	};
 
 	ChangeAnimState(CharacterAnimationState::IDLE);
@@ -153,4 +156,17 @@ void Animation::UpdateDeathTime(f32 dt)
 bool Animation::isRestartAnimDeathtoIDLE()
 {
 	return m_deathTimer >= m_restartDelay;
+}
+
+float Animation::GetAnimationDuration(CharacterAnimationState state) const
+{
+	auto it = m_animDataMap.find(state);
+
+	if (it != m_animDataMap.end())
+	{
+		const AnimData& data = it->second;
+		return static_cast<float>(data.frameCount) * data.frameDuration;
+	}
+
+	return 0.0f;
 }
