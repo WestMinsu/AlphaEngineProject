@@ -1,6 +1,7 @@
 #pragma once
 #include "AGameState.h"
 #include "CharacterPlayer.h"
+#include "TileMap.h"
 
 class MainGameState : public AGameState
 {
@@ -17,6 +18,5 @@ public:
 
 private:
 	CharacterPlayer m_Player;
-	AEGfxTexture* m_tileSet;
-	SparseTileMap m_TileMap;
+	TileMap m_TileMap;
 };

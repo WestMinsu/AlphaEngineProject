@@ -1,27 +1,46 @@
 #pragma once
 #include <AEEngine.h>
 #include <unordered_map>
+#include <vector>
 #include <string>
 #include "json.hpp"
 
-struct Tile {
-    s32 tileId;
-};
+struct TilesetInfo {
+    s32 firstGId;
+    s32 tileWidth, tileHeight;
+    s32 columns, tileCount;
+    AEGfxTexture* tilesetTexture;
+    s32 imageWidth, imageHeight;
+    std::string name;
+    
 
-struct TileCoord {
-    s32 x, y;
-    bool operator==(const TileCoord& other) const {
-        return x == other.x && y == other.y;
+    bool contains(s32 globalID) const
+    {
+        return globalID >= firstGId && globalID < firstGId + tileCount;
     }
 };
 
-struct TileCoordHash {
-    std::size_t operator()(const TileCoord& coord) const {
-        return std::hash<int>()(coord.x) ^ (std::hash<int>()(coord.y) << 1);
-    }
+class TileMap
+{
+public:
+    TileMap();
+    ~TileMap();
+
+    void Init();
+    void Update(f32 dt);
+    void Draw();
+
+private:
+    s32 m_mapWidth, m_mapHeight;
+    s32 m_tileSize;
+    nlohmann::json m_mapJson;
+
+    std::vector<TilesetInfo> m_tilesets;
+    std::vector<std::vector<int>> m_layers;
+    std::map<std::pair<f32, f32>, AEGfxVertexList*> m_meshes;
+
+    void LoadJson(const char*);
+    void LoadTilesets(const char*);
+    void PrepareLayerData();
 };
 
-using SparseLayer = std::unordered_map<TileCoord, Tile, TileCoordHash>;
-using SparseTileMap = std::unordered_map<std::string, SparseLayer>;
-
-SparseTileMap loadSparseTileMapByLayer(const std::string& filename);

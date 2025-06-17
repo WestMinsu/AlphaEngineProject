@@ -114,6 +114,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="MainGameState.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="TileMap.h" />
+    <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +128,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="MainGameState.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="TileMap.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
