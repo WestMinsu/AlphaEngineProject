@@ -1,6 +1,13 @@
 #pragma once
 #include "ACharacter.h"
 #include "Animation.h"
+#include <vector>
+
+struct AttackHitbox
+{
+	AEVec2 offset;
+	AEVec2 size;   
+};
 
 class CharacterPlayer : public ACharacter
 {
@@ -16,11 +23,13 @@ public:
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
 
-	bool IsAttacking() const { return m_isAttacking; }
-	bool IsAttackHitboxActive() const { return m_isAttackHitboxActive; }
-	bool HasHitEnemyThisAttack() const { return m_hasHitEnemyThisAttack; }
+	bool IsAttacking() const;
+	bool IsAttackHitboxActive() const;
+	bool HasHitEnemyThisAttack() const;
 
-	void RegisterHit() { m_hasHitEnemyThisAttack = true; }
+	void RegisterHit();
+	s32 GetCurrentAnimationFrame() const;
+	const AttackHitbox& GetCurrentAttackHitbox() const;
 
 private:
 	Animation m_animation;
@@ -42,4 +51,5 @@ private:
 	f32 m_dashSpeed;
 
 	CharacterAnimationState m_currentAnimState;
+	std::vector<AttackHitbox> m_attackHitboxes;
 };

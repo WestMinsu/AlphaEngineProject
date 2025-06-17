@@ -28,11 +28,12 @@ public:
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
 	virtual void Destroy() = 0;
+	virtual void TakeDamage(s32 damage) = 0;
 
 	const AEVec2& GetPosition() const;
 	const AEVec2& GetSize() const;
-	virtual void TakeDamage(s32 damage) = 0; 
 	s32 GetHealth() const;
+	CharacterDirection GetDirection() const;
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;

@@ -26,15 +26,21 @@ void MainGameState::Update(f32 dt)
 
 	if (m_Player.IsAttackHitboxActive() && !m_Player.HasHitEnemyThisAttack())
 	{
+		const AttackHitbox& currentHitbox = m_Player.GetCurrentAttackHitbox();
+
 		AEVec2 playerPos = m_Player.GetPosition();
-		AEVec2 playerSize = m_Player.GetSize();
+		AEVec2 hitboxPos;
+		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
+		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
+
+		AEVec2 hitboxSize = currentHitbox.size;
 		AEVec2 enemyPos = m_Enemy.GetPosition();
 		AEVec2 enemySize = m_Enemy.GetSize();
 
-		float pLeft = playerPos.x - playerSize.x / 2;
-		float pRight = playerPos.x + playerSize.x / 2;
-		float pTop = playerPos.y + playerSize.y / 2;
-		float pBottom = playerPos.y - playerSize.y / 2;
+		float pLeft = hitboxPos.x - hitboxSize.x / 2;
+		float pRight = hitboxPos.x + hitboxSize.x / 2;
+		float pTop = hitboxPos.y + hitboxSize.y / 2;
+		float pBottom = hitboxPos.y - hitboxSize.y / 2;
 
 		float eLeft = enemyPos.x - enemySize.x / 2;
 		float eRight = enemyPos.x + enemySize.x / 2;

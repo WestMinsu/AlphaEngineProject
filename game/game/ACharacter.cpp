@@ -14,3 +14,8 @@ s32 ACharacter::GetHealth() const
 {
 	return m_healthPoint;
 }
+
+CharacterDirection ACharacter::GetDirection() const
+{
+	return m_currentDirection;
+}

@@ -33,7 +33,8 @@ public:
 	bool getAnimationFinished();
 	void UpdateDeathTime(f32 dt);
 	bool isRestartAnimDeathtoIDLE();
-
+	
+	s32 GetCurrentFrame() const;
 private:
 	AEGfxVertexList* m_mesh;
 

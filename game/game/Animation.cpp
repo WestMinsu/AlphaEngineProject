@@ -161,6 +161,11 @@ bool Animation::isRestartAnimDeathtoIDLE()
 	return m_deathTimer >= m_restartDelay;
 }
 
+s32 Animation::GetCurrentFrame() const
+{
+	return m_subImageIndex;
+}
+
 float Animation::GetAnimationDuration(CharacterAnimationState state) const
 {
 	auto it = m_animDataMap.find(state);
