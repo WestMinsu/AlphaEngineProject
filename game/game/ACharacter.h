@@ -6,7 +6,8 @@ enum class CharacterAnimationState
 	IDLE,
 	WALK,
 	JUMP,
-	ATTACK,
+	MELEE_ATTACK,
+	PROJECTILE_ATTACK,
 	DASH,
 	DEATH
 };
@@ -17,11 +18,10 @@ enum class CharacterDirection
 	RIGHT
 };
 
-
 class ACharacter
 {
 public:
-	~ACharacter() {};
+	virtual ~ACharacter() {};
 	virtual void Init(AEVec2 position) = 0;
 	virtual void Update(f32 dt) = 0;
 	virtual void Move(f32 dt) = 0;
@@ -30,10 +30,23 @@ public:
 	virtual void Destroy() = 0;
 	virtual void TakeDamage(s32 damage) = 0;
 
-	const AEVec2& GetPosition() const;
-	const AEVec2& GetSize() const;
-	s32 GetHealth() const;
-	CharacterDirection GetDirection() const;
+	const AEVec2& GetPosition() const 
+	{ 
+		return m_position;
+	}
+	const AEVec2& GetSize() const 
+	{
+		return m_size;
+	}
+	CharacterDirection GetDirection() const 
+	{
+		return m_currentDirection; 
+	}
+	s32 GetHealth() const 
+	{ 
+		return m_healthPoint;
+	}
+
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
@@ -44,4 +57,3 @@ protected:
 
 	CharacterDirection m_currentDirection;
 };
-

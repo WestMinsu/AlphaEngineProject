@@ -1,13 +1,14 @@
 #include "CharacterEnemy.h"
 #include "Constants.h"
 #include "Utility.h"
+#include <iostream>
 
 CharacterEnemy::CharacterEnemy()
 {
 	m_size = { 500.f, 500.f };
-	m_healthPoint = 50; 
-	m_characterSpeed = 0.0f; 
-	m_currentDirection = CharacterDirection::LEFT; 
+	m_healthPoint = 50;
+	m_characterSpeed = 0.0f;
+	m_currentDirection = CharacterDirection::LEFT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 }
 
@@ -16,25 +17,39 @@ CharacterEnemy::~CharacterEnemy() {}
 void CharacterEnemy::Init(AEVec2 position)
 {
 	m_position = position;
-	m_animation.Init(); 
-	m_animation.ChangeAnimState(CharacterAnimationState::IDLE);
+	m_animation.Init();
+
+	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
+	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
+
+	for (auto& pair : m_animDataMap) {
+		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+	}
+
+	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 }
 
 void CharacterEnemy::Update(f32 dt)
 {
-	// TODO: AI
+	if (m_animation.GetCurrentState() == CharacterAnimationState::DEATH && m_animation.IsFinished())
+	{
+		return;
+	}
+
 	m_animation.Update(dt);
 }
 
-void CharacterEnemy::Move(f32 dt) 
+void CharacterEnemy::Move(f32 dt)
 {
 	// TODO
-} 
+}
 
-void CharacterEnemy::Attack() 
+void CharacterEnemy::Attack()
 {
 	// TODO
-}  
+}
+
 
 void CharacterEnemy::Draw()
 {
@@ -60,6 +75,9 @@ void CharacterEnemy::Draw()
 
 void CharacterEnemy::Destroy()
 {
+	for (auto& pair : m_animDataMap) {
+		if (pair.second.pTexture) AEGfxTextureUnload(pair.second.pTexture);
+	}
 	m_animation.Destroy();
 }
 
@@ -71,10 +89,12 @@ void CharacterEnemy::TakeDamage(s32 damage)
 	}
 
 	m_healthPoint -= damage;
+	std::cout << "Enemy takes damage! HP: " << m_healthPoint << std::endl;
 
 	if (m_healthPoint <= 0)
 	{
+		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
-		m_animation.ChangeAnimState(m_currentAnimState);
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 }

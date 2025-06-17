@@ -1,133 +1,115 @@
 #include "Animation.h"
-#include "AssetManager.h"
-Animation::Animation()
+
+Animation::Animation() : m_mesh(nullptr), m_subImageIndex(0), m_elapsedTime(0.0f), m_isFinished(false), m_currentState(CharacterAnimationState::IDLE)
 {
+	m_currentClipData.pTexture = nullptr;
 }
 
 Animation::~Animation()
 {
+	Destroy();
 }
 
 void Animation::Init()
 {
 	m_mesh = nullptr;
+}
 
-	m_animDataMap[CharacterAnimationState::IDLE] = {
-		  AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
-	};
-	m_animDataMap[CharacterAnimationState::WALK] = {
-		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png"), 10, SpriteSheetOrientation::VERTICAL, 0.08f
-	};
-	m_animDataMap[CharacterAnimationState::JUMP] = {
-		AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png"), 12, SpriteSheetOrientation::VERTICAL, 0.08f
-	};
-	m_animDataMap[CharacterAnimationState::ATTACK] = {
-	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png"), 8, SpriteSheetOrientation::VERTICAL, 0.1f
-	};	
-	m_animDataMap[CharacterAnimationState::DASH] = {
-	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png"), 7, SpriteSheetOrientation::VERTICAL, 0.11f
-	};
-	m_animDataMap[CharacterAnimationState::DEATH] = {
-	AEGfxTextureLoad("Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png"), 12, SpriteSheetOrientation::VERTICAL, 0.065f
-	};
+void Animation::Play(CharacterAnimationState state, const AnimData& clipData)
+{
+	if (m_mesh != nullptr && m_currentState == state && !m_isFinished)
+	{
+		return;
+	}
 
-	ChangeAnimState(CharacterAnimationState::IDLE);
+	m_currentState = state;
+
+	bool needsRebuild = false;
+	if (!m_mesh || m_currentClipData.pTexture != clipData.pTexture || m_currentClipData.frameCount != clipData.frameCount || m_currentClipData.orientation != clipData.orientation)
+	{
+		needsRebuild = true;
+	}
+
+	m_currentClipData = clipData;
+
+	if (needsRebuild)
+	{
+		if (m_mesh)
+		{
+			AEGfxMeshFree(m_mesh);
+		}
+
+		float frameU = 1.0f;
+		float frameV = 1.0f;
+
+		if (m_currentClipData.frameCount > 1) {
+			if (m_currentClipData.orientation == SpriteSheetOrientation::HORIZONTAL) frameU = 1.0f / m_currentClipData.frameCount;
+			else frameV = 1.0f / m_currentClipData.frameCount;
+		}
+
+		AEGfxMeshStart();
+		AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, frameV, 0.5f, -0.5f, 0xFFFFFFFF, frameU, frameV, -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+		AEGfxTriAdd(0.5f, -0.5f, 0xFFFFFFFF, frameU, frameV, 0.5f, 0.5f, 0xFFFFFFFF, frameU, 0.0f, -0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+		m_mesh = AEGfxMeshEnd();
+	}
+
+	m_subImageIndex = 0;
+	m_elapsedTime = 0.0f;
+	m_isFinished = false;
 }
 
 void Animation::Update(f32 dt)
 {
-	const AnimData& currentData = m_animDataMap.at(m_currentAnimState);
-	s32 totalFrames = currentData.frameCount;
-	f32 frameDuration = currentData.frameDuration;
+	if (!m_currentClipData.pTexture) return;
+	if (!m_currentClipData.loop && m_isFinished) return;
+	if (m_currentClipData.frameCount <= 1) return;
 
 	m_elapsedTime += dt;
-	if (m_elapsedTime >= frameDuration)
+	if (m_elapsedTime >= m_currentClipData.frameDuration)
 	{
-		m_subImageIndex++;
-		if (m_subImageIndex >= totalFrames)
+		m_elapsedTime -= m_currentClipData.frameDuration;
+
+		if (!m_isFinished) m_subImageIndex++;
+
+		if (m_subImageIndex >= m_currentClipData.frameCount)
 		{
-			m_animationFinished = true;
-			m_subImageIndex = (m_currentAnimState == CharacterAnimationState::DEATH) ? totalFrames - 1 : 0;
+			if (m_currentClipData.loop) {
+				m_subImageIndex = 0;
+			}
+			else {
+				m_isFinished = true;
+				m_subImageIndex = m_currentClipData.frameCount - 1;
+			}
 		}
-		m_offset = static_cast<f32>(m_subImageIndex) / totalFrames;
-		m_elapsedTime = 0.0f;
 	}
 }
-
-void Animation::ChangeAnimState(CharacterAnimationState newAnimState)
-{
-	if (m_currentAnimState == newAnimState && m_mesh != nullptr) 
-		return;
-
-	m_currentAnimState = newAnimState;
-	m_subImageIndex = 0;
-	m_offset = 0.0f;
-	m_elapsedTime = 0.0f;
-	m_animationFinished = false;
-
-	if (newAnimState == CharacterAnimationState::DEATH)
-	{
-		m_deathTimer = 0.0f;
-	}
-
-	if (m_mesh)
-	{
-		AEGfxMeshFree(m_mesh);
-	}
-
-	const AnimData& currentData = m_animDataMap.at(m_currentAnimState);
-	f32 frameU = 1.0f;
-	f32 frameV = 1.0f; 
-
-	if (currentData.orientation == SpriteSheetOrientation::HORIZONTAL)
-	{
-		frameU = 1.0f / currentData.frameCount;
-	}
-	else 
-	{
-		frameV = 1.0f / currentData.frameCount;
-	}
-
-	AEGfxMeshStart();
-	AEGfxTriAdd(
-		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, frameV,
-		0.5f, -0.5f, 0xFFFFFFFF, frameU, frameV,
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f
-	);
-	AEGfxTriAdd(
-		0.5f, -0.5f, 0xFFFFFFFF, frameU, frameV,
-		0.5f, 0.5f, 0xFFFFFFFF, frameU, 0.0f,
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f
-	);
-	m_mesh = AEGfxMeshEnd();
-}
-
 
 void Animation::Draw(AEMtx33 transform)
 {
+	if (!m_currentClipData.pTexture || !m_mesh) return;
+
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetTransparency(1.0f);
 
-	const AnimData& currentData = m_animDataMap.at(m_currentAnimState);
-	f32 translateX = 0.0f, translateY = 0.0f;
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
 
-	if (currentData.orientation == SpriteSheetOrientation::HORIZONTAL)
+	if (m_currentClipData.frameCount > 0)
 	{
-		translateX = m_offset;
-	}
-	else 
-	{
-		translateY = m_offset;
+		if (m_currentClipData.orientation == SpriteSheetOrientation::HORIZONTAL) {
+			offsetX = static_cast<float>(m_subImageIndex) / m_currentClipData.frameCount;
+		}
+		else {
+			offsetY = static_cast<float>(m_subImageIndex) / m_currentClipData.frameCount;
+		}
 	}
 
-	AEGfxTextureSet(currentData.pTexture, translateX, translateY);
+	AEGfxTextureSet(m_currentClipData.pTexture, offsetX, offsetY);
 	AEGfxSetTransform(transform.m);
-
 	AEGfxMeshDraw(m_mesh, AE_GFX_MDM_TRIANGLES);
 }
-
 
 void Animation::Destroy()
 {
@@ -136,45 +118,4 @@ void Animation::Destroy()
 		AEGfxMeshFree(m_mesh);
 		m_mesh = nullptr;
 	}
-
-	for (auto const& [key, val] : m_animDataMap)
-	{
-		if (val.pTexture)
-		{
-			AEGfxTextureUnload(val.pTexture);
-		}
-	}
-	m_animDataMap.clear();
-}
-bool Animation::getAnimationFinished()
-{
-	return m_animationFinished;
-}
-
-void Animation::UpdateDeathTime(f32 dt)
-{
-	m_deathTimer += dt;
-}
-
-bool Animation::isRestartAnimDeathtoIDLE()
-{
-	return m_deathTimer >= m_restartDelay;
-}
-
-s32 Animation::GetCurrentFrame() const
-{
-	return m_subImageIndex;
-}
-
-float Animation::GetAnimationDuration(CharacterAnimationState state) const
-{
-	auto it = m_animDataMap.find(state);
-
-	if (it != m_animDataMap.end())
-	{
-		const AnimData& data = it->second;
-		return static_cast<float>(data.frameCount) * data.frameDuration;
-	}
-
-	return 0.0f;
 }

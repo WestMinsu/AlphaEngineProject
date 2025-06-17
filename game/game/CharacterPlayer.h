@@ -2,11 +2,12 @@
 #include "ACharacter.h"
 #include "Animation.h"
 #include <vector>
+#include <map>
 
 struct AttackHitbox
 {
 	AEVec2 offset;
-	AEVec2 size;   
+	AEVec2 size;
 };
 
 class CharacterPlayer : public ACharacter
@@ -23,16 +24,21 @@ public:
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
 
-	bool IsAttacking() const;
-	bool IsAttackHitboxActive() const;
-	bool HasHitEnemyThisAttack() const;
-
-	void RegisterHit();
+	Animation& GetAnimation() { return m_animation; }
+	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }
 	s32 GetCurrentAnimationFrame() const;
 	const AttackHitbox& GetCurrentAttackHitbox() const;
 
+	bool HasFiredProjectile() const { return m_hasFiredProjectile; }
+	void SetFiredProjectile(bool fired) { m_hasFiredProjectile = fired; }
+
+	bool IsMeleeAttackHitboxActive() const { return m_isMeleeAttackHitboxActive; }
+	void RegisterHit() { m_hasHitEnemyThisAttack = true; }
+	bool HasHitEnemyThisAttack() const { return m_hasHitEnemyThisAttack; }
+
 private:
 	Animation m_animation;
+	std::map<CharacterAnimationState, AnimData> m_animDataMap;
 
 	f32 m_velocityX;
 	f32 m_velocityY;
@@ -41,15 +47,16 @@ private:
 	f32 m_groundLevel;
 	bool m_isGrounded;
 
-	bool m_isAttacking;
-	f32 m_attackTimer;
-	bool m_isAttackHitboxActive;
+	bool m_isMeleeAttacking;
+	bool m_isMeleeAttackHitboxActive;
 	bool m_hasHitEnemyThisAttack;
+	std::vector<AttackHitbox> m_attackHitboxes;
+
+	bool m_isProjectileAttacking;
+	bool m_hasFiredProjectile;
 
 	bool m_isDashing;
-	f32 m_dashTimer;
 	f32 m_dashSpeed;
 
 	CharacterAnimationState m_currentAnimState;
-	std::vector<AttackHitbox> m_attackHitboxes;
 };

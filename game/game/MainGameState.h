@@ -2,15 +2,16 @@
 #include "AGameState.h"
 #include "CharacterPlayer.h"
 #include "CharacterEnemy.h"
+#include "Projectile.h"
+#include <vector>
+#include <memory>
 
 class MainGameState : public AGameState
 {
 public:
 	MainGameState();
-
 	~MainGameState();
 
-	// Override Functions
 	void Init() override;
 	void Update(f32 dt) override;
 	void Draw() override;
@@ -19,4 +20,5 @@ public:
 private:
 	CharacterPlayer m_Player;
 	CharacterEnemy m_Enemy;
+	std::vector<Projectile> m_projectiles;
 };

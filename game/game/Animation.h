@@ -1,20 +1,19 @@
 #pragma once
 #include <AEEngine.h>
 #include "ACharacter.h"
+#include <string>
 #include <map>
 
-enum class SpriteSheetOrientation
-{
-	HORIZONTAL, 
-	VERTICAL   
-};
+enum class SpriteSheetOrientation { HORIZONTAL, VERTICAL };
 
 struct AnimData
 {
+	std::string texturePath;
 	AEGfxTexture* pTexture = nullptr;
 	s32 frameCount = 0;
 	SpriteSheetOrientation orientation = SpriteSheetOrientation::VERTICAL;
 	f32 frameDuration = 0.1f;
+	bool loop = true;
 };
 
 class Animation
@@ -25,27 +24,21 @@ public:
 
 	void Init();
 	void Update(f32 dt);
-	void ChangeAnimState(CharacterAnimationState newAnimState);
 	void Draw(AEMtx33 transform);
 	void Destroy();
 
-	float GetAnimationDuration(CharacterAnimationState state) const;
-	bool getAnimationFinished();
-	void UpdateDeathTime(f32 dt);
-	bool isRestartAnimDeathtoIDLE();
-	
-	s32 GetCurrentFrame() const;
+	void Play(CharacterAnimationState state, const AnimData& clipData);
+
+	s32 GetCurrentFrame() const { return m_subImageIndex; }
+	bool IsFinished() const { return m_isFinished; }
+	CharacterAnimationState GetCurrentState() const { return m_currentState; }
+
 private:
 	AEGfxVertexList* m_mesh;
-
-	std::map<CharacterAnimationState, AnimData> m_animDataMap;
-	CharacterAnimationState m_currentAnimState; 
+	AnimData m_currentClipData;
+	CharacterAnimationState m_currentState;
 
 	s32 m_subImageIndex;
-	f32 m_offset;
 	f32 m_elapsedTime;
-
-	bool m_animationFinished;
-	f32 m_deathTimer;
-	const f32 m_restartDelay = 3.0f;
+	bool m_isFinished;
 };
