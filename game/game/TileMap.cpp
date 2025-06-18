@@ -87,7 +87,8 @@ void TileMap::Draw()
 
 void TileMap::Destroy()
 {
-	for (auto& m_mesh : m_meshes) {
+	for (auto& m_mesh : m_meshes) 
+	{
 		AEGfxMeshFree(m_mesh.second);
 	}
 	m_meshes.clear();
