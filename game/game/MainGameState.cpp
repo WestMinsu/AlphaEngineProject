@@ -19,7 +19,10 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
-	m_TileMap.Init();
+
+	m_TileMap0.Init("Assets/Maps/test0.tmj");
+	std::cout << m_TileMap0.GetMapWidth()  << std::endl;
+	m_TileMap1.Init("Assets/Maps/test1.tmj", m_TileMap0.GetMapWidth(), 0.f);
 	m_Background.Init();
 }
 
@@ -133,13 +136,15 @@ void MainGameState::Update(f32 dt)
 	}
 
 	
-	m_TileMap.Update(dt);
+	m_TileMap0.Update(dt);
+	m_TileMap1.Update(dt);
 }
 
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_TileMap.Draw();
+	m_TileMap0.Draw();
+	m_TileMap1.Draw();
 	m_Player.Draw();
 	m_Enemy.Draw();
 	for (auto& projectile : m_projectiles)
@@ -150,7 +155,8 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	m_TileMap.Destroy();
+	m_TileMap0.Destroy();
+	m_TileMap1.Destroy();
 	m_Background.Destroy();
 	m_Player.Destroy();
 	m_Enemy.Destroy();

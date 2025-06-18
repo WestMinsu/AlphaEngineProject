@@ -14,18 +14,28 @@ TileMap::~TileMap()
 {
 }
 
-void TileMap::Init()
+void TileMap::Init(std::string mapfileDir, f32 x, f32 y)
 {
-	LoadJson("Assets/Maps/testDemo.tmj");
+	m_offset = AEVec2{ x, y };
+	LoadJson(mapfileDir.c_str());
 	LoadTilesets("Assets/FreeCuteTileset/");
 	PrepareLayerData();
-
 }
 
 // To Do 
 void TileMap::Update(f32 dt)
 {
-	//
+	float mapPixelWidth = m_mapWidth * m_tileSize;
+
+	f32 xCAM, yCAM;
+	AEGfxGetCamPosition(&xCAM, &yCAM);
+	
+	if (m_offset.x + mapPixelWidth < xCAM ) {
+		m_offset.x += mapPixelWidth * 2;
+	}
+	else if (m_offset.x > xCAM + kWindowWidth) {
+		m_offset.x -= mapPixelWidth * 2;
+	}
 }
 
 void TileMap::Draw()
@@ -57,7 +67,7 @@ void TileMap::Draw()
 			float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
 			float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
 
-			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f;
+			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f + m_offset.x;
 			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize - kHalfWindowHeight + m_tileSize / 2.0f;
 
 			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -92,6 +102,21 @@ void TileMap::Destroy()
 		AEGfxMeshFree(m_mesh.second);
 	}
 	m_meshes.clear();
+}
+
+s32 TileMap::GetMapWidth()
+{
+	return m_mapWidth*m_tileSize;
+}
+
+AEVec2 TileMap::GetOffset()
+{
+	return m_offset;
+}
+
+void TileMap::SetOffset(f32 offsetX, f32 offsetY)
+{
+	m_offset = AEVec2{offsetX, offsetY};
 }
 
 void TileMap::LoadJson(const char* jsonfile)
