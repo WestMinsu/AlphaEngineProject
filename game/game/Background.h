@@ -9,12 +9,12 @@ public:
 	~Background();
 
 	void Init();
-	void Update();
+	void Update(f32);
 	void Draw();
+	void Destroy();
 
 private:
 	std::vector<AEGfxTexture*> m_backgrounds;
-	AEVec2 position;
-	AEGfxVertexList* m_meshBG;
+	AEVec2 m_position;
 };
 

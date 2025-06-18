@@ -1,10 +1,11 @@
 #include "Background.h"
 #include "AssetManager.h"
+#include "Utility.h"
+#include "Constants.h"
 
 Background::Background()
 	: m_position{0.f, 0.f}
 {
-	m_meshBG = nullptr;
 }
 
 Background::~Background()
@@ -20,14 +21,21 @@ void Background::Init()
 
 }
 
-void Background::Update()
+void Background::Update(f32 dt)
 {
 
 }
 
 void Background::Draw()
 {
+	for (auto& texBG : m_backgrounds)
+	{
+		DrawRect(m_position.x, m_position.y, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, texBG);
+	}
 
+}
 
+void Background::Destroy()
+{
 
 }
