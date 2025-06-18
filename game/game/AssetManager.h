@@ -10,8 +10,8 @@ public:
 	AssetManager();
 	~AssetManager();
 
-	AEGfxTexture* LoadImageAsset(const char*);
-	AEAudio LoadSoundAsset(const char*);
+	AEGfxTexture* LoadImageAsset(std::string);
+	AEAudio LoadSoundAsset(std::string);
 
 private:
 	std::map<std::string, AEGfxTexture* > m_imageAssets;
