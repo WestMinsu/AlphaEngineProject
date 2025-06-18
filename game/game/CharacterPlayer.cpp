@@ -103,7 +103,6 @@ void CharacterPlayer::Update(f32 dt)
 
 	m_isMeleeAttackHitboxActive = m_isMeleeAttacking && (m_animation.GetCurrentFrame() >= 3);
 
-	// --- 핵심 수정: 속도 결정 로직을 Update 함수로 통합 ---
 	if (m_isDashing)
 	{
 		if (isAttacking)
@@ -152,8 +151,6 @@ void CharacterPlayer::Update(f32 dt)
 		else if (AEInputCheckCurr(AEVK_RIGHT))
 			m_currentDirection = CharacterDirection::RIGHT;
 	}
-	// --- 속도 결정 로직 통합 끝 ---
-
 
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
