@@ -29,6 +29,7 @@ public:
     void Init();
     void Update(f32 dt);
     void Draw();
+    void Destroy();
 
 private:
     s32 m_mapWidth, m_mapHeight;
