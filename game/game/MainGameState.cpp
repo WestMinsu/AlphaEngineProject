@@ -3,6 +3,12 @@
 #include "Constants.h"
 #include <iostream>
 #include <algorithm>
+#include "TileMap.h"
+#include "AssetManager.h"
+
+MainGameState::MainGameState()
+{
+}
 
 MainGameState::MainGameState() {}
 MainGameState::~MainGameState() {}
@@ -11,6 +17,7 @@ void MainGameState::Init()
 {
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
+	m_TileMap.Init();
 }
 
 void MainGameState::Update(f32 dt)
@@ -116,10 +123,12 @@ void MainGameState::Update(f32 dt)
 			m_Player.RegisterHit();
 		}
 	}
+	m_TileMap.Update(dt);
 }
 
 void MainGameState::Draw()
 {
+	m_TileMap.Draw();
 	m_Player.Draw();
 	m_Enemy.Draw();
 	for (auto& projectile : m_projectiles)

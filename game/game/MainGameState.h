@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include <vector>
 #include <memory>
+#include "TileMap.h"
 
 class MainGameState : public AGameState
 {
@@ -21,4 +22,5 @@ private:
 	CharacterPlayer m_Player;
 	CharacterEnemy m_Enemy;
 	std::vector<Projectile> m_projectiles;
+	TileMap m_TileMap;
 };
