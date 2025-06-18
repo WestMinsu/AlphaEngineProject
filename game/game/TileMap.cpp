@@ -12,7 +12,6 @@ TileMap::TileMap()
 
 TileMap::~TileMap()
 {
-	m_meshes.clear();
 }
 
 void TileMap::Init()
@@ -84,6 +83,15 @@ void TileMap::Draw()
 
 		}
 	}
+}
+
+void TileMap::Destroy()
+{
+	for (auto& m_mesh : m_meshes) 
+	{
+		AEGfxMeshFree(m_mesh.second);
+	}
+	m_meshes.clear();
 }
 
 void TileMap::LoadJson(const char* jsonfile)

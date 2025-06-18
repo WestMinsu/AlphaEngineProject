@@ -19,6 +19,7 @@ void MainGameState::Init()
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
 	m_TileMap.Init();
+	m_Background.Init();
 }
 
 void MainGameState::Update(f32 dt)
@@ -129,6 +130,7 @@ void MainGameState::Update(f32 dt)
 
 void MainGameState::Draw()
 {
+	m_Background.Draw();
 	m_TileMap.Draw();
 	m_Player.Draw();
 	m_Enemy.Draw();
@@ -140,6 +142,8 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
+	m_TileMap.Destroy();
+	m_Background.Destroy();
 	m_Player.Destroy();
 	m_Enemy.Destroy();
 	for (auto& projectile : m_projectiles)
