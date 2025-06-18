@@ -1,4 +1,4 @@
-#include "CharacterPlayer.h"
+﻿#include "CharacterPlayer.h"
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
@@ -28,10 +28,12 @@ CharacterPlayer::CharacterPlayer()
 	m_hasFiredProjectile = false;
 
 	m_isDashing = false;
-	m_dashSpeed = 800.0f;
+	m_dashSpeed = 800.f;
 }
 
-CharacterPlayer::~CharacterPlayer() {}
+CharacterPlayer::~CharacterPlayer()
+{
+}
 
 void CharacterPlayer::Init(AEVec2 position)
 {
@@ -43,24 +45,19 @@ void CharacterPlayer::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
 	m_animDataMap[CharacterAnimationState::PROJECTILE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.11f, false };
+	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 
-	for (auto& pair : m_animDataMap) {
+	for (auto& pair : m_animDataMap)
+	{
 		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
 	}
 
 	m_attackHitboxes.resize(8);
-	m_attackHitboxes[0] = { {0, 0}, {0, 0} };
-	m_attackHitboxes[1] = { {0, 0}, {0, 0} };
-	m_attackHitboxes[2] = { {0, 0}, {0, 0} };
-
 	m_attackHitboxes[3] = { { m_size.x * 0.25f, m_size.y * -0.15f },  { m_size.x * 0.40f, m_size.y * 0.70f } };
-	m_attackHitboxes[4] = { { m_size.x * 0.28f, m_size.y * -0.3f },  { m_size.x * 0.40f, m_size.y * 0.20f } };
-	m_attackHitboxes[5] = { { m_size.x * 0.28f, m_size.y * -0.4f }, { m_size.x * 0.40f, m_size.y * 0.10f } };
-	m_attackHitboxes[6] = { { m_size.x * 0.28f, m_size.y * -0.4f }, { m_size.x * 0.40f, m_size.y * 0.10f } };
-
-	m_attackHitboxes[7] = { {0, 0}, {0, 0} };
+	m_attackHitboxes[4] = { { m_size.x * 0.28f, m_size.y * -0.3f },   { m_size.x * 0.40f, m_size.y * 0.20f } };
+	m_attackHitboxes[5] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
+	m_attackHitboxes[6] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
@@ -68,82 +65,131 @@ void CharacterPlayer::Init(AEVec2 position)
 void CharacterPlayer::Update(f32 dt)
 {
 	if (m_animation.GetCurrentState() == CharacterAnimationState::DEATH && m_animation.IsFinished())
-	{
 		return;
-	}
 
-	bool isBusy = m_isMeleeAttacking || m_isProjectileAttacking || m_isDashing;
+	bool isAttacking = m_isMeleeAttacking || m_isProjectileAttacking;
 
-	if (AEInputCheckTriggered(AEVK_A) && !isBusy) 
+	if (AEInputCheckTriggered(AEVK_A) && !isAttacking)
 	{
-			m_isMeleeAttacking = true;
-			m_hasHitEnemyThisAttack = false;
+		m_isMeleeAttacking = true;
+		m_hasHitEnemyThisAttack = false;
 	}
-	if (AEInputCheckTriggered(AEVK_S) && !isBusy) 
+	if (AEInputCheckTriggered(AEVK_S) && !isAttacking)
 	{
 		m_isProjectileAttacking = true;
 		m_hasFiredProjectile = false;
 	}
-	if (AEInputCheckTriggered(AEVK_LSHIFT) && m_isGrounded && !isBusy) {
+	if (AEInputCheckTriggered(AEVK_LSHIFT) && !m_isDashing && !isAttacking)
+	{
 		m_isDashing = true;
 	}
-	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isBusy) {
+	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isAttacking && !m_isDashing)
+	{
 		m_isGrounded = false;
 		m_velocityY = m_jumpStrength;
 	}
 
-	if (m_isMeleeAttacking) {
-		if (m_animation.GetCurrentFrame() >= 3) {
-			m_isMeleeAttackHitboxActive = true;
-		}
-		if (m_animation.IsFinished()) {
-			m_isMeleeAttacking = false;
-			m_isMeleeAttackHitboxActive = false;
-		}
-	}
-	else {
-		m_isMeleeAttackHitboxActive = false;
+	if (m_animation.IsFinished())
+	{
+		if (m_isMeleeAttacking) m_isMeleeAttacking = false;
+		if (m_isProjectileAttacking) m_isProjectileAttacking = false;
+		if (m_isDashing) m_isDashing = false;
 	}
 
-	if (m_isProjectileAttacking && m_animation.IsFinished()) {
-		m_isProjectileAttacking = false;
-	}
-	if (m_isDashing && m_animation.IsFinished()) {
+	if (m_isDashing && isAttacking)
+	{
 		m_isDashing = false;
 	}
 
-	Move(dt);
+	m_isMeleeAttackHitboxActive = m_isMeleeAttacking && (m_animation.GetCurrentFrame() >= 3);
 
-	if (m_isGrounded && (m_isMeleeAttacking || m_isProjectileAttacking)) {
+	// --- 핵심 수정: 속도 결정 로직을 Update 함수로 통합 ---
+	if (m_isDashing)
+	{
+		if (isAttacking)
+		{
+			m_velocityX = 0.0f;
+		}
+		else
+		{
+			m_velocityX = (m_currentDirection == CharacterDirection::RIGHT) ? m_dashSpeed : -m_dashSpeed;
+		}
+	}
+	else if (m_isGrounded && isAttacking)
+	{
 		m_velocityX = 0.0f;
 	}
-	if (m_isDashing) {
-		m_velocityX = (m_currentDirection == CharacterDirection::RIGHT) ? m_dashSpeed : -m_dashSpeed;
+	else
+	{
+		float currentMaxSpeed = m_characterSpeed;
+		if (m_isGrounded)
+		{
+			if (AEInputCheckCurr(AEVK_LEFT))
+				m_velocityX = -currentMaxSpeed;
+			else if (AEInputCheckCurr(AEVK_RIGHT))
+				m_velocityX = currentMaxSpeed;
+			else
+				m_velocityX = 0.0f;
+		}
+		else
+		{
+			if (AEInputCheckCurr(AEVK_LEFT))
+				m_velocityX -= m_airAcceleration * dt;
+			else if (AEInputCheckCurr(AEVK_RIGHT))
+				m_velocityX += m_airAcceleration * dt;
+		}
+
+		if (m_velocityX > currentMaxSpeed)
+			m_velocityX = currentMaxSpeed;
+		if (m_velocityX < -currentMaxSpeed)
+			m_velocityX = -currentMaxSpeed;
 	}
 
-	if (!m_isGrounded) { m_velocityY += m_gravity * dt; }
+	if (!m_isMeleeAttacking && !m_isProjectileAttacking)
+	{
+		if (AEInputCheckCurr(AEVK_LEFT))
+			m_currentDirection = CharacterDirection::LEFT;
+		else if (AEInputCheckCurr(AEVK_RIGHT))
+			m_currentDirection = CharacterDirection::RIGHT;
+	}
+	// --- 속도 결정 로직 통합 끝 ---
+
+
+	if (!m_isGrounded)
+		m_velocityY += m_gravity * dt;
+
 	m_position.x += m_velocityX * dt;
 	m_position.y += m_velocityY * dt;
 
-	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f) {
+	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
+	{
 		m_position.y = m_groundLevel;
 		m_velocityY = 0.0f;
-		if (!m_isGrounded) {
+		if (!m_isGrounded)
+		{
 			m_isGrounded = true;
-			if (!AEInputCheckCurr(AEVK_LEFT) && !AEInputCheckCurr(AEVK_RIGHT)) {
+			if (!AEInputCheckCurr(AEVK_LEFT) && !AEInputCheckCurr(AEVK_RIGHT))
+			{
 				m_velocityX = 0.0f;
 			}
 		}
 	}
 
 	CharacterAnimationState desiredState;
-	if (m_isDashing) { desiredState = CharacterAnimationState::DASH; }
-	else if (m_isProjectileAttacking) { desiredState = CharacterAnimationState::PROJECTILE_ATTACK; }
-	else if (m_isMeleeAttacking) { desiredState = CharacterAnimationState::MELEE_ATTACK; }
-	else if (!m_isGrounded) { desiredState = CharacterAnimationState::JUMP; }
-	else {
-		if (m_velocityX == 0.0f) desiredState = CharacterAnimationState::IDLE;
-		else desiredState = CharacterAnimationState::WALK;
+	if (m_isMeleeAttacking)
+		desiredState = CharacterAnimationState::MELEE_ATTACK;
+	else if (m_isProjectileAttacking)
+		desiredState = CharacterAnimationState::PROJECTILE_ATTACK;
+	else if (m_isDashing)
+		desiredState = CharacterAnimationState::DASH;
+	else if (!m_isGrounded)
+		desiredState = CharacterAnimationState::JUMP;
+	else
+	{
+		if (m_velocityX == 0.0f)
+			desiredState = CharacterAnimationState::IDLE;
+		else
+			desiredState = CharacterAnimationState::WALK;
 	}
 
 	m_animation.Play(desiredState, m_animDataMap.at(desiredState));
@@ -151,46 +197,36 @@ void CharacterPlayer::Update(f32 dt)
 
 	const f32 halfCharWidth = m_size.x / 2.0f;
 	const f32 halfCharHeight = m_size.y / 2.0f;
-	if (m_position.x < -kHalfWindowWidth + halfCharWidth) { m_position.x = -kHalfWindowWidth + halfCharWidth; }
-	if (m_position.x > kHalfWindowWidth - halfCharWidth) { m_position.x = kHalfWindowWidth - halfCharWidth; }
-	if (m_position.y > kHalfWindowHeight - halfCharHeight) { m_position.y = kHalfWindowHeight - halfCharHeight; m_velocityY = 0; }
+	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
+		m_position.x = -kHalfWindowWidth + halfCharWidth;
+
+	if (m_position.x > kHalfWindowWidth - halfCharWidth)
+		m_position.x = kHalfWindowWidth - halfCharWidth;
+
+	if (m_position.y > kHalfWindowHeight - halfCharHeight)
+	{
+		m_position.y = kHalfWindowHeight - halfCharHeight;
+		m_velocityY = 0;
+	}
 
 	m_animation.Update(dt);
 }
 
-void CharacterPlayer::Move(f32 dt) {
-	if (m_isGrounded) {
-		if (AEInputCheckCurr(AEVK_LEFT)) { m_velocityX = -m_characterSpeed; }
-		else if (AEInputCheckCurr(AEVK_RIGHT)) { m_velocityX = m_characterSpeed; }
-		else { m_velocityX = 0.0f; }
-	}
-	else {
-		if (AEInputCheckCurr(AEVK_LEFT)) { m_velocityX -= m_airAcceleration * dt; }
-		else if (AEInputCheckCurr(AEVK_RIGHT)) { m_velocityX += m_airAcceleration * dt; }
-	}
-
-	if (m_velocityX > m_characterSpeed) { m_velocityX = m_characterSpeed; }
-	if (m_velocityX < -m_characterSpeed) { m_velocityX = -m_characterSpeed; }
-
-	if (!m_isMeleeAttacking && !m_isProjectileAttacking) 
-	{
-		if (AEInputCheckCurr(AEVK_LEFT)) { m_currentDirection = CharacterDirection::LEFT; }
-		else if (AEInputCheckCurr(AEVK_RIGHT)) { m_currentDirection = CharacterDirection::RIGHT; }
-	}
+void CharacterPlayer::Move(f32 dt)
+{
 }
 
 void CharacterPlayer::Draw()
 {
 	AEMtx33 scale = { 0 };
+	AEMtx33 rotate = { 0 };
+	AEMtx33 translate = { 0 };
+	AEMtx33 transform = { 0 };
+
+	AEMtx33Trans(&translate, m_position.x, m_position.y);
+	AEMtx33Rot(&rotate, 0);
 	AEMtx33Scale(&scale, m_currentDirection == CharacterDirection::RIGHT ? m_size.x : -m_size.x, m_size.y);
 
-	AEMtx33 rotate = { 0 };
-	AEMtx33Rot(&rotate, 0);
-
-	AEMtx33 translate = { 0 };
-	AEMtx33Trans(&translate, m_position.x, m_position.y);
-
-	AEMtx33 transform = { 0 };
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
 
@@ -208,8 +244,10 @@ void CharacterPlayer::Draw()
 
 void CharacterPlayer::Destroy()
 {
-	for (auto& pair : m_animDataMap) {
-		if (pair.second.pTexture) AEGfxTextureUnload(pair.second.pTexture);
+	for (auto& pair : m_animDataMap)
+	{
+		if (pair.second.pTexture)
+			AEGfxTextureUnload(pair.second.pTexture);
 	}
 	m_animation.Destroy();
 }
@@ -229,7 +267,9 @@ const AttackHitbox& CharacterPlayer::GetCurrentAttackHitbox() const
 	return m_attackHitboxes[0];
 }
 
-void CharacterPlayer::Attack() {}
+void CharacterPlayer::Attack()
+{
+}
 
 void CharacterPlayer::TakeDamage(s32 damage)
 {
