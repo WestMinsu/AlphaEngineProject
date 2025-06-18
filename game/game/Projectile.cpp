@@ -68,7 +68,6 @@ void Projectile::Draw()
 
 	AEMtx33 translate = { 0 };
 	AEMtx33Trans(&translate, m_position.x, m_position.y);
-	std::cout << m_position.y << std::endl;
 
 	AEMtx33 transform = { 0 };
 	AEMtx33Concat(&transform, &rotate, &scale);

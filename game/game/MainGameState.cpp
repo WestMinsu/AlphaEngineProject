@@ -10,8 +10,9 @@ MainGameState::MainGameState()
 {
 }
 
-MainGameState::MainGameState() {}
-MainGameState::~MainGameState() {}
+MainGameState::~MainGameState() 
+{
+}
 
 void MainGameState::Init()
 {
