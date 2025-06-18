@@ -142,8 +142,8 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	m_TileMap;
-	m_Background;
+	m_TileMap.Destroy();
+	m_Background.Destroy();
 	m_Player.Destroy();
 	m_Enemy.Destroy();
 	for (auto& projectile : m_projectiles)

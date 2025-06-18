@@ -23,6 +23,7 @@ void GameManager::Init()
 	AESysSetWindowTitle(m_kTextTitle);
 	
 	m_GameState = std::move(std::make_unique<IntroState>());
+	m_GameState->Init();
 	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 	InitUtilityMeshes();
 	AESysReset();
