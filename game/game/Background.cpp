@@ -28,6 +28,7 @@ void Background::Update(f32 dt)
 
 void Background::Draw()
 {
+	AEGfxGetCamPosition(&m_position.x, &m_position.y);
 	for (auto& texBG : m_backgrounds)
 	{
 		DrawRect(m_position.x, m_position.y, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, texBG);

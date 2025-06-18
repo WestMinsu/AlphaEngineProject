@@ -16,6 +16,7 @@ MainGameState::~MainGameState()
 
 void MainGameState::Init()
 {
+	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
 	m_TileMap.Init();
@@ -32,6 +33,11 @@ void MainGameState::Update(f32 dt)
 
 	m_Player.Update(dt);
 	m_Enemy.Update(dt);
+
+	if (m_Player.GetPosition().x > 0.f)
+	{
+		AEGfxSetCamPosition(m_Player.GetPosition().x, 0.f);
+	}
 
 	if (m_Player.GetCurrentAnimState() == CharacterAnimationState::PROJECTILE_ATTACK &&
 		m_Player.GetAnimation().GetCurrentFrame() == 4 &&
@@ -125,6 +131,8 @@ void MainGameState::Update(f32 dt)
 			m_Player.RegisterHit();
 		}
 	}
+
+	
 	m_TileMap.Update(dt);
 }
 
@@ -151,4 +159,5 @@ void MainGameState::Exit()
 		projectile.Destroy();
 	}
 	m_projectiles.clear();
+	AEGfxSetCamPosition(0.f, 0.f);
 }
