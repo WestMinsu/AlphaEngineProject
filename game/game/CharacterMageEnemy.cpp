@@ -48,11 +48,13 @@ void CharacterMageEnemy::Init(AEVec2 position, CharacterPlayer* player)
 
 void CharacterMageEnemy::Update(f32 dt)
 {
-	if (m_currentAnimState == CharacterAnimationState::DEATH && m_animation.IsFinished())
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
+		m_animation.Update(dt);
 		return;
 	}
-	if (!m_pPlayer) return;
+	if (!m_pPlayer)
+		return;
 
 	const AEVec2& playerPosConst = m_pPlayer->GetPosition();
 	AEVec2 playerPos = playerPosConst;
@@ -157,7 +159,7 @@ void CharacterMageEnemy::Draw()
 void CharacterMageEnemy::Destroy()
 {
 	for (auto& pair : m_animDataMap)
-	{
+	{	
 		if (pair.second.pTexture)
 			AEGfxTextureUnload(pair.second.pTexture);
 	}
