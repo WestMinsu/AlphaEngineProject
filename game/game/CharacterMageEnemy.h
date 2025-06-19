@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include <map>
 #include "CharacterPlayer.h"
+#include "AIState.h" 
 
 class CharacterMageEnemy : public ACharacter
 {

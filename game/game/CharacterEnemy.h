@@ -1,5 +1,3 @@
-// CharacterEnemy.h (수정된 전체 코드)
-
 #pragma once
 #include "ACharacter.h"
 #include "Animation.h"

@@ -3,7 +3,6 @@
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
-#include "AIState.h"
 
 CharacterMageEnemy::CharacterMageEnemy()
 {

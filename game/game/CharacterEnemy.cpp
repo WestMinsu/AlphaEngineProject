@@ -2,7 +2,6 @@
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
-#include "AIState.h"
 #include "CharacterPlayer.h"
 
 CharacterEnemy::CharacterEnemy()

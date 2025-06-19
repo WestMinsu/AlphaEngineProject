@@ -129,6 +129,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="CharacterEnemy.cpp" />
+    <ClCompile Include="CharacterMageEnemy.cpp" />
     <ClCompile Include="CharacterPlayer.cpp" />
     <ClCompile Include="EnemyProjectile.cpp" />
     <ClCompile Include="GameManager.cpp" />
@@ -140,11 +141,6 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Utility.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CharacterMageEnemy.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -62,13 +62,13 @@
     <ClInclude Include="Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CharacterMageEnemy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EnemyProjectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AIState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterMageEnemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -121,10 +121,8 @@
     <ClCompile Include="EnemyProjectile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CharacterMageEnemy.cpp">
+    <ClCompile Include="CharacterMageEnemy.cpp">
       <Filter>Source Files</Filter>
-    </None>
+    </ClCompile>
   </ItemGroup>
 </Project>
