@@ -2,7 +2,9 @@
 #include "AGameState.h"
 #include "CharacterPlayer.h"
 #include "CharacterEnemy.h"
+#include "CharacterMageEnemy.h"
 #include "Projectile.h"
+#include "EnemyProjectile.h"
 #include <vector>
 #include <memory>
 #include "TileMap.h"
@@ -21,8 +23,12 @@ public:
 
 private:
 	CharacterPlayer m_Player;
-	CharacterEnemy m_Enemy;
-	std::vector<Projectile> m_projectiles;
+	CharacterEnemy m_MeleeEnemy; 
+	CharacterMageEnemy m_MageEnemy;
+
+	std::vector<Projectile> m_playerProjectiles; 
+	std::vector<EnemyProjectile> m_enemyProjectiles;
+
 	TileMap m_TileMap;
 	Background m_Background;
 };

@@ -1,16 +1,15 @@
 #pragma once
 #include "ACharacter.h"
 #include "Animation.h"
-#include "AIState.h" 
 #include <map>
+#include "CharacterPlayer.h"
+#include "AIState.h" 
 
-class CharacterPlayer;
-
-class CharacterEnemy : public ACharacter
+class CharacterMageEnemy : public ACharacter
 {
 public:
-	CharacterEnemy();
-	~CharacterEnemy();
+	CharacterMageEnemy();
+	~CharacterMageEnemy();
 
 	void Init(AEVec2 position) override;
 	void Init(AEVec2 position, CharacterPlayer* player);
@@ -20,6 +19,11 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
+
+	Animation& GetAnimation() { return m_animation; }
+	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }
+	bool HasFiredProjectile() const { return m_hasFiredProjectile; }
+	void SetFiredProjectile(bool fired) { m_hasFiredProjectile = fired; }
 
 private:
 	Animation m_animation;
@@ -31,7 +35,9 @@ private:
 
 	f32 m_detectionRange;
 	f32 m_attackRange;
+	f32 m_idealRange; // 플레이어와 유지하려는 이상적인 거리
 
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
+	bool m_hasFiredProjectile;
 };

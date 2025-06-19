@@ -104,12 +104,15 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
   <ItemGroup>
     <ClInclude Include="ACharacter.h" />
     <ClInclude Include="AGameState.h" />
+    <ClInclude Include="AIState.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="CharacterEnemy.h" />
+    <ClInclude Include="CharacterMageEnemy.h" />
     <ClInclude Include="CharacterPlayer.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="EnemyProjectile.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="IntroState.h" />
     <ClInclude Include="json.hpp" />
@@ -126,7 +129,9 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="CharacterEnemy.cpp" />
+    <ClCompile Include="CharacterMageEnemy.cpp" />
     <ClCompile Include="CharacterPlayer.cpp" />
+    <ClCompile Include="EnemyProjectile.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="IntroState.cpp" />
     <ClCompile Include="Main.cpp" />

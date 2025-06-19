@@ -45,7 +45,7 @@ public:
 	s32 GetHealth() const 
 	{ 
 		return m_healthPoint;
-	}
+	}	
 
 protected:
 	AEVec2 m_position;
