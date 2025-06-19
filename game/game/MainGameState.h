@@ -1,7 +1,7 @@
 #pragma once
 #include "AGameState.h"
 #include "CharacterPlayer.h"
-#include "CharacterEnemy.h"
+#include "CharacterMeleeEnemy.h"
 #include "CharacterMageEnemy.h"
 #include "Projectile.h"
 #include "EnemyProjectile.h"
@@ -23,7 +23,7 @@ public:
 
 private:
 	CharacterPlayer m_Player;
-	CharacterEnemy m_MeleeEnemy; 
+	CharacterMeleeEnemy m_MeleeEnemy; 
 	CharacterMageEnemy m_MageEnemy;
 
 	std::vector<Projectile> m_playerProjectiles; 

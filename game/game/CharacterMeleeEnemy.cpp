@@ -4,7 +4,7 @@
 #include <iostream>
 #include "CharacterPlayer.h"
 
-CharacterEnemy::CharacterEnemy()
+CharacterMeleeEnemy::CharacterMeleeEnemy()
 {
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
@@ -20,15 +20,15 @@ CharacterEnemy::CharacterEnemy()
 	m_attackCooldownDuration = 2.0f;
 }
 
-CharacterEnemy::~CharacterEnemy() 
+CharacterMeleeEnemy::~CharacterMeleeEnemy() 
 {
 }
 
-void CharacterEnemy::Init(AEVec2 position)
+void CharacterMeleeEnemy::Init(AEVec2 position)
 {
 }
 
-void CharacterEnemy::Init(AEVec2 position, CharacterPlayer* player)
+void CharacterMeleeEnemy::Init(AEVec2 position, CharacterPlayer* player)
 {
 	m_position = position;
 	m_pPlayer = player; 
@@ -48,7 +48,7 @@ void CharacterEnemy::Init(AEVec2 position, CharacterPlayer* player)
 }
 
 
-void CharacterEnemy::Update(f32 dt)
+void CharacterMeleeEnemy::Update(f32 dt)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -129,18 +129,18 @@ void CharacterEnemy::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void CharacterEnemy::Move(f32 dt)
+void CharacterMeleeEnemy::Move(f32 dt)
 {
 	// TODO
 }
 
-void CharacterEnemy::Attack()
+void CharacterMeleeEnemy::Attack()
 {
 	// TODO
 }
 
 
-void CharacterEnemy::Draw()
+void CharacterMeleeEnemy::Draw()
 {
 	AEMtx33 scale = { 0 };
 	if (m_currentDirection == CharacterDirection::LEFT)
@@ -162,7 +162,7 @@ void CharacterEnemy::Draw()
 	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.f, 1.f, 0.f);
 }
 
-void CharacterEnemy::Destroy()
+void CharacterMeleeEnemy::Destroy()
 {
 	for (auto& pair : m_animDataMap) 
 	{
@@ -172,7 +172,7 @@ void CharacterEnemy::Destroy()
 	m_animation.Destroy();
 }
 
-void CharacterEnemy::TakeDamage(s32 damage)
+void CharacterMeleeEnemy::TakeDamage(s32 damage)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{

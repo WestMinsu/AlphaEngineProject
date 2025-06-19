@@ -6,11 +6,11 @@
 
 class CharacterPlayer;
 
-class CharacterEnemy : public ACharacter
+class CharacterMeleeEnemy : public ACharacter
 {
 public:
-	CharacterEnemy();
-	~CharacterEnemy();
+	CharacterMeleeEnemy();
+	~CharacterMeleeEnemy();
 
 	void Init(AEVec2 position) override;
 	void Init(AEVec2 position, CharacterPlayer* player);

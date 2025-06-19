@@ -113,9 +113,9 @@ void Animation::Draw(AEMtx33 transform)
 
 void Animation::Destroy()
 {
-	if (m_mesh)
-	{
-		AEGfxMeshFree(m_mesh);
-		m_mesh = nullptr;
-	}
+	//if (m_mesh)
+	//{
+	//	AEGfxMeshFree(m_mesh);
+	//	m_mesh = nullptr;
+	//}
 }
