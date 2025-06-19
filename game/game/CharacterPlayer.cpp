@@ -6,7 +6,7 @@
 CharacterPlayer::CharacterPlayer()
 {
 	m_position = { 0,0 };
-	m_size = { 500.f, 500.f };
+	m_size = { 200.f, 200.f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;

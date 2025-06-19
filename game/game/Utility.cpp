@@ -44,7 +44,6 @@ void FreeUtilityMeshes()
     }
 }
 
-
 void DrawRect(f32 x, f32 y, f32 w, f32 h, float r, float g, float b, float a, AEGfxTexture* pTex)
 { 
     AEMtx33 scale = { 0 };
@@ -110,4 +109,23 @@ AEVec2 GetNormalizedCoords(f32 x, f32 y)
     ndcCoord.x = (2.0f * x / kWindowWidth);
     ndcCoord.y = (2.0f * y / kWindowHeight);
     return ndcCoord;
+}
+
+bool CheckAABBCollision(const AEVec2& pos1, const AEVec2& size1, const AEVec2& pos2, const AEVec2& size2)
+{
+    float left1 = pos1.x - size1.x / 2;
+    float right1 = pos1.x + size1.x / 2;
+    float top1 = pos1.y + size1.y / 2;
+    float bottom1 = pos1.y - size1.y / 2;
+
+    float left2 = pos2.x - size2.x / 2;
+    float right2 = pos2.x + size2.x / 2;
+    float top2 = pos2.y + size2.y / 2;
+    float bottom2 = pos2.y - size2.y / 2;
+    if (right1 > left2 && left1 < right2 && top1 > bottom2 && bottom1 < top2)
+    {
+        return true;
+    }
+
+    return false;
 }
