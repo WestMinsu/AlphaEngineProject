@@ -20,9 +20,9 @@ void MainGameState::Init()
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
 
-	m_TileMap0.Init("Assets/Maps/test0.tmj");
+	m_TileMap0.Init("Assets/Maps/test0_32.tmj");
 	std::cout << m_TileMap0.GetMapWidth()  << std::endl;
-	m_TileMap1.Init("Assets/Maps/test1.tmj", m_TileMap0.GetMapWidth(), 0.f);
+	m_TileMap1.Init("Assets/Maps/test1_32.tmj", m_TileMap0.GetMapWidth(), 0.f);
 	m_Background.Init();
 }
 

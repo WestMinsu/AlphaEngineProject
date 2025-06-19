@@ -40,6 +40,8 @@ private:
     AEVec2 m_offset;
     s32 m_mapWidth, m_mapHeight;
     s32 m_tileSize;
+    s32 m_tileOffsetSize;
+    
     nlohmann::json m_mapJson;
 
     std::vector<TilesetInfo> m_tilesets;

@@ -7,7 +7,9 @@
 
 TileMap::TileMap()
 {
-	m_tileSize = 16;
+	m_tileSize = 32;
+	m_tileOffsetSize = 16;
+
 }
 
 TileMap::~TileMap()
@@ -166,14 +168,14 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 		if (m_meshes.find(keyPair) == m_meshes.end()) {
 			AEGfxVertexList* m_mesh;
 			AEGfxTriAdd(
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize/ (f32)tilesetInfo.imageHeight,
-				0.5f, -0.5f, 0xFFFFFFFF, m_tileSize/ (f32)tilesetInfo.imageWidth, m_tileSize / (f32)tilesetInfo.imageHeight,
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize/ (f32)tilesetInfo.imageHeight,
+				0.5f, -0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, m_tileOffsetSize / (f32)tilesetInfo.imageHeight,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f);
 
 			AEGfxTriAdd(
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f,
 				-0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f,
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize / (f32)tilesetInfo.imageHeight);
 
 			m_mesh = AEGfxMeshEnd();
 

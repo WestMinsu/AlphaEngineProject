@@ -5,7 +5,7 @@
 
 CharacterEnemy::CharacterEnemy()
 {
-	m_size = { 500.f, 500.f };
+	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
 	m_characterSpeed = 0.0f;
 	m_currentDirection = CharacterDirection::LEFT;
