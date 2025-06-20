@@ -74,7 +74,7 @@ void CharacterPlayer::Init(AEVec2 position)
 	}
 	for (auto& pair : m_projectileDataMap)
 	{
-		pair.second.animData.pTexture = assetManager.LoadImageAsset(pair.second.animData.texturePath.c_str());
+		pair.second.animData.pTexture = LoadImageAsset(pair.second.animData.texturePath.c_str());
 	}
 
 	m_availableWeapons.push_back(WeaponType::FIRE);

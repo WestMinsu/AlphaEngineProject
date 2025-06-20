@@ -42,7 +42,7 @@ void CharacterMeleeEnemy::Init(AEVec2 position, CharacterPlayer* player)
 
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = assetManager.LoadImageAsset(pair.second.texturePath);
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));

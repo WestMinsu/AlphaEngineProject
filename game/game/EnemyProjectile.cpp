@@ -31,7 +31,7 @@ void EnemyProjectile::Init(AEVec2 startPos, CharacterDirection dir)
 	m_animation.Init();
 
 	m_animData.texturePath = "Assets/MagicArrow/enemyarrow.png";
-	m_animData.pTexture = assetManager.LoadImageAsset(m_animData.texturePath);
+	m_animData.pTexture = LoadImageAsset(m_animData.texturePath);
 	m_animData.frameCount = 15;
 	m_animData.orientation = SpriteSheetOrientation::HORIZONTAL;
 	m_animData.frameDuration = 0.05f;

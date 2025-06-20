@@ -40,14 +40,14 @@ void CharacterMageEnemy::Init(AEVec2 position, CharacterPlayer* player)
 	m_animDataMap[CharacterAnimationState::PROJECTILE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/mage/attack.PNG", nullptr, 21, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = assetManager.LoadImageAsset(pair.second.texturePath);
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
 	}
 
 	m_projectileData.speed = 800.0f;
 	m_projectileData.damage = 5;
 	m_projectileData.size = { 150.f, 150.f };
 	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileData.animData.pTexture = assetManager.LoadImageAsset(m_projectileData.animData.texturePath.c_str());
+	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
