@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
+#include "AssetManager.h"
 
 CharacterMageEnemy::CharacterMageEnemy()
 {
@@ -37,11 +38,16 @@ void CharacterMageEnemy::Init(AEVec2 position, CharacterPlayer* player)
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/mage/death.PNG", nullptr, 18, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/mage/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::PROJECTILE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/mage/attack.PNG", nullptr, 21, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = assetManager.LoadImageAsset(pair.second.texturePath);
 	}
+
+	m_projectileData.speed = 800.0f;
+	m_projectileData.damage = 5;
+	m_projectileData.size = { 150.f, 150.f };
+	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
+	m_projectileData.animData.pTexture = assetManager.LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
@@ -158,11 +164,6 @@ void CharacterMageEnemy::Draw()
 
 void CharacterMageEnemy::Destroy()
 {
-	for (auto& pair : m_animDataMap)
-	{	
-		if (pair.second.pTexture)
-			AEGfxTextureUnload(pair.second.pTexture);
-	}
 	m_animation.Destroy();
 }
 

@@ -24,18 +24,19 @@ public:
 	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }
 	bool HasFiredProjectile() const { return m_hasFiredProjectile; }
 	void SetFiredProjectile(bool fired) { m_hasFiredProjectile = fired; }
-
+	const ProjectileData& GetProjectileData() const { return m_projectileData; }
 private:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
+	ProjectileData m_projectileData;
 
 	EnemyAIState m_currentAIState;
 	CharacterPlayer* m_pPlayer;
 
 	f32 m_detectionRange;
 	f32 m_attackRange;
-	f32 m_idealRange; // 플레이어와 유지하려는 이상적인 거리
+	f32 m_idealRange; 
 
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;

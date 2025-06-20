@@ -19,6 +19,7 @@ struct AnimData
 class Animation
 {
 public:
+	static int COUNT;
 	Animation();
 	~Animation();
 
@@ -41,4 +42,5 @@ private:
 	s32 m_subImageIndex;
 	f32 m_elapsedTime;
 	bool m_isFinished;
+	int id;
 };

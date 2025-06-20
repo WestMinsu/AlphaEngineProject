@@ -1,13 +1,16 @@
 #include "Animation.h"
+#include <iostream>
 
-Animation::Animation() : m_mesh(nullptr), m_subImageIndex(0), m_elapsedTime(0.0f), m_isFinished(false), m_currentState(CharacterAnimationState::IDLE)
+int Animation::COUNT = 0;
+
+Animation::Animation() : m_mesh(nullptr), m_subImageIndex(0), m_elapsedTime(0.0f), m_isFinished(false), m_currentState(CharacterAnimationState::IDLE), id(COUNT)
 {
 	m_currentClipData.pTexture = nullptr;
+	COUNT++;
 }
 
 Animation::~Animation()
 {
-	Destroy();
 }
 
 void Animation::Init()
@@ -113,9 +116,9 @@ void Animation::Draw(AEMtx33 transform)
 
 void Animation::Destroy()
 {
-	//if (m_mesh)
-	//{
-	//	AEGfxMeshFree(m_mesh);
-	//	m_mesh = nullptr;
-	//}
+	if (m_mesh)
+	{
+		AEGfxMeshFree(m_mesh);
+		m_mesh = nullptr;
+	}
 }

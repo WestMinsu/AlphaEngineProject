@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include <iostream>
 #include "CharacterPlayer.h"
+#include "AssetManager.h"
 
 CharacterMeleeEnemy::CharacterMeleeEnemy()
 {
@@ -41,7 +42,7 @@ void CharacterMeleeEnemy::Init(AEVec2 position, CharacterPlayer* player)
 
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = assetManager.LoadImageAsset(pair.second.texturePath);
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
@@ -164,11 +165,6 @@ void CharacterMeleeEnemy::Draw()
 
 void CharacterMeleeEnemy::Destroy()
 {
-	for (auto& pair : m_animDataMap) 
-	{
-		if (pair.second.pTexture) 
-			AEGfxTextureUnload(pair.second.pTexture);
-	}
 	m_animation.Destroy();
 }
 

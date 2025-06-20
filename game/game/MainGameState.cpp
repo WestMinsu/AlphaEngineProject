@@ -4,8 +4,14 @@
 #include <iostream>
 #include <algorithm>
 #include "Utility.h"
+#include "AssetManager.h"
+#include "WeaponData.h"
 
-MainGameState::MainGameState() {}
+MainGameState::MainGameState() 
+{
+	MainGameState::m_pUiSlot = nullptr;
+	MainGameState::m_pFireIcon = nullptr;
+}
 MainGameState::~MainGameState() {}
 
 void MainGameState::Init()
@@ -15,6 +21,10 @@ void MainGameState::Init()
 	m_MageEnemy.Init({ kHalfWindowWidth - 500.f, 0.f }, &m_Player);
 	m_TileMap.Init();
 	m_Background.Init();
+
+	m_pUiSlot = assetManager.LoadImageAsset("Assets/UI/slot.png");
+	m_weaponIconMap[WeaponType::FIRE] = assetManager.LoadImageAsset("Assets/MagicArrow/fire_icon.png");
+	m_weaponIconMap[WeaponType::ICE] = assetManager.LoadImageAsset("Assets/MagicArrow/ice_icon.png");
 }
 
 void MainGameState::Update(f32 dt)
@@ -43,7 +53,8 @@ void MainGameState::Update(f32 dt)
 		const f32 offsetY_Ratio = 0.1f;
 		spawnPos.x = playerPos.x + (playerDir == CharacterDirection::RIGHT ? playerSize.x * offsetX_Ratio : -playerSize.x * offsetX_Ratio);
 		spawnPos.y = playerPos.y + playerSize.y * offsetY_Ratio;
-		newProjectile.Init(spawnPos, playerDir);
+		const ProjectileData& projData = m_Player.GetCurrentProjectileData();
+		newProjectile.Init(spawnPos, playerDir, projData);
 		m_Player.SetFiredProjectile(true);
 	}
 
@@ -52,50 +63,55 @@ void MainGameState::Update(f32 dt)
 		!m_MageEnemy.HasFiredProjectile())
 	{
 		m_enemyProjectiles.emplace_back();
-		EnemyProjectile& newProjectile = m_enemyProjectiles.back();
-		newProjectile.Init(m_MageEnemy.GetPosition(), m_MageEnemy.GetDirection());
+		Projectile& newProjectile = m_enemyProjectiles.back();
+
+		const ProjectileData& projData = m_MageEnemy.GetProjectileData();
+
+		newProjectile.Init(m_MageEnemy.GetPosition(), m_MageEnemy.GetDirection(), projData);
+
 		m_MageEnemy.SetFiredProjectile(true);
 	}
 
-	for (auto it = m_playerProjectiles.begin(); it != m_playerProjectiles.end(); )
+	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
-		it->Update(dt);
+		proj->Update(dt);
 		bool hit = false;
-		if (it->IsActive() && m_MeleeEnemy.GetHealth() > 0)
+		if (proj->IsActive() && m_MeleeEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(it->GetPosition(), it->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetSize()))
 			{
-				m_MeleeEnemy.TakeDamage(15);
-				it->Deactivate();
+				m_MeleeEnemy.TakeDamage(proj->GetDamage());
+				proj->Deactivate();
 				hit = true;
 			}
 		}
-		if (!hit && it->IsActive() && m_MageEnemy.GetHealth() > 0)
+		if (!hit && proj->IsActive() && m_MageEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(it->GetPosition(), it->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetSize()))
 			{
-				m_MageEnemy.TakeDamage(15);
-				it->Deactivate();
+				m_MageEnemy.TakeDamage(proj->GetDamage());
+				proj->Deactivate();
 			}
 		}
-		if (!it->IsActive()) { it->Destroy(); it = m_playerProjectiles.erase(it); }
-		else { ++it; }
+		if (!proj->IsActive()) 
+		{ 
+			proj->Destroy();
+			proj = m_playerProjectiles.erase(proj); 
+		}
+		else 
+			++proj;
 	}
 
-	for (auto it = m_enemyProjectiles.begin(); it != m_enemyProjectiles.end(); )
+	for (auto& proj : m_enemyProjectiles)
 	{
-		it->Update(dt);
-		if (it->IsActive() && m_Player.GetHealth() > 0)
+		proj.Update(dt);
+		if (proj.IsActive() && m_Player.GetHealth() > 0 && CheckAABBCollision(proj.GetPosition(), proj.GetSize(), m_Player.GetPosition(), m_Player.GetSize()))
 		{
-			if (CheckAABBCollision(it->GetPosition(), it->GetSize(), m_Player.GetPosition(), m_Player.GetSize()))
-			{
-				m_Player.TakeDamage(5);
-				it->Deactivate();
-			}
+			m_Player.TakeDamage(proj.GetDamage());
+			proj.Deactivate();
 		}
-		if (!it->IsActive()) { it->Destroy(); it = m_enemyProjectiles.erase(it); }
-		else { ++it; }
 	}
+
 
 	if (m_Player.IsMeleeAttackHitboxActive() && !m_Player.HasHitEnemyThisAttack())
 	{
@@ -123,16 +139,22 @@ void MainGameState::Draw()
 	m_Background.Draw();
 	m_TileMap.Draw();
 
-	m_Player.Draw();
 	m_MeleeEnemy.Draw();
 	m_MageEnemy.Draw();
+	m_Player.Draw();
 
-	for (auto& projectile : m_playerProjectiles) projectile.Draw();
-	for (auto& projectile : m_enemyProjectiles) projectile.Draw();
+	for (auto& projectile : m_playerProjectiles)
+		projectile.Draw();
+	for (auto& projectile : m_enemyProjectiles) 
+		projectile.Draw();
+
+	DrawUI();
 }
 
 void MainGameState::Exit()
 {
+	m_TileMap.Destroy();
+	m_Background.Destroy();
 	m_Player.Destroy();
 	m_MeleeEnemy.Destroy();
 	m_MageEnemy.Destroy();
@@ -140,4 +162,37 @@ void MainGameState::Exit()
 	for (auto& projectile : m_enemyProjectiles) projectile.Destroy();
 	m_playerProjectiles.clear();
 	m_enemyProjectiles.clear();
+}
+
+void MainGameState::DrawUI()
+{
+	const f32 slotSize = 80.0f;
+	const f32 slotMargin = 10.0f;
+	const auto& availableWeapons = m_Player.GetAvailableWeapons();
+	const size_t totalSlots = availableWeapons.size();
+	if (totalSlots == 0) return;
+
+	const f32 totalWidth = (slotSize * totalSlots) + (slotMargin * (totalSlots - 1));
+	const f32 startX = -(totalWidth / 2.0f) + (slotSize / 2.0f);
+	const f32 posY = kHalfWindowHeight - 60.0f;
+
+	WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
+
+	for (size_t i = 0; i < totalSlots; ++i)
+	{
+		float posX = startX + i * (slotSize + slotMargin);
+		WeaponType slotWeaponType = availableWeapons[i];
+
+		DrawRect(posX, posY, slotSize, slotSize, 1.f, 1.f, 1.f, 0.7f, m_pUiSlot);
+
+		if (m_weaponIconMap.count(slotWeaponType))
+		{
+			DrawRect(posX, posY, slotSize * 0.8f, slotSize * 0.8f, 1.f, 1.f, 1.f, 1.f, m_weaponIconMap.at(slotWeaponType));
+		}
+
+		if (slotWeaponType == currentWeapon)
+		{
+			DrawHollowRect(posX, posY, slotSize, slotSize, 1.0f, 1.0f, 0.0f, 1.0f);
+		}
+	}
 }

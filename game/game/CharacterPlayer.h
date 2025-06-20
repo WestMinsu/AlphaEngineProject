@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include <vector>
 #include <map>
+#include "WeaponData.h"
 
 struct AttackHitbox
 {
@@ -36,6 +37,9 @@ public:
 	void RegisterHit() { m_hasHitEnemyThisAttack = true; }
 	bool HasHitEnemyThisAttack() const { return m_hasHitEnemyThisAttack; }
 
+	const ProjectileData& GetCurrentProjectileData() const;
+	WeaponType GetCurrentWeaponType() const { return m_currentWeapon; }
+	const std::vector<WeaponType>& GetAvailableWeapons() const { return m_availableWeapons; }
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -59,4 +63,9 @@ private:
 	f32 m_dashSpeed;
 
 	CharacterAnimationState m_currentAnimState;
+
+	std::map<WeaponType, ProjectileData> m_projectileDataMap;
+	std::vector<WeaponType> m_availableWeapons;
+	WeaponType m_currentWeapon;
+	int m_currentWeaponIndex;
 };
