@@ -22,7 +22,7 @@ void MainGameState::Init()
 	m_MageEnemy.Init({ kHalfWindowWidth - 500.f, 0.f }, &m_Player);
 
 	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
-	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth()* m_TileMaps[0].GetTileSize(), 0.f));
+	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
 	m_Background.Init();
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
@@ -44,11 +44,11 @@ void MainGameState::Update(f32 dt)
 	m_MeleeEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 
+	int tileX = m_Player.GetPosition().x / 32;
+	int tileY = m_Player.GetPosition().y / 32;
+
 	// To Do 
 	// TileMap Collision
-	for (auto& tm : m_TileMaps) {
-		tm.checkCollisionTileMap(m_Player.GetPosition(), m_Player.GetSize());
-	}
 
 	if (m_Player.GetPosition().x > 0.f)
 	{
@@ -71,7 +71,6 @@ void MainGameState::Update(f32 dt)
 		spawnPos.y = playerPos.y + playerSize.y * offsetY_Ratio;
 		const ProjectileData& projData = m_Player.GetCurrentProjectileData();
 		newProjectile.Init(spawnPos, playerDir, projData);
-
 		m_Player.SetFiredProjectile(true);
 	}
 
@@ -206,12 +205,15 @@ void MainGameState::DrawUI()
 	const f32 totalWidth = (slotSize * totalSlots) + (slotMargin * (totalSlots - 1));
 	const f32 startX = -(totalWidth / 2.0f) + (slotSize / 2.0f);
 	const f32 posY = kHalfWindowHeight - 60.0f;
+	
+	f32 xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
 
 	WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
 
 	for (size_t i = 0; i < totalSlots; ++i)
 	{
-		float posX = startX + i * (slotSize + slotMargin);
+		float posX = startX + i * (slotSize + slotMargin) + xCam;
 		WeaponType slotWeaponType = availableWeapons[i];
 
 		DrawRect(posX, posY, slotSize, slotSize, 1.f, 1.f, 1.f, 0.7f, m_pUiSlot);
