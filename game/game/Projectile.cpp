@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include <iostream>
 #include "Utility.h"
+#include "AssetManager.h"
 
 Projectile::Projectile()
 {
@@ -74,9 +75,5 @@ void Projectile::Draw()
 
 void Projectile::Destroy()
 {
-	if (m_animData.pTexture)
-	{
-		AEGfxTextureUnload(m_animData.pTexture);
-	}
 	m_animation.Destroy();
 }

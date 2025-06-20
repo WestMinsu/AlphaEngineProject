@@ -7,25 +7,38 @@
 
 TileMap::TileMap()
 {
-	m_tileSize = 16;
+	m_tileSize = 32;
+	m_tileOffsetSize = 16;
+}
+
+TileMap::TileMap(std::string mapfileDir, f32 x, f32 y)
+{
+	m_tileSize = 32;
+	m_tileOffsetSize = 16;
+	m_offset = AEVec2{ x, y };
+	LoadJson(mapfileDir.c_str());
+	LoadTilesets("Assets/FreeCuteTileset/");
+	PrepareLayerData();
 }
 
 TileMap::~TileMap()
 {
 }
 
-void TileMap::Init()
-{
-	LoadJson("Assets/Maps/testDemo.tmj");
-	LoadTilesets("Assets/FreeCuteTileset/");
-	PrepareLayerData();
-
-}
-
-// To Do 
 void TileMap::Update(f32 dt)
 {
-	//
+	float mapPixelWidth = m_mapWidth * m_tileSize;
+	f32 xCAM, yCAM;
+	AEGfxGetCamPosition(&xCAM, &yCAM);
+
+	if (m_offset.x + mapPixelWidth < xCAM ) {
+		m_offset.x += mapPixelWidth * 2;
+	}
+	else if (m_offset.x > xCAM + kWindowWidth) {
+		m_offset.x -= mapPixelWidth * 2;
+	}
+
+	//std::cout << m_offset.x << std::endl;
 }
 
 void TileMap::Draw()
@@ -57,7 +70,7 @@ void TileMap::Draw()
 			float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
 			float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
 
-			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f;
+			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f + m_offset.x;
 			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize - kHalfWindowHeight + m_tileSize / 2.0f;
 
 			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -92,6 +105,21 @@ void TileMap::Destroy()
 		AEGfxMeshFree(m_mesh.second);
 	}
 	m_meshes.clear();
+}
+
+s32 TileMap::GetMapWidth()
+{
+	return m_mapWidth*m_tileSize;
+}
+
+AEVec2 TileMap::GetOffset()
+{
+	return m_offset;
+}
+
+void TileMap::SetOffset(f32 offsetX, f32 offsetY)
+{
+	m_offset = AEVec2{offsetX, offsetY};
 }
 
 void TileMap::LoadJson(const char* jsonfile)
@@ -135,25 +163,44 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 		image->QueryIntAttribute("height", &tilesetInfo.imageHeight);
 
 		s32 channels;
-		tilesetInfo.tilesetTexture = assetManager.LoadImageAsset(imagePath);
+		tilesetInfo.tilesetTexture = LoadImageAsset(imagePath);
 		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight};
 
 		if (m_meshes.find(keyPair) == m_meshes.end()) {
 			AEGfxVertexList* m_mesh;
 			AEGfxTriAdd(
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize/ (f32)tilesetInfo.imageHeight,
-				0.5f, -0.5f, 0xFFFFFFFF, m_tileSize/ (f32)tilesetInfo.imageWidth, m_tileSize / (f32)tilesetInfo.imageHeight,
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize/ (f32)tilesetInfo.imageHeight,
+				0.5f, -0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, m_tileOffsetSize / (f32)tilesetInfo.imageHeight,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f);
 
 			AEGfxTriAdd(
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f,
 				-0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f,
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize / (f32)tilesetInfo.imageHeight);
 
 			m_mesh = AEGfxMeshEnd();
 
 			m_meshes[keyPair] = m_mesh;
 		}
+
+		for (auto* tile = tileset->FirstChildElement("tile");tile;tile = tile->NextSiblingElement("tile"))
+		{
+			s32 tileID = tile->IntAttribute("id");
+
+			auto* objGroup = tile->FirstChildElement("objectgroup");
+			if (!objGroup) continue;
+
+			for (auto* obj = objGroup->FirstChildElement("object"); obj; obj = obj->NextSiblingElement("object"))
+			{
+				f32 x = obj->FloatAttribute("x");
+				f32 y= obj->FloatAttribute("y");
+				f32 w = obj->FloatAttribute("width");
+				f32 h = obj->FloatAttribute("height");
+
+				tilesetInfo.collisions[tileID].push_back({x, y, w*2, h*2});
+			}
+		}
+
 
 		m_tilesets.push_back(tilesetInfo);
 	}

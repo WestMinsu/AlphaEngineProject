@@ -32,6 +32,10 @@ private:
 	std::vector<Projectile> m_enemyProjectiles;
 
 	TileMap m_TileMap;
+
+	AEVec2 m_oldPositionPlayer;
+	std::vector<TileMap> m_TileMaps;
+
 	Background m_Background;
 
 	AEGfxTexture* m_pUiSlot;      

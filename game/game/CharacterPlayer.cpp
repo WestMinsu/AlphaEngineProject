@@ -1,6 +1,7 @@
 ﻿#include "CharacterPlayer.h"
 #include "Constants.h"
 #include "Utility.h"
+#include "AssetManager.h"
 #include <iostream>
 #include "AssetManager.h"
 
@@ -69,7 +70,7 @@ void CharacterPlayer::Init(AEVec2 position)
 
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath.c_str());
 	}
 	for (auto& pair : m_projectileDataMap)
 	{
@@ -238,8 +239,8 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
 		m_position.x = -kHalfWindowWidth + halfCharWidth;
 
-	if (m_position.x > kHalfWindowWidth - halfCharWidth)
-		m_position.x = kHalfWindowWidth - halfCharWidth;
+	//if (m_position.x > kHalfWindowWidth - halfCharWidth)
+	//	m_position.x = kHalfWindowWidth - halfCharWidth;
 
 	if (m_position.y > kHalfWindowHeight - halfCharHeight)
 	{
@@ -282,11 +283,12 @@ void CharacterPlayer::Draw()
 
 void CharacterPlayer::Destroy()
 {
-	for (auto& pair : m_animDataMap)
-	{
-		if (pair.second.pTexture)
-			AEGfxTextureUnload(pair.second.pTexture);
-	}
+	//for (auto& pair : m_animDataMap)
+	//{
+	//	if (pair.second.pTexture)
+	//		AEGfxTextureUnload(pair.second.pTexture);
+	//}
+	m_animDataMap.clear();
 	m_animation.Destroy();
 }
 

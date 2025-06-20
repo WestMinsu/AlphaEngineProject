@@ -15,9 +15,9 @@ Background::~Background()
 
 void Background::Init()
 {
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG1.png"));
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG2.png"));
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG3.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG1.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG2.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG3.png"));
 
 }
 
@@ -28,6 +28,7 @@ void Background::Update(f32 dt)
 
 void Background::Draw()
 {
+	AEGfxGetCamPosition(&m_position.x, &m_position.y);
 	for (auto& texBG : m_backgrounds)
 	{
 		DrawRect(m_position.x, m_position.y, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, texBG);

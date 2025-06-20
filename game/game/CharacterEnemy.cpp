@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include <iostream>
 #include "CharacterPlayer.h"
+#include "AssetManager.h"
 
 CharacterEnemy::CharacterEnemy()
 {
@@ -39,9 +40,9 @@ void CharacterEnemy::Init(AEVec2 position, CharacterPlayer* player)
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/warrior/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/warrior/attack.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 
-	for (auto& pair : m_animDataMap)
+	for (auto& pair : m_animDataMap) 
 	{
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath.c_str());
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
@@ -164,11 +165,6 @@ void CharacterEnemy::Draw()
 
 void CharacterEnemy::Destroy()
 {
-	for (auto& pair : m_animDataMap) 
-	{
-		if (pair.second.pTexture) 
-			AEGfxTextureUnload(pair.second.pTexture);
-	}
 	m_animation.Destroy();
 }
 
