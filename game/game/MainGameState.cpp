@@ -205,12 +205,15 @@ void MainGameState::DrawUI()
 	const f32 totalWidth = (slotSize * totalSlots) + (slotMargin * (totalSlots - 1));
 	const f32 startX = -(totalWidth / 2.0f) + (slotSize / 2.0f);
 	const f32 posY = kHalfWindowHeight - 60.0f;
+	
+	f32 xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
 
 	WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
 
 	for (size_t i = 0; i < totalSlots; ++i)
 	{
-		float posX = startX + i * (slotSize + slotMargin);
+		float posX = startX + i * (slotSize + slotMargin) + xCam;
 		WeaponType slotWeaponType = availableWeapons[i];
 
 		DrawRect(posX, posY, slotSize, slotSize, 1.f, 1.f, 1.f, 0.7f, m_pUiSlot);
