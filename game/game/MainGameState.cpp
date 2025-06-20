@@ -47,8 +47,11 @@ void MainGameState::Update(f32 dt)
 	int tileX = m_Player.GetPosition().x / 32;
 	int tileY = m_Player.GetPosition().y / 32;
 
-	// To Do 
-	// TileMap Collision
+	for (auto& tileMap : m_TileMaps)
+	{
+		tileMap.checkCollisionTileMap(m_Player.GetPosition(), m_Player.GetSize());
+	}
+
 
 	if (m_Player.GetPosition().x > 0.f)
 	{

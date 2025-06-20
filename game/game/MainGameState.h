@@ -31,8 +31,6 @@ private:
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
 
-	TileMap m_TileMap;
-
 	AEVec2 m_oldPositionPlayer;
 	std::vector<TileMap> m_TileMaps;
 
