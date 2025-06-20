@@ -164,7 +164,7 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 		image->QueryIntAttribute("height", &tilesetInfo.imageHeight);
 
 		s32 channels;
-		tilesetInfo.tilesetTexture = assetManager.LoadImageAsset(imagePath);
+		tilesetInfo.tilesetTexture = LoadImageAsset(imagePath);
 		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight};
 
 		if (m_meshes.find(keyPair) == m_meshes.end()) {

@@ -15,9 +15,9 @@ Background::~Background()
 
 void Background::Init()
 {
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG1.png"));
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG2.png"));
-	m_backgrounds.push_back(assetManager.LoadImageAsset("Assets/FreeCuteTileset/BG3.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG1.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG2.png"));
+	m_backgrounds.push_back(LoadImageAsset("Assets/FreeCuteTileset/BG3.png"));
 
 }
 

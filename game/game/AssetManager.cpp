@@ -19,22 +19,22 @@ AssetManager::~AssetManager()
 	}
 }
 
-AEGfxTexture* AssetManager::LoadImageAsset(std::string file)
+AEGfxTexture* LoadImageAsset(std::string file)
 {
-	if (m_imageAssets.find(file) == m_imageAssets.end())
+	if (assetManager.m_imageAssets.find(file) == assetManager.m_imageAssets.end())
 	{
-		m_imageAssets[file] = AEGfxTextureLoad(file.c_str());
+		assetManager.m_imageAssets[file] = AEGfxTextureLoad(file.c_str());
 	}
 
-	return m_imageAssets.find(file)->second;
+	return assetManager.m_imageAssets.find(file)->second;
 }
 
-AEAudio AssetManager::LoadSoundAsset(std::string file)
+AEAudio LoadSoundAsset(std::string file)
 {
-	if (m_soundAssets.find(file) == m_soundAssets.end())
+	if (assetManager.m_soundAssets.find(file) == assetManager.m_soundAssets.end())
 	{
-		m_soundAssets[file] = AEAudioLoadMusic(file.c_str());
+		assetManager.m_soundAssets[file] = AEAudioLoadMusic(file.c_str());
 	}
 
-	return m_soundAssets.find(file)->second;
+	return assetManager.m_soundAssets.find(file)->second;
 }
