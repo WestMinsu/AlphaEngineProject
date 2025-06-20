@@ -16,9 +16,12 @@ MainGameState::~MainGameState()
 
 void MainGameState::Init()
 {
+	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
-	m_TileMap.Init();
+
+	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
+	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
 	m_Background.Init();
 }
 
@@ -30,8 +33,22 @@ void MainGameState::Update(f32 dt)
 		return;
 	}
 
+	m_oldPositionPlayer = m_Player.GetPosition();
+
 	m_Player.Update(dt);
+
+	int tileX = m_Player.GetPosition().x / 32;
+	int tileY = m_Player.GetPosition().y / 32;
+
+	// To Do 
+	// TileMap Collision
+
 	m_Enemy.Update(dt);
+
+	if (m_Player.GetPosition().x > 0.f)
+	{
+		AEGfxSetCamPosition(m_Player.GetPosition().x, 0.f);
+	}
 
 	if (m_Player.GetCurrentAnimState() == CharacterAnimationState::PROJECTILE_ATTACK &&
 		m_Player.GetAnimation().GetCurrentFrame() == 4 &&
@@ -125,13 +142,20 @@ void MainGameState::Update(f32 dt)
 			m_Player.RegisterHit();
 		}
 	}
-	m_TileMap.Update(dt);
+
+	for (auto& tm : m_TileMaps)
+	{
+		tm.Update(dt);
+	}
 }
 
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_TileMap.Draw();
+	for (auto tm : m_TileMaps)
+	{
+		tm.Draw();
+	}
 	m_Player.Draw();
 	m_Enemy.Draw();
 	for (auto& projectile : m_projectiles)
@@ -142,7 +166,10 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	m_TileMap.Destroy();
+	for (auto& tm : m_TileMaps)
+	{
+		tm.Destroy();
+	}
 	m_Background.Destroy();
 	m_Player.Destroy();
 	m_Enemy.Destroy();
@@ -151,4 +178,5 @@ void MainGameState::Exit()
 		projectile.Destroy();
 	}
 	m_projectiles.clear();
+	AEGfxSetCamPosition(0.f, 0.f);
 }

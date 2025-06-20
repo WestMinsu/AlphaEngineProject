@@ -21,8 +21,9 @@ public:
 
 private:
 	CharacterPlayer m_Player;
+	AEVec2 m_oldPositionPlayer;
 	CharacterEnemy m_Enemy;
 	std::vector<Projectile> m_projectiles;
-	TileMap m_TileMap;
+	std::vector<TileMap> m_TileMaps;
 	Background m_Background;
 };

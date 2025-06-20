@@ -2,10 +2,11 @@
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
+#include "AssetManager.h"
 
 CharacterEnemy::CharacterEnemy()
 {
-	m_size = { 500.f, 500.f };
+	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
 	m_characterSpeed = 0.0f;
 	m_currentDirection = CharacterDirection::LEFT;
@@ -23,7 +24,7 @@ void CharacterEnemy::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 
 	for (auto& pair : m_animDataMap) {
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath.c_str());
 	}
 
 	m_currentAnimState = CharacterAnimationState::IDLE;

@@ -1,6 +1,7 @@
 #include "Projectile.h"
 #include "Constants.h"
 #include <iostream>
+#include "AssetManager.h"
 
 Projectile::Projectile()
 {
@@ -29,7 +30,7 @@ void Projectile::Init(AEVec2 startPos, CharacterDirection dir)
 	m_animation.Init();
 
 	m_animData.texturePath = "Assets/MagicArrow/fire.png";
-	m_animData.pTexture = AEGfxTextureLoad(m_animData.texturePath.c_str());
+	m_animData.pTexture = LoadImageAsset(m_animData.texturePath.c_str());
 	m_animData.frameCount = 15;
 	m_animData.orientation = SpriteSheetOrientation::HORIZONTAL;
 	m_animData.frameDuration = 0.05f;
@@ -78,9 +79,9 @@ void Projectile::Draw()
 
 void Projectile::Destroy()
 {
-	if (m_animData.pTexture)
+	/*if (m_animData.pTexture)
 	{
 		AEGfxTextureUnload(m_animData.pTexture);
-	}
+	}*/
 	m_animation.Destroy();
 }

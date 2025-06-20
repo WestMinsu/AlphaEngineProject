@@ -6,7 +6,7 @@
 #include "AssetManager.h"
 
 IntroState::IntroState(): 
-m_pTex{assetManager.LoadImageAsset("Assets/Digipen_logo.png")}, 
+m_pTex{LoadImageAsset("Assets/Digipen_logo.png")}, 
 m_alphaTime{ 0.0f },
 m_alphaSpeed{ 1.0f },
 m_currentAlpha{ 0.0f }
