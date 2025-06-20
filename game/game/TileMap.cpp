@@ -33,13 +33,12 @@ void TileMap::Update(f32 dt)
 
 	if (m_offset.x + mapPixelWidth < xCAM ) {
 		m_offset.x += mapPixelWidth * 2;
-		std::cout << m_offset.x << std::endl;
 	}
 	else if (m_offset.x > xCAM + kWindowWidth) {
 		m_offset.x -= mapPixelWidth * 2;
 	}
 
-	std::cout << m_offset.x << std::endl;
+	//std::cout << m_offset.x << std::endl;
 }
 
 void TileMap::Draw()
