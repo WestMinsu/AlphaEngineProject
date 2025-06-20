@@ -107,9 +107,61 @@ void TileMap::Destroy()
 	m_meshes.clear();
 }
 
+bool TileMap::checkCollisionTileMap(AEVec2 position, AEVec2 size)
+{
+	bool result = false;
+
+	int tileX = (int)((position.x + kHalfWindowWidth) / m_tileSize) % m_mapWidth;
+	int tileY = (int)((position.y + kHalfWindowHeight) / m_tileSize) % m_mapHeight;
+	if (m_offset.x / m_tileSize <= tileX
+		&& m_offset.x / m_tileSize + m_mapWidth >= tileX)
+
+	{
+		f32 tileID = m_layers[0][tileX+tileY*m_mapWidth];
+		const TilesetInfo* tilesetInfo = nullptr;
+		for (const auto& ts : m_tilesets)
+		{
+			if (ts.contains(tileID))
+			{
+				tilesetInfo = &ts;
+				break;
+			}
+		}
+		
+		if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
+		{
+			for (auto& box : tilesetInfo->collisions.at(tileID))
+			{
+				if ( tileX + size.x < box.x ) {
+					result = true;
+					break;
+				}
+			}
+		}
+	}
+
+
+	return result;
+}
+
+s32 TileMap::GetTileSize()
+{
+	return m_tileSize;
+}
+
 s32 TileMap::GetMapWidth()
 {
-	return m_mapWidth*m_tileSize;
+	return m_mapWidth;
+}
+
+s32 TileMap::GetMapHeight()
+{
+	return m_mapHeight;
+}
+
+std::vector<int> TileMap::GetLayer(s32 idx)
+{
+	return m_layers[idx];
 }
 
 AEVec2 TileMap::GetOffset()

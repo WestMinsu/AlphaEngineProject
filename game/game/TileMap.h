@@ -38,11 +38,16 @@ public:
     void Draw();
     void Destroy();
 
+    bool checkCollisionTileMap(AEVec2 position, AEVec2 size);
+
     AEVec2 GetOffset();
     void SetOffset(f32 offsetX, f32 offsetY);
 
+    s32 GetTileSize();
     s32 GetMapWidth();
-
+    s32 GetMapHeight();
+    std::vector<int> GetLayer(s32 idx);
+    
 private:
     AEVec2 m_offset;
     s32 m_mapWidth, m_mapHeight;
@@ -54,6 +59,7 @@ private:
     
     std::vector<TilesetInfo> m_tilesets;
     std::vector<std::vector<int>> m_layers;
+    std::vector<CollisionBox> m_collisionBoxes;
     std::map<std::pair<f32, f32>, AEGfxVertexList*> m_meshes;
 
     void LoadJson(const char*);
