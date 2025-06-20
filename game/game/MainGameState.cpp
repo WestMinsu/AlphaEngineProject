@@ -20,9 +20,8 @@ void MainGameState::Init()
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_Enemy.Init({ kHalfWindowWidth - 200.f, 0.f });
 
-	m_TileMap0.Init("Assets/Maps/test0_32.tmj");
-	std::cout << m_TileMap0.GetMapWidth()  << std::endl;
-	m_TileMap1.Init("Assets/Maps/test1_32.tmj", m_TileMap0.GetMapWidth(), 0.f);
+	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
+	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
 	m_Background.Init();
 }
 
@@ -34,7 +33,16 @@ void MainGameState::Update(f32 dt)
 		return;
 	}
 
+	m_oldPositionPlayer = m_Player.GetPosition();
+
 	m_Player.Update(dt);
+
+	int tileX = m_Player.GetPosition().x / 32;
+	int tileY = m_Player.GetPosition().y / 32;
+
+	// To Do 
+	// TileMap Collision
+
 	m_Enemy.Update(dt);
 
 	if (m_Player.GetPosition().x > 0.f)
@@ -135,16 +143,19 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	
-	m_TileMap0.Update(dt);
-	m_TileMap1.Update(dt);
+	for (auto& tm : m_TileMaps)
+	{
+		tm.Update(dt);
+	}
 }
 
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_TileMap0.Draw();
-	m_TileMap1.Draw();
+	for (auto tm : m_TileMaps)
+	{
+		tm.Draw();
+	}
 	m_Player.Draw();
 	m_Enemy.Draw();
 	for (auto& projectile : m_projectiles)
@@ -155,8 +166,10 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	m_TileMap0.Destroy();
-	m_TileMap1.Destroy();
+	for (auto& tm : m_TileMaps)
+	{
+		tm.Destroy();
+	}
 	m_Background.Destroy();
 	m_Player.Destroy();
 	m_Enemy.Destroy();

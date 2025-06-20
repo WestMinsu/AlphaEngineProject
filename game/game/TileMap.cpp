@@ -9,35 +9,37 @@ TileMap::TileMap()
 {
 	m_tileSize = 32;
 	m_tileOffsetSize = 16;
-
 }
 
-TileMap::~TileMap()
+TileMap::TileMap(std::string mapfileDir, f32 x, f32 y)
 {
-}
-
-void TileMap::Init(std::string mapfileDir, f32 x, f32 y)
-{
+	m_tileSize = 32;
+	m_tileOffsetSize = 16;
 	m_offset = AEVec2{ x, y };
 	LoadJson(mapfileDir.c_str());
 	LoadTilesets("Assets/FreeCuteTileset/");
 	PrepareLayerData();
 }
 
-// To Do 
+TileMap::~TileMap()
+{
+}
+
 void TileMap::Update(f32 dt)
 {
 	float mapPixelWidth = m_mapWidth * m_tileSize;
-
 	f32 xCAM, yCAM;
 	AEGfxGetCamPosition(&xCAM, &yCAM);
-	
+
 	if (m_offset.x + mapPixelWidth < xCAM ) {
 		m_offset.x += mapPixelWidth * 2;
+		std::cout << m_offset.x << std::endl;
 	}
 	else if (m_offset.x > xCAM + kWindowWidth) {
 		m_offset.x -= mapPixelWidth * 2;
 	}
+
+	std::cout << m_offset.x << std::endl;
 }
 
 void TileMap::Draw()
@@ -181,6 +183,25 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 
 			m_meshes[keyPair] = m_mesh;
 		}
+
+		for (auto* tile = tileset->FirstChildElement("tile");tile;tile = tile->NextSiblingElement("tile"))
+		{
+			s32 tileID = tile->IntAttribute("id");
+
+			auto* objGroup = tile->FirstChildElement("objectgroup");
+			if (!objGroup) continue;
+
+			for (auto* obj = objGroup->FirstChildElement("object"); obj; obj = obj->NextSiblingElement("object"))
+			{
+				f32 x = obj->FloatAttribute("x");
+				f32 y= obj->FloatAttribute("y");
+				f32 w = obj->FloatAttribute("width");
+				f32 h = obj->FloatAttribute("height");
+
+				tilesetInfo.collisions[tileID].push_back({x, y, w*2, h*2});
+			}
+		}
+
 
 		m_tilesets.push_back(tilesetInfo);
 	}
