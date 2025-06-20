@@ -1,6 +1,7 @@
 ﻿#include "CharacterPlayer.h"
 #include "Constants.h"
 #include "Utility.h"
+#include "AssetManager.h"
 #include <iostream>
 
 CharacterPlayer::CharacterPlayer()
@@ -50,7 +51,7 @@ void CharacterPlayer::Init(AEVec2 position)
 
 	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = AEGfxTextureLoad(pair.second.texturePath.c_str());
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath.c_str());
 	}
 
 	m_attackHitboxes.resize(8);
@@ -241,11 +242,12 @@ void CharacterPlayer::Draw()
 
 void CharacterPlayer::Destroy()
 {
-	for (auto& pair : m_animDataMap)
-	{
-		if (pair.second.pTexture)
-			AEGfxTextureUnload(pair.second.pTexture);
-	}
+	//for (auto& pair : m_animDataMap)
+	//{
+	//	if (pair.second.pTexture)
+	//		AEGfxTextureUnload(pair.second.pTexture);
+	//}
+	m_animDataMap.clear();
 	m_animation.Destroy();
 }
 

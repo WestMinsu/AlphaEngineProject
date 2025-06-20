@@ -76,9 +76,9 @@ void CharacterEnemy::Draw()
 
 void CharacterEnemy::Destroy()
 {
-	for (auto& pair : m_animDataMap) {
-		if (pair.second.pTexture) AEGfxTextureUnload(pair.second.pTexture);
-	}
+	//for (auto& pair : m_animDataMap) {
+	//	if (pair.second.pTexture) AEGfxTextureUnload(pair.second.pTexture);
+	//}
 	m_animation.Destroy();
 }
 
