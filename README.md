@@ -39,3 +39,6 @@ https://docs.google.com/spreadsheets/d/1_rd4efAFq6yj2rB4g8uc9z1E7zXegBNbUHBqKwO9
 
 1주차 영상
 https://drive.google.com/file/d/11PfgaqduD3h8pQlVvXl4tRaPJUkzD9Bo/view?usp=sharing
+
+2주차 영상
+https://drive.google.com/file/d/10DRyd-ret1Mp1GASrjwPJAG_jIGx_9WR/view?usp=sharing
