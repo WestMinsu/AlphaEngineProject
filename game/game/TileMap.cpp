@@ -7,14 +7,14 @@
 
 TileMap::TileMap()
 {
-	m_tileSize = 32;
-	m_tileOffsetSize = 16;
+	m_tileSize = 16;
+	m_tileScale = 2.f;
 }
 
-TileMap::TileMap(std::string mapfileDir, f32 x, f32 y)
+TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 {
-	m_tileSize = 32;
-	m_tileOffsetSize = 16;
+	m_tileSize = 16;
+	m_tileScale = tileScale;
 	m_offset = AEVec2{ x, y };
 	LoadJson(mapfileDir.c_str());
 	LoadTilesets("Assets/FreeCuteTileset/");
@@ -27,7 +27,7 @@ TileMap::~TileMap()
 
 void TileMap::Update(f32 dt)
 {
-	float mapPixelWidth = m_mapWidth * m_tileSize;
+	float mapPixelWidth = m_mapWidth * m_tileSize * m_tileScale;
 	f32 xCAM, yCAM;
 	AEGfxGetCamPosition(&xCAM, &yCAM);
 
@@ -70,14 +70,15 @@ void TileMap::Draw()
 			float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
 			float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
 
-			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f + m_offset.x;
-			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize - kHalfWindowHeight + m_tileSize / 2.0f;
+			int x = (i % m_mapWidth) * m_tileSize * m_tileScale - kHalfWindowWidth + m_tileSize * m_tileScale / 2.f + m_offset.x;
+			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize*m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
 
 			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 			AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
 
 			AEMtx33 scale = { 0 };
-			AEMtx33Scale(&scale, m_tileSize, m_tileSize);
+			AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+			//AEMtx33Scale(&scale, 32.f, 32.f);
 
 			AEMtx33 rotate = { 0 };
 			AEMtx33Rot(&rotate, 0);
@@ -111,10 +112,10 @@ bool TileMap::checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
 	bool result = false;
 
-	int tileX = (int)((position.x + kHalfWindowWidth) / m_tileSize) % m_mapWidth;
-	int tileY = (int)((position.y + kHalfWindowHeight) / m_tileSize) % m_mapHeight;
-	if (m_offset.x / m_tileSize <= tileX
-		&& m_offset.x / m_tileSize + m_mapWidth >= tileX)
+	int tileX = (int)((position.x + kHalfWindowWidth) / (m_tileSize*m_tileScale)) % m_mapWidth;
+	int tileY = (int)((position.y + kHalfWindowHeight) / (m_tileSize * m_tileScale)) % m_mapHeight;
+	if (m_offset.x / (m_tileSize*m_tileScale) <= tileX
+		&& m_offset.x / (m_tileSize*m_tileScale) + m_mapWidth >= tileX)
 
 	{
 		f32 tileID = m_layers[0][tileX+tileY*m_mapWidth];
@@ -144,14 +145,9 @@ bool TileMap::checkCollisionTileMap(AEVec2 position, AEVec2 size)
 	return result;
 }
 
-s32 TileMap::GetTileSize()
+s32 TileMap::GetMapTotalWidth()
 {
-	return m_tileSize;
-}
-
-s32 TileMap::GetMapWidth()
-{
-	return m_mapWidth;
+	return m_mapWidth*m_tileSize*m_tileScale;
 }
 
 s32 TileMap::GetMapHeight()
@@ -221,14 +217,14 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 		if (m_meshes.find(keyPair) == m_meshes.end()) {
 			AEGfxVertexList* m_mesh;
 			AEGfxTriAdd(
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize/ (f32)tilesetInfo.imageHeight,
-				0.5f, -0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, m_tileOffsetSize / (f32)tilesetInfo.imageHeight,
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize/ (f32)tilesetInfo.imageHeight,
+				0.5f, -0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, m_tileSize / (f32)tilesetInfo.imageHeight,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f);
 
 			AEGfxTriAdd(
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f,
 				-0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f,
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize / (f32)tilesetInfo.imageHeight);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight);
 
 			m_mesh = AEGfxMeshEnd();
 
@@ -252,8 +248,6 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 				tilesetInfo.collisions[tileID].push_back({x, y, w*2, h*2});
 			}
 		}
-
-
 		m_tilesets.push_back(tilesetInfo);
 	}
 }
@@ -267,3 +261,4 @@ void TileMap::PrepareLayerData()
 		m_layers.push_back(layerData);
 	}
 }
+

@@ -31,7 +31,7 @@ class TileMap
 {
 public:
     TileMap();
-    TileMap(std::string mapfileDir, f32 offsetX = 0.f, f32 offsetY = 0.f);
+    TileMap(std::string mapfileDir, f32 tileScale = 1.f, f32 offsetX = 0.f, f32 offsetY = 0.f);
     ~TileMap();
 
     void Update(f32 dt);
@@ -43,8 +43,7 @@ public:
     AEVec2 GetOffset();
     void SetOffset(f32 offsetX, f32 offsetY);
 
-    s32 GetTileSize();
-    s32 GetMapWidth();
+    s32 GetMapTotalWidth();
     s32 GetMapHeight();
     std::vector<int> GetLayer(s32 idx);
     
@@ -52,7 +51,7 @@ private:
     AEVec2 m_offset;
     s32 m_mapWidth, m_mapHeight;
     s32 m_tileSize;
-    s32 m_tileOffsetSize;
+    f32 m_tileScale;
     
     nlohmann::json m_mapJson;
 
@@ -61,9 +60,10 @@ private:
     std::vector<std::vector<int>> m_layers;
     std::vector<CollisionBox> m_collisionBoxes;
     std::map<std::pair<f32, f32>, AEGfxVertexList*> m_meshes;
-
+    
     void LoadJson(const char*);
     void LoadTilesets(const char*);
     void PrepareLayerData();
+    void ExtractWorldColliders();
 };
 

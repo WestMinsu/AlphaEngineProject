@@ -21,8 +21,8 @@ void MainGameState::Init()
 	m_MeleeEnemy.Init({ kHalfWindowWidth - 200.f, 0.f }, &m_Player);
 	m_MageEnemy.Init({ kHalfWindowWidth - 500.f, 0.f }, &m_Player);
 
-	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
-	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth() * m_TileMaps[0].GetTileSize(), 0.f));
+	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
+	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, m_TileMaps[0].GetMapTotalWidth()));
 	m_Background.Init();
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
