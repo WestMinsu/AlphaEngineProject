@@ -31,9 +31,7 @@ private:
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
 
-	AEVec2 m_oldPositionPlayer;
 	std::vector<TileMap> m_TileMaps;
-
 	Background m_Background;
 
 	AEGfxTexture* m_pUiSlot;      

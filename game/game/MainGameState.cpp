@@ -38,19 +38,23 @@ void MainGameState::Update(f32 dt)
 		return;
 	}
 
-	m_oldPositionPlayer = m_Player.GetPosition();
+	for (auto& tm : m_TileMaps)
+	{
+		tm.Update(dt);
+	}
 
 	m_Player.Update(dt);
 	m_MeleeEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 
-	int tileX = m_Player.GetPosition().x / 32;
-	int tileY = m_Player.GetPosition().y / 32;
 
-	for (auto& tileMap : m_TileMaps)
-	{
-		tileMap.checkCollisionTileMap(m_Player.GetPosition(), m_Player.GetSize());
-	}
+	//for (auto& tileMap : m_TileMaps)
+	//{
+	//	if (tileMap.checkCollisionTileMap(m_Player.GetPosition(), m_Player.GetSize()))
+	//	{
+	//		m_Player.SetPosition(m_oldPositionPlayer);
+	//	}
+	//}
 
 
 	if (m_Player.GetPosition().x > 0.f)
@@ -152,10 +156,6 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	for (auto& tm : m_TileMaps)
-	{
-		tm.Update(dt);
-	}
 }
 
 void MainGameState::Draw()
