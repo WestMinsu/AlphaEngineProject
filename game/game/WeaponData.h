@@ -4,8 +4,8 @@
 enum class WeaponType
 {
 	FIRE,
-	ICE
-	//LIGHTNING
+	ICE,
+	LIGHTNING,
 };
 
 struct ProjectileData

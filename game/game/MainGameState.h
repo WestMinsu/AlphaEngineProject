@@ -1,14 +1,16 @@
 #pragma once
 #include "AGameState.h"
-#include "CharacterPlayer.h"
-#include "CharacterMeleeEnemy.h"
-#include "CharacterMageEnemy.h"
+#include "PlayerCharacter.h"
+#include "MeleeEnemyCharacter.h"
+#include "MageEnemyCharacter.h"
 #include "Projectile.h"
 #include "EnemyProjectile.h"
 #include <vector>
 #include <memory>
 #include "TileMap.h"
 #include "Background.h"
+#include "BossCharacter.h"
+#include "VisualEffect.h"
 
 class MainGameState : public AGameState
 {
@@ -23,23 +25,26 @@ public:
 
 private:
 	void DrawUI();
+	ACharacter* FindClosestEnemyInFront();
 	 
-	CharacterPlayer m_Player;
-	CharacterMeleeEnemy m_MeleeEnemy; 
-	CharacterMageEnemy m_MageEnemy;
+	PlayerCharacter m_Player;
+	MeleeEnemyCharacter m_MeleeEnemy; 
+	MageEnemyCharacter m_MageEnemy;
+	BossCharacter m_Boss;
 
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
+	std::vector<VisualEffect> m_visualEffects;
 
 	TileMap m_TileMap;
-
-	AEVec2 m_oldPositionPlayer;
 	std::vector<TileMap> m_TileMaps;
 
 	Background m_Background;
 
 	AEGfxTexture* m_pUiSlot;      
-	AEGfxTexture* m_pFireIcon;    
-	AEGfxTexture* m_pIceIcon;
 	std::map<WeaponType, AEGfxTexture*> m_weaponIconMap;
+	AnimData m_lightningEffectData;
+
+	AEGfxTexture* m_pHealthBarFrame;
+	AEGfxTexture* m_pHealthBar;
 };

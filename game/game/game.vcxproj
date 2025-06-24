@@ -108,9 +108,10 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Background.h" />
-    <ClInclude Include="CharacterMeleeEnemy.h" />
-    <ClInclude Include="CharacterMageEnemy.h" />
-    <ClInclude Include="CharacterPlayer.h" />
+    <ClInclude Include="BossCharacter.h" />
+    <ClInclude Include="MeleeEnemyCharacter.h" />
+    <ClInclude Include="MageEnemyCharacter.h" />
+    <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="EnemyProjectile.h" />
     <ClInclude Include="GameManager.h" />
@@ -122,6 +123,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="VisualEffect.h" />
     <ClInclude Include="WeaponData.h" />
   </ItemGroup>
   <ItemGroup>
@@ -129,9 +131,10 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Background.cpp" />
-    <ClCompile Include="CharacterMeleeEnemy.cpp" />
-    <ClCompile Include="CharacterMageEnemy.cpp" />
-    <ClCompile Include="CharacterPlayer.cpp" />
+    <ClCompile Include="BossCharacter.cpp" />
+    <ClCompile Include="MeleeEnemyCharacter.cpp" />
+    <ClCompile Include="MageEnemyCharacter.cpp" />
+    <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="EnemyProjectile.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="IntroState.cpp" />
@@ -142,6 +145,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="VisualEffect.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

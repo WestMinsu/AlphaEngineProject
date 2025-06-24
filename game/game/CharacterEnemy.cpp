@@ -59,8 +59,7 @@ void CharacterEnemy::Update(f32 dt)
 	if (!m_pPlayer) 
 		return;
 
-	const AEVec2& playerPosConst = m_pPlayer->GetPosition();
-	AEVec2 playerPos = playerPosConst;
+	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
 
 	switch (m_currentAIState)

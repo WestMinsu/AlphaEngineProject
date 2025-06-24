@@ -1,11 +1,10 @@
-﻿#include "CharacterPlayer.h"
+﻿#include "PlayerCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include "AssetManager.h"
 #include <iostream>
-#include "AssetManager.h"
 
-CharacterPlayer::CharacterPlayer()
+PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0,0 };
 	m_size = { 200.f, 200.f };
@@ -36,11 +35,11 @@ CharacterPlayer::CharacterPlayer()
 	m_currentWeaponIndex = 0;
 }
 
-CharacterPlayer::~CharacterPlayer()
+PlayerCharacter::~PlayerCharacter()
 {
 }
 
-void CharacterPlayer::Init(AEVec2 position)
+void PlayerCharacter::Init(AEVec2 position)
 {
 	m_position = position;
 	m_animation.Init();
@@ -49,7 +48,7 @@ void CharacterPlayer::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
-	m_animDataMap[CharacterAnimationState::PROJECTILE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 
@@ -79,7 +78,7 @@ void CharacterPlayer::Init(AEVec2 position)
 
 	m_availableWeapons.push_back(WeaponType::FIRE);
 	m_availableWeapons.push_back(WeaponType::ICE);
-	//m_availableWeapons.push_back(WeaponType::LIGHTNING);
+	m_availableWeapons.push_back(WeaponType::LIGHTNING);
 
 	m_attackHitboxes.resize(8);
 	m_attackHitboxes[3] = { { m_size.x * 0.25f, m_size.y * -0.15f },  { m_size.x * 0.40f, m_size.y * 0.70f } };
@@ -90,10 +89,13 @@ void CharacterPlayer::Init(AEVec2 position)
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
-void CharacterPlayer::Update(f32 dt)
+void PlayerCharacter::Update(f32 dt)
 {
-	if (m_animation.GetCurrentState() == CharacterAnimationState::DEATH && m_animation.IsFinished())
-		return;
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
+	{
+		m_animation.Update(dt);
+		return; 
+	}
 
 	bool isAttacking = m_isMeleeAttacking || m_isProjectileAttacking;
 
@@ -110,7 +112,14 @@ void CharacterPlayer::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-
+	if (AEInputCheckTriggered(AEVK_3))
+	{
+		if (m_availableWeapons.size() > 2)
+		{
+			m_currentWeaponIndex = 2;
+			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
+		}
+	}
 	if (AEInputCheckCurr(AEVK_A) && !isAttacking)
 	{
 		m_isMeleeAttacking = true;
@@ -218,7 +227,7 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_isMeleeAttacking)
 		desiredState = CharacterAnimationState::MELEE_ATTACK;
 	else if (m_isProjectileAttacking)
-		desiredState = CharacterAnimationState::PROJECTILE_ATTACK;
+		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)
 		desiredState = CharacterAnimationState::DASH;
 	else if (!m_isGrounded)
@@ -239,9 +248,6 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
 		m_position.x = -kHalfWindowWidth + halfCharWidth;
 
-	//if (m_position.x > kHalfWindowWidth - halfCharWidth)
-	//	m_position.x = kHalfWindowWidth - halfCharWidth;
-
 	if (m_position.y > kHalfWindowHeight - halfCharHeight)
 	{
 		m_position.y = kHalfWindowHeight - halfCharHeight;
@@ -251,11 +257,11 @@ void CharacterPlayer::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void CharacterPlayer::Move(f32 dt)
+void PlayerCharacter::Move(f32 dt)
 {
 }
 
-void CharacterPlayer::Draw()
+void PlayerCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
 	AEMtx33 rotate = { 0 };
@@ -281,23 +287,18 @@ void CharacterPlayer::Draw()
 	}
 }
 
-void CharacterPlayer::Destroy()
+void PlayerCharacter::Destroy()
 {
-	//for (auto& pair : m_animDataMap)
-	//{
-	//	if (pair.second.pTexture)
-	//		AEGfxTextureUnload(pair.second.pTexture);
-	//}
 	m_animDataMap.clear();
 	m_animation.Destroy();
 }
 
-s32 CharacterPlayer::GetCurrentAnimationFrame() const
+s32 PlayerCharacter::GetCurrentAnimationFrame() const
 {
 	return m_animation.GetCurrentFrame();
 }
 
-const AttackHitbox& CharacterPlayer::GetCurrentAttackHitbox() const
+const AttackHitbox& PlayerCharacter::GetCurrentAttackHitbox() const
 {
 	s32 currentFrame = GetCurrentAnimationFrame();
 	if (currentFrame >= 0 && currentFrame < m_attackHitboxes.size())
@@ -307,16 +308,29 @@ const AttackHitbox& CharacterPlayer::GetCurrentAttackHitbox() const
 	return m_attackHitboxes[0];
 }
 
-void CharacterPlayer::Attack()
+void PlayerCharacter::Attack()
 {
 }
 
-void CharacterPlayer::TakeDamage(s32 damage)
+void PlayerCharacter::TakeDamage(s32 damage)
 {
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
+	{
+		return;
+	}
+
 	m_healthPoint -= damage;
+	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
+
+	if (m_healthPoint <= 0)
+	{
+		m_healthPoint = 0;
+		m_currentAnimState = CharacterAnimationState::DEATH;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
+	}
 }
 
-const ProjectileData& CharacterPlayer::GetCurrentProjectileData() const
+const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 {
 	return m_projectileDataMap.at(m_currentWeapon);
 }

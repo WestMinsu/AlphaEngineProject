@@ -1,11 +1,11 @@
-#include "CharacterMeleeEnemy.h"
+#include "MeleeEnemyCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
-#include "CharacterPlayer.h"
+#include "PlayerCharacter.h"
 #include "AssetManager.h"
 
-CharacterMeleeEnemy::CharacterMeleeEnemy()
+MeleeEnemyCharacter::MeleeEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
@@ -21,15 +21,15 @@ CharacterMeleeEnemy::CharacterMeleeEnemy()
 	m_attackCooldownDuration = 2.0f;
 }
 
-CharacterMeleeEnemy::~CharacterMeleeEnemy() 
+MeleeEnemyCharacter::~MeleeEnemyCharacter() 
 {
 }
 
-void CharacterMeleeEnemy::Init(AEVec2 position)
+void MeleeEnemyCharacter::Init(AEVec2 position)
 {
 }
 
-void CharacterMeleeEnemy::Init(AEVec2 position, CharacterPlayer* player)
+void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {
 	m_position = position;
 	m_pPlayer = player; 
@@ -49,7 +49,7 @@ void CharacterMeleeEnemy::Init(AEVec2 position, CharacterPlayer* player)
 }
 
 
-void CharacterMeleeEnemy::Update(f32 dt)
+void MeleeEnemyCharacter::Update(f32 dt)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -59,8 +59,7 @@ void CharacterMeleeEnemy::Update(f32 dt)
 	if (!m_pPlayer) 
 		return;
 
-	const AEVec2& playerPosConst = m_pPlayer->GetPosition();
-	AEVec2 playerPos = playerPosConst;
+	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
 
 	switch (m_currentAIState)
@@ -130,18 +129,18 @@ void CharacterMeleeEnemy::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void CharacterMeleeEnemy::Move(f32 dt)
+void MeleeEnemyCharacter::Move(f32 dt)
 {
 	// TODO
 }
 
-void CharacterMeleeEnemy::Attack()
+void MeleeEnemyCharacter::Attack()
 {
 	// TODO
 }
 
 
-void CharacterMeleeEnemy::Draw()
+void MeleeEnemyCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
 	if (m_currentDirection == CharacterDirection::LEFT)
@@ -163,12 +162,12 @@ void CharacterMeleeEnemy::Draw()
 	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.f, 1.f, 0.f);
 }
 
-void CharacterMeleeEnemy::Destroy()
+void MeleeEnemyCharacter::Destroy()
 {
 	m_animation.Destroy();
 }
 
-void CharacterMeleeEnemy::TakeDamage(s32 damage)
+void MeleeEnemyCharacter::TakeDamage(s32 damage)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{

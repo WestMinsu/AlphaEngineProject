@@ -7,9 +7,16 @@ enum class CharacterAnimationState
 	WALK,
 	JUMP,
 	MELEE_ATTACK,
-	PROJECTILE_ATTACK,
+	RANGED_ATTACK,
 	DASH,
-	DEATH
+	DEATH,
+
+	//for boss
+	APPEARANCE,
+	GLOWING,
+	LASER_CAST,
+	LASER_SHEET,
+	BUFF
 };
 
 enum class CharacterDirection

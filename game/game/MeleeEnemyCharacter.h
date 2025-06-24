@@ -4,16 +4,16 @@
 #include "AIState.h" 
 #include <map>
 
-class CharacterPlayer;
+class PlayerCharacter;
 
-class CharacterMeleeEnemy : public ACharacter
+class MeleeEnemyCharacter : public ACharacter
 {
 public:
-	CharacterMeleeEnemy();
-	~CharacterMeleeEnemy();
+	MeleeEnemyCharacter();
+	~MeleeEnemyCharacter();
 
 	void Init(AEVec2 position) override;
-	void Init(AEVec2 position, CharacterPlayer* player);
+	void Init(AEVec2 position, PlayerCharacter* player);
 	void Update(f32 dt) override;
 	void Move(f32 dt) override;
 	void Attack() override;
@@ -27,7 +27,7 @@ private:
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
 
 	EnemyAIState m_currentAIState;
-	CharacterPlayer* m_pPlayer;
+	PlayerCharacter* m_pPlayer;
 
 	f32 m_detectionRange;
 	f32 m_attackRange;
