@@ -49,6 +49,7 @@ public:
     
 private:
     AEVec2 m_offset;
+    s32 m_offsetCount;
     s32 m_mapWidth, m_mapHeight;
     s32 m_tileSize;
     f32 m_tileScale;
