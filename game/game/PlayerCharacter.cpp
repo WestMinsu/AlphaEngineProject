@@ -8,6 +8,8 @@ PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0,0 };
 	m_size = { 200.f, 200.f };
+	m_hitboxSize = { m_size.x * 0.4f, m_size.y * 0.6f };
+	m_hitboxOffset = { 0.0f, -40.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;

@@ -56,6 +56,7 @@ public:
 	bool IsCompletelyDead() const;
 	bool HasHitPlayerThisAttack() const { return m_hasHitPlayerThisAttack; }
 	void RegisterPlayerHit() { m_hasHitPlayerThisAttack = true; }
+	std::vector<AttackHitbox> GetCurrentActiveHitboxes();
 private:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
