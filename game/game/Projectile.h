@@ -10,7 +10,7 @@ public:
 	Projectile();
 	~Projectile();
 
-	void Init(AEVec2 startPos, CharacterDirection dir, const ProjectileData& data);
+	void Init(AEVec2 startPos, AEVec2 direction, const ProjectileData& data);
 	void Update(f32 dt);
 	void Draw();
 	void Destroy();

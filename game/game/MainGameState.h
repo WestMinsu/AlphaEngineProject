@@ -4,7 +4,6 @@
 #include "MeleeEnemyCharacter.h"
 #include "MageEnemyCharacter.h"
 #include "Projectile.h"
-#include "EnemyProjectile.h"
 #include <vector>
 #include <memory>
 #include "TileMap.h"

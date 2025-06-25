@@ -46,7 +46,7 @@ public:
 	bool IsUnbeatable() const; 
 	bool IsBuffed() const { return m_isInBuffState; }
 	const ProjectileData& GetProjectileData() const { return m_projectileData; }
-	const AttackHitbox& GetCurrentAttackHitbox() const;
+	const AttackHitbox& GetCurrentMeleeHitbox() const;
 	bool HasFired() const { return m_hasFired; }
 	void SetFired(bool fired) { m_hasFired = fired; }
 	AEVec2 GetLaserTargetPos() const { return m_laserTargetPos; }
@@ -54,6 +54,8 @@ public:
 	const AttackHitbox& GetLaserHitbox() const { return m_laserHitbox; }
 	const f32 getMaxHealth() const { return m_maxHealth; }
 	bool IsCompletelyDead() const;
+	bool HasHitPlayerThisAttack() const { return m_hasHitPlayerThisAttack; }
+	void RegisterPlayerHit() { m_hasHitPlayerThisAttack = true; }
 private:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
@@ -82,4 +84,5 @@ private:
 
 	bool m_hasFired;
 	AEVec2 m_laserTargetPos;
+	bool m_hasHitPlayerThisAttack;
 };

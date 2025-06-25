@@ -25,6 +25,7 @@ BossCharacter::BossCharacter()
 	m_rangedAttackRange = 800.f;
 	m_cooldownDuration = 1.5f;
 	m_hasFired = false;
+	m_hasHitPlayerThisAttack = false;
 }
 
 BossCharacter::~BossCharacter() {}
@@ -122,6 +123,7 @@ void BossCharacter::Update(f32 dt)
 		else if (distanceToPlayer < m_meleeAttackRange && !m_isInBuffState)
 		{
 			m_currentAIState = BossAIState::MELEE_ATTACK;
+			m_hasHitPlayerThisAttack = false;
 		}
 		else if (distanceToPlayer < m_rangedAttackRange)
 		{
@@ -242,28 +244,59 @@ void BossCharacter::Draw()
 
 	if (m_currentAIState == BossAIState::MELEE_ATTACK && m_animation.GetCurrentFrame() >= 3)
 	{
-		const AttackHitbox& currentHitbox = GetCurrentAttackHitbox();
+		const AttackHitbox& currentHitbox = GetCurrentMeleeHitbox();
 		AEVec2 hitboxPos;
 		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::LEFT ? -currentHitbox.offset.x : currentHitbox.offset.x);
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
 
+
 	if (m_currentAIState == BossAIState::LASER_BEAM)
 	{
-		AEVec2 laserPos;
 		const AttackHitbox& laserHitbox = GetLaserHitbox();
-		laserPos.x = m_position.x + (m_currentDirection == CharacterDirection::LEFT ? -laserHitbox.offset.x : laserHitbox.offset.x);
-		laserPos.y = m_position.y + laserHitbox.offset.y;
+		float offsetDir = (m_currentDirection == CharacterDirection::RIGHT) ? 1.0f : -1.0f;
 
-		AEMtx33Trans(&translate, laserPos.x, laserPos.y);
-		float laserScaleX = (m_currentDirection == CharacterDirection::LEFT) ? -laserHitbox.size.x : laserHitbox.size.x;
-		AEMtx33Scale(&scale, laserScaleX, laserHitbox.size.y);
-		AEMtx33Concat(&transform, &rotate, &scale);
-		AEMtx33Concat(&transform, &translate, &transform);
+		if (m_isInBuffState)
+		{
+			// 3-Way Laser
+			AEVec2 directions[] = { {offsetDir, 0.5f}, {offsetDir, 0.0f}, {offsetDir, -0.5f} };
+			for (auto& dir : directions)
+			{
+				AEVec2 normalizedDir;
+				AEVec2Normalize(&normalizedDir, &dir);
+				float angle = atan2(normalizedDir.y, normalizedDir.x);
+				AEMtx33Rot(&rotate, angle);
+				AEMtx33Trans(&translate, m_position.x + laserHitbox.offset.x * offsetDir, m_position.y + laserHitbox.offset.y);
+				AEMtx33Scale(&scale, laserHitbox.size.x, laserHitbox.size.y);
+				AEMtx33Concat(&transform, &rotate, &scale);
+				AEMtx33Concat(&transform, &translate, &transform);
+				m_laserAnimation.Draw(transform);
+			}
+		}
+		else
+		{
+			AEVec2 finalDir = { offsetDir, 0.f };
+			float yDiff = m_pPlayer->GetPosition().y - m_position.y;
 
-		m_laserAnimation.Draw(transform);
+			if (yDiff > 150.f) // 플레이어가 충분히 위에 있으면
+				finalDir.y = 0.35f; // 위쪽 대각선
+			else if (yDiff < -150.f) // 플레이어가 충분히 아래에 있으면
+				finalDir.y = -0.35f; // 아래쪽 대각선
+
+			AEVec2 normalizedDir;
+			AEVec2Normalize(&normalizedDir, &finalDir);
+			float angle = atan2f(normalizedDir.y, normalizedDir.x);
+
+			AEMtx33Rot(&rotate, angle);
+			AEMtx33Trans(&translate, m_position.x + laserHitbox.offset.x * offsetDir, m_position.y + laserHitbox.offset.y);
+			AEMtx33Scale(&scale, laserHitbox.size.x, laserHitbox.size.y);
+			AEMtx33Concat(&transform, &rotate, &scale);
+			AEMtx33Concat(&transform, &translate, &transform);
+			m_laserAnimation.Draw(transform);
+		}
 	}
+
 }
 
 void BossCharacter::TakeDamage(s32 damage)
@@ -312,7 +345,7 @@ bool BossCharacter::IsUnbeatable() const
 	return m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF || !m_isAttackable;
 }
 
-const AttackHitbox& BossCharacter::GetCurrentAttackHitbox() const
+const AttackHitbox& BossCharacter::GetCurrentMeleeHitbox() const
 {
 	s32 currentFrame = m_animation.GetCurrentFrame();
 	if (currentFrame >= 0 && currentFrame < m_meleeHitboxes.size())

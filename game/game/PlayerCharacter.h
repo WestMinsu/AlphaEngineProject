@@ -34,7 +34,7 @@ public:
 		return m_currentAnimState;
 	}
 	s32 GetCurrentAnimationFrame() const;
-	const AttackHitbox& GetCurrentAttackHitbox() const;
+	const AttackHitbox& GetCurrentMeleeHitbox() const;
 
 	bool HasFiredProjectile() const 
 	{

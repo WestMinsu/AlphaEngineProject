@@ -17,22 +17,15 @@ Projectile::~Projectile()
 {
 }
 
-
-
-void Projectile::Init(AEVec2 startPos, CharacterDirection dir, const ProjectileData& data)
+void Projectile::Init(AEVec2 startPos, AEVec2 direction, const ProjectileData& data)
 {
 	m_position = startPos;
 	m_size = data.size;
 	m_damage = data.damage;
 
-	if (dir == CharacterDirection::RIGHT)
-	{
-		m_velocity.x = data.speed;
-	}
-	else
-	{
-		m_velocity.x = -data.speed;
-	}
+	AEVec2Normalize(&direction, &direction);
+	m_velocity.x = direction.x * data.speed;
+	m_velocity.y = direction.y * data.speed;
 
 	m_animation.Init();
 	m_animation.Play(CharacterAnimationState::IDLE, data.animData);

@@ -279,12 +279,14 @@ void PlayerCharacter::Draw()
 
 	if (m_isMeleeAttackHitboxActive)
 	{
-		const AttackHitbox& currentHitbox = GetCurrentAttackHitbox();
+		const AttackHitbox& currentHitbox = GetCurrentMeleeHitbox();
 		AEVec2 hitboxPos;
 		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
+
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
 void PlayerCharacter::Destroy()
@@ -298,7 +300,7 @@ s32 PlayerCharacter::GetCurrentAnimationFrame() const
 	return m_animation.GetCurrentFrame();
 }
 
-const AttackHitbox& PlayerCharacter::GetCurrentAttackHitbox() const
+const AttackHitbox& PlayerCharacter::GetCurrentMeleeHitbox() const
 {
 	s32 currentFrame = GetCurrentAnimationFrame();
 	if (currentFrame >= 0 && currentFrame < m_attackHitboxes.size())

@@ -74,6 +74,9 @@ void MainGameState::Update(f32 dt)
 	if (isPlayerCasting && canPlayerFire)
 	{
 		WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
+		CharacterDirection playerDir = m_Player.GetDirection();
+		AEVec2 directionVec = { (playerDir == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
+
 		if (currentWeapon == WeaponType::FIRE || currentWeapon == WeaponType::ICE)
 		{
 			m_playerProjectiles.emplace_back();
@@ -87,7 +90,7 @@ void MainGameState::Update(f32 dt)
 			spawnPos.x = playerPos.x + (playerDir == CharacterDirection::RIGHT ? playerSize.x * offsetX_Ratio : -playerSize.x * offsetX_Ratio);
 			spawnPos.y = playerPos.y + playerSize.y * offsetY_Ratio;
 			const ProjectileData& projData = m_Player.GetCurrentProjectileData();
-			newProjectile.Init(spawnPos, playerDir, projData);
+			newProjectile.Init(spawnPos, directionVec, projData);
 			m_Player.SetFiredProjectile(true);
 		}
 		else if (currentWeapon == WeaponType::LIGHTNING)
@@ -111,12 +114,35 @@ void MainGameState::Update(f32 dt)
 	{
 		m_enemyProjectiles.emplace_back();
 		Projectile& newProjectile = m_enemyProjectiles.back();
-
 		const ProjectileData& projData = m_MageEnemy.GetProjectileData();
+		AEVec2 directionVec = { (m_MageEnemy.GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
 
-		newProjectile.Init(m_MageEnemy.GetPosition(), m_MageEnemy.GetDirection(), projData);
+		newProjectile.Init(m_MageEnemy.GetPosition(), directionVec, projData);
 
 		m_MageEnemy.SetFiredProjectile(true);
+	}
+
+	bool isBossMeleeAttacking = m_Boss.GetCurrentAIState() == BossAIState::MELEE_ATTACK;
+	bool isBossHitboxActive = m_Boss.GetAnimation().GetCurrentFrame() >= 3;
+
+	if (isBossMeleeAttacking && isBossHitboxActive && !m_Boss.HasHitPlayerThisAttack() && m_Player.GetHealth() > 0)
+	{
+		const AttackHitbox& bossHitbox = m_Boss.GetCurrentMeleeHitbox();
+		AEVec2 bossPos = m_Boss.GetPosition();
+		CharacterDirection bossDir = m_Boss.GetDirection();
+		AEVec2 bossHitboxPos;
+		bossHitboxPos.x = bossPos.x + (bossDir == CharacterDirection::RIGHT ? bossHitbox.offset.x : -bossHitbox.offset.x);
+		bossHitboxPos.y = bossPos.y + bossHitbox.offset.y;
+
+		AEVec2 playerHitboxPos = m_Player.GetPosition();
+		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+
+		if (CheckAABBCollision(bossHitboxPos, bossHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
+		{
+			m_Player.TakeDamage(15);
+			m_Boss.RegisterPlayerHit();
+		}
 	}
 
 	bool isBossCastingRanged = m_Boss.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
@@ -124,32 +150,50 @@ void MainGameState::Update(f32 dt)
 	{
 		m_Boss.SetFired(true);
 		const ProjectileData& projData = m_Boss.GetProjectileData();
+		AEVec2 bossPos = m_Boss.GetPosition();
+		AEVec2 playerPos = m_Player.GetPosition();
 
 		if (m_Boss.IsBuffed())
 		{
-			// 3-way shot	
+			// 3-Way Shot
+			float baseAngle = atan2(playerPos.y - bossPos.y, playerPos.x - bossPos.x);
+			AEVec2 dirMid = { cosf(baseAngle), sinf(baseAngle) };
+			AEVec2 dirUp = { cosf(baseAngle - 0.3f), sinf(baseAngle - 0.3f) };
+			AEVec2 dirDown = { cosf(baseAngle + 0.3f), sinf(baseAngle + 0.3f) };
+
+			m_enemyProjectiles.emplace_back().Init(bossPos, dirUp, projData);
+			m_enemyProjectiles.emplace_back().Init(bossPos, dirMid, projData);
+			m_enemyProjectiles.emplace_back().Init(bossPos, dirDown, projData);
 		}
 		else
 		{
-			m_enemyProjectiles.emplace_back();
-			Projectile& newProjectile = m_enemyProjectiles.back();
-			newProjectile.Init(m_Boss.GetPosition(), m_Boss.GetDirection(), projData);
+			AEVec2 finalDir = { (m_Boss.GetDirection() == CharacterDirection::RIGHT ? 1.f : -1.f), 0.f };
+			float yDiff = playerPos.y - bossPos.y;
+			if (yDiff > 150.f) finalDir.y = 0.5f;
+			else if (yDiff < -150.f) finalDir.y = -0.5f;
+
+			AEVec2Normalize(&finalDir, &finalDir);
+			m_enemyProjectiles.emplace_back().Init(bossPos, finalDir, projData);
 		}
 	}
 
 	if (m_Boss.GetCurrentAIState() == BossAIState::LASER_BEAM &&
-		m_Boss.GetLaserAnimation().GetCurrentFrame() >= 8 && 
+		m_Boss.GetLaserAnimation().GetCurrentFrame() >= 8 &&
 		!m_Boss.IsUnbeatable() && m_Player.GetHealth() > 0)
 	{
 		const AttackHitbox& laserHitbox = m_Boss.GetLaserHitbox();
 		AEVec2 bossPos = m_Boss.GetPosition();
-		AEVec2 hitboxPos;
-		hitboxPos.x = bossPos.x + (m_Boss.GetDirection() == CharacterDirection::LEFT ? -laserHitbox.offset.x : laserHitbox.offset.x);
-		hitboxPos.y = bossPos.y + laserHitbox.offset.y;
+		AEVec2 laserHitboxPos;
+		laserHitboxPos.x = bossPos.x + (m_Boss.GetDirection() == CharacterDirection::LEFT ? -laserHitbox.offset.x : laserHitbox.offset.x);
+		laserHitboxPos.y = bossPos.y + laserHitbox.offset.y;
 
-		if (CheckAABBCollision(hitboxPos, laserHitbox.size, m_Player.GetPosition(), m_Player.GetSize()))
+		AEVec2 playerHitboxPos = m_Player.GetPosition();
+		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+
+		if (CheckAABBCollision(laserHitboxPos, laserHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
 		{
-			m_Player.TakeDamage(1);
+			m_Player.TakeDamage(20);
 		}
 	}
 
@@ -196,16 +240,23 @@ void MainGameState::Update(f32 dt)
 	for (auto& proj : m_enemyProjectiles)
 	{
 		proj.Update(dt);
-		if (proj.IsActive() && m_Player.GetHealth() > 0 && CheckAABBCollision(proj.GetPosition(), proj.GetSize(), m_Player.GetPosition(), m_Player.GetSize()))
+		if (proj.IsActive() && m_Player.GetHealth() > 0)
 		{
-			m_Player.TakeDamage(proj.GetDamage());
-			proj.Deactivate();
+			AEVec2 playerHitboxPos = m_Player.GetPosition();
+			playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+			playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+
+			if (CheckAABBCollision(proj.GetPosition(), proj.GetSize(), playerHitboxPos, m_Player.GetHitboxSize()))
+			{
+				m_Player.TakeDamage(proj.GetDamage());
+				proj.Deactivate();
+			}
 		}
 	}
 
 	if (m_Player.IsMeleeAttackHitboxActive() && !m_Player.HasHitEnemyThisAttack())
 	{
-		const AttackHitbox& currentHitbox = m_Player.GetCurrentAttackHitbox();
+		const AttackHitbox& currentHitbox = m_Player.GetCurrentMeleeHitbox();
 		const AEVec2& playerPos = m_Player.GetPosition();
 		AEVec2 hitboxPos;
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
@@ -328,13 +379,13 @@ void MainGameState::DrawUI()
 		const float barX = 0;
 		const float barY = kHalfWindowHeight - 150.f;
 
-		DrawRect(barX, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+		DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
 		float healthRatio = static_cast<float>(m_Boss.GetHealth()) / m_Boss.getMaxHealth();
 		float currentHealthWidth = barWidth * healthRatio;
 		// 남은 체력 그리기
-		DrawRect(barX - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
+		DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
 		// 체력바 테두리
-		DrawHollowRect(barX, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+		DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
 	}
 
 	if (m_Boss.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK && m_Boss.GetAnimation().IsFinished() && !m_Boss.HasFired())
