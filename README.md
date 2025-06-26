@@ -1,4 +1,6 @@
-# AlphaEngineProject
+# Arcane Edge   
+## directed by Team Damascus
+
 설명
 - 2D 횡스크롤 런앤건 게임으로 적의 속성에 따라 무기를 변경하여 모든 적을 처치하는 게임
 
