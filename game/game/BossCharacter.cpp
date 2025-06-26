@@ -174,7 +174,7 @@ void BossCharacter::Update(f32 dt)
 	switch (m_currentAIState)
 	{
 	case BossAIState::IDLE:
-	case BossAIState::APPEARANCE_WAIT:
+	case BossAIState::APPEARANCE_WAIT:	
 	case BossAIState::COOLDOWN:
 		desiredAnimState = CharacterAnimationState::IDLE;
 		break;
@@ -256,50 +256,44 @@ void BossCharacter::Draw()
 	{
 		const AttackHitbox& laserData = GetLaserHitbox();
 		float offsetDir = (m_currentDirection == CharacterDirection::RIGHT) ? 1.0f : -1.0f;
-		AEVec2 laserBasePos = { m_position.x + (laserData.offset.x * offsetDir), m_position.y + laserData.offset.y };
+
+		AEVec2 basePosition;
+		basePosition.x = m_position.x + (laserData.offset.x * offsetDir);
+		basePosition.y = m_position.y + laserData.offset.y;
 
 		if (m_isInBuffState)
 		{
-			// 3-Way Laser
-			AEVec2 directions[] = { {offsetDir, 0.5f}, {offsetDir, 0.0f}, {offsetDir, -0.5f} };
-			for (auto& dir : directions)
+			// <<< 핵심 수정: 3방향 평행 레이저 그리기 >>>
+			float yOffsets[] = { 150.f, 0.f, -150.f }; // 위, 중간, 아래 Y축 오프셋
+			for (float yOffset : yOffsets)
 			{
-				AEVec2 normalizedDir;
-				AEVec2Normalize(&normalizedDir, &dir);
-				float angle = atan2f(normalizedDir.y, normalizedDir.x);
-				AEMtx33 transform_laser;
-				AEMtx33Rot(&rotate, angle);
-				AEMtx33Trans(&translate, laserBasePos.x, laserBasePos.y);
-				AEMtx33Scale(&scale, laserData.size.x, laserData.size.y);
-				AEMtx33Concat(&transform_laser, &rotate, &scale);
-				AEMtx33Concat(&transform_laser, &translate, &transform_laser);
-				m_laserAnimation.Draw(transform_laser);
+				AEMtx33 laserTransform;
+				AEMtx33Trans(&translate, basePosition.x, basePosition.y + yOffset);
+				AEMtx33Rot(&rotate, 0); // 회전 없음
+				AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
+				AEMtx33Concat(&laserTransform, &rotate, &scale);
+				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
+				m_laserAnimation.Draw(laserTransform);
 				if (m_laserAnimation.GetCurrentFrame() >= 8)
-					DrawTransformedHollowRect(laserBasePos.x, laserBasePos.y, laserData.size.x, laserData.size.y, angle, 1.f, 0.f, 1.f, 0.5f);
+					DrawHollowRect(basePosition.x, basePosition.y + yOffset, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 			}
 		}
 		else
 		{
-			AEVec2 dirToPlayer;
-			AEVec2 playerPos = m_pPlayer->GetPosition();
-			float yDiff = playerPos.y - m_position.y;
+			AEVec2 finalPos = basePosition;
+			float yDiff = m_pPlayer->GetPosition().y - m_position.y;
+			if (yDiff > 150.f) finalPos.y += 100.f;
+			else if (yDiff < -150.f) finalPos.y -= 100.f;
 
-			if (yDiff > 150.f) dirToPlayer = { offsetDir, 0.35f };
-			else if (yDiff < -150.f) dirToPlayer = { offsetDir, -0.35f };
-			else dirToPlayer = { offsetDir, 0.0f };
-
-			AEVec2Normalize(&dirToPlayer, &dirToPlayer);
-			float angle = atan2f(dirToPlayer.y, dirToPlayer.x);
-
-			AEMtx33 transform_laser;
-			AEMtx33Rot(&rotate, angle);
-			AEMtx33Trans(&translate, laserBasePos.x, laserBasePos.y);
-			AEMtx33Scale(&scale, laserData.size.x, laserData.size.y);
-			AEMtx33Concat(&transform_laser, &rotate, &scale);
-			AEMtx33Concat(&transform_laser, &translate, &transform_laser);
-			m_laserAnimation.Draw(transform_laser);
+			AEMtx33 laserTransform;
+			AEMtx33Trans(&translate, finalPos.x, finalPos.y);
+			AEMtx33Rot(&rotate, 0);
+			AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
+			AEMtx33Concat(&laserTransform, &rotate, &scale);
+			AEMtx33Concat(&laserTransform, &translate, &laserTransform);
+			m_laserAnimation.Draw(laserTransform);
 			if (m_laserAnimation.GetCurrentFrame() >= 8)
-				DrawTransformedHollowRect(laserBasePos.x, laserBasePos.y, laserData.size.x, laserData.size.y, angle, 1.f, 0.f, 1.f, 0.5f);
+				DrawHollowRect(finalPos.x, finalPos.y, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 		}
 	}
 }

@@ -47,6 +47,16 @@ void MainGameState::Init()
 
 void MainGameState::Update(f32 dt)
 {
+	if (m_Boss.IsCompletelyDead())
+	{
+		GameManager::ChangeState(GameState::GAME_CLEAR);
+		return;
+	}
+	if (m_Player.IsCompletelyDead())
+	{
+		GameManager::ChangeState(GameState::GAME_OVER);
+		return;
+	}
 	if (AEInputCheckTriggered(AEVK_R))
 	{
 		GameManager::ChangeState(GameState::MAIN_MENU);
@@ -177,23 +187,44 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	if (m_Boss.GetCurrentAIState() == BossAIState::LASER_BEAM &&
-		m_Boss.GetLaserAnimation().GetCurrentFrame() >= 8 &&
-		!m_Boss.IsUnbeatable() && m_Player.GetHealth() > 0)
+	bool isBossLaserAttacking = m_Boss.GetCurrentAIState() == BossAIState::LASER_BEAM;
+	bool isLaserHitboxActive = m_Boss.GetLaserAnimation().GetCurrentFrame() >= 8;
+
+	if (isBossLaserAttacking && isLaserHitboxActive && !m_Boss.IsUnbeatable() && m_Player.GetHealth() > 0)
 	{
-		const AttackHitbox& laserHitbox = m_Boss.GetLaserHitbox();
-		AEVec2 bossPos = m_Boss.GetPosition();
-		AEVec2 laserHitboxPos;
-		laserHitboxPos.x = bossPos.x + (m_Boss.GetDirection() == CharacterDirection::LEFT ? -laserHitbox.offset.x : laserHitbox.offset.x);
-		laserHitboxPos.y = bossPos.y + laserHitbox.offset.y;
+		const AttackHitbox& laserData = m_Boss.GetLaserHitbox();
+		float offsetDir = (m_Boss.GetDirection() == CharacterDirection::RIGHT) ? 1.0f : -1.0f;
+		AEVec2 laserBasePos = { m_Boss.GetPosition().x + (laserData.offset.x * offsetDir), m_Boss.GetPosition().y + laserData.offset.y };
 
 		AEVec2 playerHitboxPos = m_Player.GetPosition();
 		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
 		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
 
-		if (CheckAABBCollision(laserHitboxPos, laserHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
+		if (m_Boss.IsBuffed())
 		{
-			m_Player.TakeDamage(20);
+			// 3-Way Laser
+			float yOffsets[] = { 150.f, 0.f, -150.f };
+			for (float yOffset : yOffsets)
+			{
+				AEVec2 currentLaserPos = { laserBasePos.x, laserBasePos.y + yOffset };
+				if (CheckAABBCollision(currentLaserPos, laserData.size, playerHitboxPos, m_Player.GetHitboxSize()))
+				{
+					m_Player.TakeDamage(1);
+					break;
+				}
+			}
+		}
+		else
+		{
+			AEVec2 finalLaserPos = laserBasePos;
+			float yDiff = m_Player.GetPosition().y - m_Boss.GetPosition().y;
+			if (yDiff > 150.f) finalLaserPos.y += 100.f;
+			else if (yDiff < -150.f) finalLaserPos.y -= 100.f;
+
+			if (CheckAABBCollision(finalLaserPos, laserData.size, playerHitboxPos, m_Player.GetHitboxSize()))
+			{
+				m_Player.TakeDamage(1);
+			}
 		}
 	}
 
@@ -300,7 +331,7 @@ void MainGameState::Draw()
 
 	m_MeleeEnemy.Draw();
 	m_MageEnemy.Draw();
-	
+
 	if (!m_Boss.IsCompletelyDead())
 	{
 		m_Boss.Draw();
@@ -312,7 +343,7 @@ void MainGameState::Draw()
 		projectile.Draw();
 	for (auto& projectile : m_enemyProjectiles)
 		projectile.Draw();
-	for (auto& effect : m_visualEffects) 
+	for (auto& effect : m_visualEffects)
 		effect.Draw();
 
 	DrawUI();
@@ -350,7 +381,7 @@ void MainGameState::DrawUI()
 	const f32 posY = -(kHalfWindowHeight - 60.0f);
 
 	f32 xCam, yCam;
-		AEGfxGetCamPosition(&xCam, &yCam);
+	AEGfxGetCamPosition(&xCam, &yCam);
 
 	WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
 

@@ -48,6 +48,12 @@ void GameManager::Update(f32 dt)
 			case GameState::MAIN_GAME:
 				m_GameState = std::move(std::make_unique<MainGameState>());
 				break;
+			case GameState::GAME_CLEAR:
+				m_GameState = std::move(std::make_unique<GameClearState>());
+				break;
+			case GameState::GAME_OVER:
+				m_GameState = std::move(std::make_unique<GameOverState>());
+				break;
 			}
 
 			m_GameState->Init();

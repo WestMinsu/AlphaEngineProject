@@ -24,6 +24,7 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
+	bool IsCompletelyDead() const;
 
 	Animation& GetAnimation() 
 	{

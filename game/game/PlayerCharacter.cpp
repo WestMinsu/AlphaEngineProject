@@ -334,6 +334,11 @@ void PlayerCharacter::TakeDamage(s32 damage)
 	}
 }
 
+bool PlayerCharacter::IsCompletelyDead() const
+{
+	return (m_currentAnimState == CharacterAnimationState::DEATH && m_animation.IsFinished());
+}
+
 const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 {
 	return m_projectileDataMap.at(m_currentWeapon);

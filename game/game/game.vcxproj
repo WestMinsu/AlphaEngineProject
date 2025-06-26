@@ -109,6 +109,8 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="BossCharacter.h" />
+    <ClInclude Include="GameClearState.h" />
+    <ClInclude Include="GameOverState.h" />
     <ClInclude Include="MeleeEnemyCharacter.h" />
     <ClInclude Include="MageEnemyCharacter.h" />
     <ClInclude Include="PlayerCharacter.h" />
@@ -131,6 +133,8 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="BossCharacter.cpp" />
+    <ClCompile Include="GameClearState.cpp" />
+    <ClCompile Include="GameOverState.cpp" />
     <ClCompile Include="MeleeEnemyCharacter.cpp" />
     <ClCompile Include="MageEnemyCharacter.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
