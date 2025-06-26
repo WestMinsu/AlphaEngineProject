@@ -14,7 +14,7 @@ TileMap::TileMap()
 	m_tileScale = 2.f;
 }
 
-TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
+TileMap::TileMap(const std::string& mapfileDir, f32 tileScale, f32 x, f32 y)
 {
 	m_offsetCount = 1;
 	m_tileSize = 16;
@@ -49,8 +49,6 @@ void TileMap::Update(f32 dt)
 		m_offset.x -= mapPixelWidth * 2;
 		m_offsetCount--;
 	}
-
-	//std::cout << m_offset.x << std::endl;
 }
 
 void TileMap::Draw()

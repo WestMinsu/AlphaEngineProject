@@ -5,6 +5,7 @@
 #include "IntroState.h"
 #include "MainMenuState.h"
 #include "MainGameState.h"
+#include "MainGameStateTest.h"
 
 class GameManager
 {

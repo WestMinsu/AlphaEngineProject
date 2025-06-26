@@ -30,7 +30,7 @@ class TileMap
 {
 public:
     TileMap();
-    TileMap(std::string mapfileDir, f32 tileScale = 1.f, f32 offsetX = 0.f, f32 offsetY = 0.f);
+    TileMap(const std::string& mapfileDir, f32 tileScale = 1.f, f32 offsetX = 0.f, f32 offsetY = 0.f);
     ~TileMap();
 
     void Update(f32 dt);
