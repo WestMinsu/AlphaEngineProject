@@ -20,8 +20,8 @@ void MainGameState::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
-	m_MeleeEnemy.Init({ kHalfWindowWidth - 200.f, 0.f }, &m_Player);
-	m_MageEnemy.Init({ kHalfWindowWidth - 500.f, 0.f }, &m_Player);
+	m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
