@@ -210,27 +210,7 @@ void CharacterPlayer::Update(f32 dt)
 
 	if (enableCollisionDetection)
 	{
-		while (m_velocityY >= 0 ? m_position.y < desiredNextPosition.y : m_position.y > desiredNextPosition.y)
-		{
-			if (checkCollisionTileMap(m_position, m_size)) break;
-			new_position.y += std::copysign(1.0f, m_velocityY);
-		}
-	
-		if (checkCollisionTileMap(m_position, m_size))
-		{
-			new_position.y -= std::copysign(1.0f, m_velocityY);
-		}
-
-		while (m_velocityX >= 0 ? m_position.x < desiredNextPosition.x : m_position.x > desiredNextPosition.x)
-		{
-			if (checkCollisionTileMap(m_position, m_size)) break;
-			new_position.x += std::copysign(1.0f, m_velocityX);
-		}
-
-		if (checkCollisionTileMap(m_position, m_size))
-		{
-			new_position.x -= std::copysign(1.0f, m_velocityX);
-		}
+		
 
 		m_position = new_position;
 	}

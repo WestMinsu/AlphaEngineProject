@@ -30,6 +30,18 @@ inline bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVe
     return true;
 }
 
+inline f32 Clamp(f32 value, f32 min, f32 max)
+{
+    value = value < min ? min : value;
+    value = value > max ? max : value;
+    return value;
+}
+
+inline AEVec2 Clamp(const AEVec2& value, const AEVec2& min, const AEVec2& max)
+{
+    return { Clamp(value.x, min.x, max.x), Clamp(value.y, min.y, max.y) };
+}
+
 inline void GetPlayerAABB(const AEVec2& position, const AEVec2& size, AEVec2& min, AEVec2& max)
 {
     min.x = (int)(position.x - (size.x * 0.25f));

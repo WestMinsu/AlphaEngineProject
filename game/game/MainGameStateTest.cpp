@@ -55,6 +55,7 @@ void MainGameStateTest::Draw()
 	{
 		AEVec2 min, max;
 		GetPlayerAABB(m_Player.GetPosition(), m_Player.GetSize(), min, max);
+		AEVec2 player_aabb_center = { (min.x + max.x) * 0.5f,(min.y + max.y) * 0.5f };
 
 		f32 green_color[] = { 0, 1, 0 };
 		f32 blue_color[] = { 0, 0, 1 };
@@ -65,22 +66,39 @@ void MainGameStateTest::Draw()
 
 		for (auto& curr_tilemap : TileMaps)
 		{
-			for (int row = 0; row < curr_tilemap.GetMapHeight(); row++)
+			const AEVec2 player_standing_tile = curr_tilemap.GetTileIndexAt(player_aabb_center);
+
+			AEVec2 player_tile_position = curr_tilemap.GetTileWorldPosAt(player_standing_tile.x, player_standing_tile.y);
+			TileMaps.begin()->DrawRect(player_tile_position.x, player_tile_position.y, 5, red_color);
+
+			int num_adjacent = (m_Player.GetSize().x / curr_tilemap.GetTileSize()) * 0.5f; // 넉넉잡아
+			int row_begin = (int)player_standing_tile.y - num_adjacent;
+			int row_end = (int)player_standing_tile.y + num_adjacent + 1;
+			int col_begin = (int)player_standing_tile.x - num_adjacent;
+			int col_end = (int)player_standing_tile.x + num_adjacent + 1;
+
+			row_begin = Clamp(row_begin, 0, curr_tilemap.GetMapHeight());
+			row_end = Clamp(row_end, 0, curr_tilemap.GetMapHeight());
+			col_begin = Clamp(col_begin, 0, 58);
+			col_end = Clamp(col_end, 0, 58);
+
+			for (int row = row_begin; row < row_end; row++)
 			{
-				for (int col = 0; col < 58; col++)
+				for (int col = col_begin; col < col_end; col++)
 				{
 					AEVec2 tile_position = curr_tilemap.GetTileWorldPosAt(col, row);
 
+					TileMaps.begin()->DrawRect(tile_position.x, tile_position.y, 5, red_color);
 					if (curr_tilemap.HasTile(col, row))
 					{
 						AEVec2 tmin, tmax;
 						f32 tsize = curr_tilemap.GetTileSize();
 						GetAABBFrom(tile_position, {tsize, tsize}, tmin, tmax);
 
-						curr_tilemap.DrawRect(tile_position.x, tile_position.y, blue_color);
+						//curr_tilemap.DrawRect(tile_position.x, tile_position.y, blue_color);
 						if (IntersectAABBAABB(min, max, tmin, tmax))
 						{
-							curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
+							//curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
 						}
 					}
 				}
