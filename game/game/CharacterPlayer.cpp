@@ -3,11 +3,11 @@
 #include "Utility.h"
 #include "AssetManager.h"
 #include <iostream>
-#include "AssetManager.h"
+#include "TileMap.h"
 
 CharacterPlayer::CharacterPlayer()
 {
-	m_position = { 0,0 };
+	m_position = { 0, };
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
@@ -197,8 +197,39 @@ void CharacterPlayer::Update(f32 dt)
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
 
-	m_position.x += m_velocityX * dt;
-	m_position.y += m_velocityY * dt;
+	//m_position.x += m_velocityX * dt;
+	//m_position.y += m_velocityY * dt;
+
+	//std::cout << m_position.x << ", " << m_position.y << std::endl;
+
+	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.y += std::copysign(1.0f, m_velocityY);
+		std::cout << "Call Y" << std::endl;
+	}
+	
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.y -= std::copysign(1.0f, m_velocityY);
+	}
+
+	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.x += std::copysign(1.0f, m_velocityX);
+		std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.x -= std::copysign(1.0f, m_velocityX);
+	}
+
+	//m_position.x = tempPosition.x;
+	//m_position.y = tempPosition.y;
 
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{
@@ -279,15 +310,11 @@ void CharacterPlayer::Draw()
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
+	DrawHollowRect(m_position.x, m_position.y - m_size.y / 4.f, m_size.x / 2.f, m_size.y / 2.f, 1.0f, 0.0f, 0.0f, 0.5f);
 }
 
 void CharacterPlayer::Destroy()
 {
-	//for (auto& pair : m_animDataMap)
-	//{
-	//	if (pair.second.pTexture)
-	//		AEGfxTextureUnload(pair.second.pTexture);
-	//}
 	m_animDataMap.clear();
 	m_animation.Destroy();
 }

@@ -21,8 +21,8 @@ void MainGameState::Init()
 	m_MeleeEnemy.Init({ kHalfWindowWidth - 200.f, 0.f }, &m_Player);
 	m_MageEnemy.Init({ kHalfWindowWidth - 500.f, 0.f }, &m_Player);
 
-	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
-	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
+	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
+	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 	m_Background.Init();
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
@@ -38,17 +38,23 @@ void MainGameState::Update(f32 dt)
 		return;
 	}
 
-	m_oldPositionPlayer = m_Player.GetPosition();
+	for (auto& tm : TileMaps)
+	{
+		tm.Update(dt);
+	}
 
 	m_Player.Update(dt);
 	m_MeleeEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 
-	int tileX = m_Player.GetPosition().x / 32;
-	int tileY = m_Player.GetPosition().y / 32;
+	//for (auto& tileMap : m_TileMaps)
+	//{
+	//	if (tileMap.checkCollisionTileMap(m_Player.GetPosition(), m_Player.GetSize()))
+	//	{
+	//		m_Player.SetPosition(m_oldPositionPlayer);
+	//	}
+	//}
 
-	// To Do 
-	// TileMap Collision
 
 	if (m_Player.GetPosition().x > 0.f)
 	{
@@ -149,10 +155,6 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	for (auto& tm : m_TileMaps)
-	{
-		tm.Update(dt);
-	}
 }
 
 void MainGameState::Draw()
@@ -161,7 +163,7 @@ void MainGameState::Draw()
 	m_MeleeEnemy.Draw();
 	m_MageEnemy.Draw();
 
-	for (auto tm : m_TileMaps)
+	for (auto tm : TileMaps)
 	{
 		tm.Draw();
 	}
@@ -178,10 +180,11 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	for (auto& tm : m_TileMaps)
+	for (auto& tm : TileMaps)
 	{
 		tm.Destroy();
 	}
+	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
 	m_MeleeEnemy.Destroy();
