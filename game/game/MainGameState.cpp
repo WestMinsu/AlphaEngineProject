@@ -68,6 +68,54 @@ void MainGameState::Update(f32 dt)
 	m_MageEnemy.Update(dt);
 	m_Boss.Update(dt);
 
+	BossAIState currentBossState = m_Boss.GetCurrentAIState();
+	if (currentBossState != m_previousBossAIState)
+	{
+		if (currentBossState == BossAIState::GLOWING)
+		{
+			m_pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png"); 
+			m_bossMessageTimer = m_bossMessageDuration;
+		}
+		else if (currentBossState == BossAIState::BUFF)
+		{
+			m_pBossMessageTexture = LoadImageAsset("Assets/UI/enragetext.png");
+			m_bossMessageTimer = m_bossMessageDuration;
+		}
+		m_previousBossAIState = currentBossState;
+	}
+
+	if (m_bossMessageTimer > 0.0f)
+	{
+		m_bossMessageTimer -= dt;
+		if (m_bossMessageTimer <= 0.0f)
+		{
+			m_pBossMessageTexture = nullptr; // 시간이 다 되면 표시할 텍스처를 비움
+		}
+	}
+
+	if (!m_Player.IsInvincible() && m_Player.GetHealth() > 0)
+	{
+		std::vector<ACharacter*> enemies;
+		if (m_MeleeEnemy.GetHealth() > 0) enemies.push_back(&m_MeleeEnemy);
+		if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
+		if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
+
+		AEVec2 playerHitboxPos = m_Player.GetPosition();
+		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+		const AEVec2& playerHitboxSize = m_Player.GetHitboxSize();
+
+		for (auto* enemy : enemies)
+		{
+			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
+			{
+				std::cout << "collsion" << std::endl;
+				m_Player.TakeDamage(1); 
+				break; 
+			}
+		}
+	}
+
 	int tileX = m_Player.GetPosition().x / 32;
 	int tileY = m_Player.GetPosition().y / 32;
 
@@ -234,7 +282,7 @@ void MainGameState::Update(f32 dt)
 		bool hit = false;
 		if (proj->IsActive() && m_MeleeEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
 			{
 				m_MeleeEnemy.TakeDamage(proj->GetDamage());
 				proj->Deactivate();
@@ -243,7 +291,7 @@ void MainGameState::Update(f32 dt)
 		}
 		if (!hit && proj->IsActive() && m_MageEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
 			{
 				m_MageEnemy.TakeDamage(proj->GetDamage());
 				proj->Deactivate();
@@ -293,17 +341,17 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
-		if (m_MeleeEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetSize()))
+		if (m_MeleeEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
 		{
 			m_MeleeEnemy.TakeDamage(10);
 			m_Player.RegisterHit();
 		}
-		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetSize()))
+		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
 		{
 			m_MageEnemy.TakeDamage(10);
 			m_Player.RegisterHit();
 		}
-		else if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable() && CheckAABBCollision(hitboxPos, currentHitbox.size, m_Boss.GetPosition(), m_Boss.GetSize()))
+		else if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable() && CheckAABBCollision(hitboxPos, currentHitbox.size, m_Boss.GetPosition(), m_Boss.GetHitboxSize()))
 		{
 			m_Boss.TakeDamage(10);
 			m_Player.RegisterHit();
@@ -347,6 +395,18 @@ void MainGameState::Draw()
 		effect.Draw();
 
 	DrawUI();
+
+	if (m_pBossMessageTexture)
+	{
+		float xCam, yCam;
+		AEGfxGetCamPosition(&xCam, &yCam);
+
+		float imgWidth = 500.f;
+		float imgHeight = 100.f;
+		float imgY = 200.f;
+
+		DrawRect(xCam, imgY, imgWidth, imgHeight, 1.f, 1.f, 1.f, 1.f, m_pBossMessageTexture);
+	}
 }
 
 void MainGameState::Exit()
@@ -403,42 +463,17 @@ void MainGameState::DrawUI()
 		}
 	}
 
-	if (m_Boss.IsAttackable()) // 보스가 공격 가능한 상태일 때만 체력바 표시
+	if (m_Boss.IsAttackable())
 	{
 		const float barWidth = 500.f;
 		const float barHeight = 125.f;
 		const float barX = 0;
 		const float barY = kHalfWindowHeight - 150.f;
-
 		DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
 		float healthRatio = static_cast<float>(m_Boss.GetHealth()) / m_Boss.getMaxHealth();
 		float currentHealthWidth = barWidth * healthRatio;
-		// 남은 체력 그리기
 		DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
-		// 체력바 테두리
 		DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
-	}
-
-	if (m_Boss.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK && m_Boss.GetAnimation().IsFinished() && !m_Boss.HasFired())
-	{
-		m_Boss.SetFired(true);
-		// 버프 상태에 따른 분기
-		if (m_Boss.IsBuffed())
-		{
-			// 3-way shot
-			// ... 로직 추가 ...
-		}
-		else
-		{
-			// 단일 샷
-			// ... 로직 추가 ...
-		}
-	}
-
-	// 레이저 공격 충돌
-	if (m_Boss.GetCurrentAnimState() == CharacterAnimationState::LASER_SHEET && m_Boss.GetAnimation().GetCurrentFrame() >= 9)
-	{
-		// AABB Check
 	}
 }
 
@@ -465,7 +500,7 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
 			(playerDir == CharacterDirection::LEFT && enemyPos.x < playerPos.x);
 
-		const float yTolerance = m_Player.GetSize().y / 2.0f;
+		const float yTolerance = m_Player.GetHitboxSize().y / 2.0f;
 		float yDistance = std::abs(playerPos.y - enemyPos.y);
 
 		if (isInFront && yDistance <= yTolerance)

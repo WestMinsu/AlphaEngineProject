@@ -34,4 +34,5 @@ private:
 
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
+	bool m_isHurt;
 };

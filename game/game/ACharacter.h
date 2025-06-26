@@ -10,6 +10,7 @@ enum class CharacterAnimationState
 	RANGED_ATTACK,
 	DASH,
 	DEATH,
+	HURT,
 
 	//for boss
 	APPEARANCE,

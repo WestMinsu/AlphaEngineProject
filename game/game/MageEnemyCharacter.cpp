@@ -22,6 +22,10 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
+
+	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
+	m_hitboxOffset = { 0.f, 0.f };
+	m_isHurt = false;
 }
 
 MageEnemyCharacter::~MageEnemyCharacter() {}
@@ -38,6 +42,7 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/mage/death.PNG", nullptr, 18, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/mage/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Fantasy Skeleton Enemies/mage/attack.PNG", nullptr, 21, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fantasy Skeleton Enemies/mage/hurt.PNG", nullptr, 5, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	for (auto& pair : m_animDataMap)
 	{
 		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
@@ -61,6 +66,11 @@ void MageEnemyCharacter::Update(f32 dt)
 	}
 	if (!m_pPlayer)
 		return;
+
+	if (m_isHurt && m_animation.IsFinished())
+	{
+		m_isHurt = false;
+	}
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
@@ -128,6 +138,10 @@ void MageEnemyCharacter::Update(f32 dt)
 	{
 		desiredAnimState = CharacterAnimationState::RANGED_ATTACK;
 	}
+	else if (m_isHurt)
+	{
+		desiredAnimState = CharacterAnimationState::HURT;
+	}
 
 	m_position.x += velocityX * dt;
 
@@ -158,7 +172,7 @@ void MageEnemyCharacter::Draw()
 	AEMtx33Concat(&transform, &translate, &transform);
 
 	m_animation.Draw(transform);
-	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.f, 1.f, 0.f, 0.5f);
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
 void MageEnemyCharacter::Destroy()
@@ -175,6 +189,8 @@ void MageEnemyCharacter::TakeDamage(s32 damage)
 
 	m_healthPoint -= damage;
 	std::cout << "Mage Enemy takes damage! HP: " << m_healthPoint << std::endl;
+
+	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
 	{

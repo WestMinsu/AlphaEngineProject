@@ -26,6 +26,9 @@ BossCharacter::BossCharacter()
 	m_cooldownDuration = 1.5f;
 	m_hasFired = false;
 	m_hasHitPlayerThisAttack = false;
+
+	m_hitboxSize = { m_size.x * 0.8f, m_size.y * 0.8f };
+	m_hitboxOffset = { 0.f, 0.f };
 }
 
 BossCharacter::~BossCharacter() {}
@@ -296,6 +299,8 @@ void BossCharacter::Draw()
 				DrawHollowRect(finalPos.x, finalPos.y, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 		}
 	}
+
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
 void BossCharacter::TakeDamage(s32 damage)

@@ -25,6 +25,7 @@ public:
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
 	bool IsCompletelyDead() const;
+	bool IsInvincible() const;
 
 	Animation& GetAnimation() 
 	{
@@ -94,4 +95,9 @@ private:
 	std::vector<WeaponType> m_availableWeapons;
 	WeaponType m_currentWeapon;
 	int m_currentWeaponIndex;
+
+	bool m_isInvincible;
+	f32 m_invincibilityTimer;
+	const f32 m_invincibilityDuration = 0.7f;
+	bool m_isHurt;
 };

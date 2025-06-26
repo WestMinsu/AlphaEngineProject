@@ -46,4 +46,9 @@ private:
 
 	AEGfxTexture* m_pHealthBarFrame;
 	AEGfxTexture* m_pHealthBar;
+
+	AEGfxTexture* m_pBossMessageTexture;
+	float m_bossMessageTimer;
+	const float m_bossMessageDuration = 2.5f;
+	BossAIState m_previousBossAIState;
 };

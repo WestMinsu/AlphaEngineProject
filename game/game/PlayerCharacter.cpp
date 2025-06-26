@@ -35,6 +35,10 @@ PlayerCharacter::PlayerCharacter()
 
 	m_currentWeapon = WeaponType::FIRE;
 	m_currentWeaponIndex = 0;
+
+	m_isInvincible = false;
+	m_invincibilityTimer = 0.0f;
+	m_isHurt = false;
 }
 
 PlayerCharacter::~PlayerCharacter()
@@ -53,7 +57,8 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-
+	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Hurt/hurt.png", nullptr, 2, SpriteSheetOrientation::HORIZONTAL, 0.2f, false };
+	
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
 	fireData.damage = 10;
@@ -99,6 +104,21 @@ void PlayerCharacter::Update(f32 dt)
 		return; 
 	}
 
+	if (m_isInvincible)
+	{
+		m_invincibilityTimer += dt;
+		if (m_invincibilityTimer >= m_invincibilityDuration)
+		{
+			m_isInvincible = false;
+			m_invincibilityTimer = 0.0f;
+		}
+	}
+
+	if (m_isHurt && m_animation.IsFinished())
+	{
+		m_isHurt = false;
+	}
+
 	bool isAttacking = m_isMeleeAttacking || m_isProjectileAttacking;
 
 	if (AEInputCheckTriggered(AEVK_1))
@@ -135,6 +155,9 @@ void PlayerCharacter::Update(f32 dt)
 	if (AEInputCheckTriggered(AEVK_LSHIFT) && !m_isDashing && !isAttacking)
 	{
 		m_isDashing = true;
+
+		m_isInvincible = true;
+		m_invincibilityTimer = 0.0f;
 	}
 	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isAttacking && !m_isDashing)
 	{
@@ -232,6 +255,8 @@ void PlayerCharacter::Update(f32 dt)
 		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)
 		desiredState = CharacterAnimationState::DASH;
+	else if (m_isHurt)
+		desiredState = CharacterAnimationState::HURT;
 	else if (!m_isGrounded)
 		desiredState = CharacterAnimationState::JUMP;
 	else
@@ -318,13 +343,17 @@ void PlayerCharacter::Attack()
 
 void PlayerCharacter::TakeDamage(s32 damage)
 {
-	if (m_currentAnimState == CharacterAnimationState::DEATH)
+	if (m_isInvincible || m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		return;
 	}
 
 	m_healthPoint -= damage;
 	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
+
+	m_isInvincible = true;
+	m_invincibilityTimer = 0.0f;
+	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
 	{
@@ -342,4 +371,9 @@ bool PlayerCharacter::IsCompletelyDead() const
 const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 {
 	return m_projectileDataMap.at(m_currentWeapon);
+}
+
+bool PlayerCharacter::IsInvincible() const
+{
+	return m_isInvincible;
 }
