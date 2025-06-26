@@ -24,9 +24,9 @@ void MainGameState::Init()
 	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
-	m_TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj"));
-	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
-	m_TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", m_TileMaps[0].GetMapWidth(), 0.f));
+	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
+	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
+
 	m_Background.Init();
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
@@ -63,6 +63,11 @@ void MainGameState::Update(f32 dt)
 		return;
 	}
 
+	for (auto& tm : TileMaps)
+	{
+		tm.Update(dt);
+	}
+
 	m_Player.Update(dt);
 	m_MeleeEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
@@ -89,7 +94,7 @@ void MainGameState::Update(f32 dt)
 		m_bossMessageTimer -= dt;
 		if (m_bossMessageTimer <= 0.0f)
 		{
-			m_pBossMessageTexture = nullptr; // 시간이 다 되면 표시할 텍스처를 비움
+			m_pBossMessageTexture = nullptr; 
 		}
 	}
 
@@ -115,12 +120,6 @@ void MainGameState::Update(f32 dt)
 			}
 		}
 	}
-
-	int tileX = m_Player.GetPosition().x / 32;
-	int tileY = m_Player.GetPosition().y / 32;
-
-	// To Do 
-	// TileMap Collision
 
 	if (m_Player.GetPosition().x > 0.f)
 	{
@@ -358,11 +357,6 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	for (auto& tm : m_TileMaps)
-	{
-		tm.Update(dt);
-	}
-
 	for (auto& effect : m_visualEffects)
 	{
 		effect.Update(dt);
@@ -372,7 +366,11 @@ void MainGameState::Update(f32 dt)
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	for (auto tm : m_TileMaps)
+	m_MeleeEnemy.Draw();
+	m_MageEnemy.Draw();
+
+	for (auto tm : TileMaps)
+
 	{
 		tm.Draw();
 	}
@@ -411,10 +409,11 @@ void MainGameState::Draw()
 
 void MainGameState::Exit()
 {
-	for (auto& tm : m_TileMaps)
+	for (auto& tm : TileMaps)
 	{
 		tm.Destroy();
 	}
+	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
 	m_MeleeEnemy.Destroy();

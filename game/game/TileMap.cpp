@@ -5,20 +5,30 @@
 #include "AssetManager.h"
 #include "Constants.h"
 
+std::vector<TileMap> TileMaps;
+
 TileMap::TileMap()
 {
-	m_tileSize = 32;
-	m_tileOffsetSize = 16;
+	m_offsetCount = 0;
+	m_tileSize = 16;
+	m_tileScale = 2.f;
 }
 
-TileMap::TileMap(std::string mapfileDir, f32 x, f32 y)
+TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 {
-	m_tileSize = 32;
-	m_tileOffsetSize = 16;
+	m_offsetCount = 0;
+	m_tileSize = 16;
+	m_tileScale = tileScale;
 	m_offset = AEVec2{ x, y };
 	LoadJson(mapfileDir.c_str());
 	LoadTilesets("Assets/FreeCuteTileset/");
 	PrepareLayerData();
+	ExtractWorldColliders();
+
+	for (auto& box : m_collisionBoxes)
+	{
+		std::cout << "Box: " << box.x << ", " << box.y << std::endl;
+	}
 }
 
 TileMap::~TileMap()
@@ -27,89 +37,138 @@ TileMap::~TileMap()
 
 void TileMap::Update(f32 dt)
 {
-	float mapPixelWidth = m_mapWidth * m_tileSize;
+	float mapPixelWidth = m_mapWidth * m_tileSize * m_tileScale;
 	f32 xCAM, yCAM;
 	AEGfxGetCamPosition(&xCAM, &yCAM);
 
-	if (m_offset.x + mapPixelWidth < xCAM ) {
+	if (m_offset.x + mapPixelWidth < xCAM) {
 		m_offset.x += mapPixelWidth * 2;
+		m_offsetCount++;
 	}
-	else if (m_offset.x > xCAM + kWindowWidth) {
+	else if (m_offset.x > xCAM + mapPixelWidth) {
 		m_offset.x -= mapPixelWidth * 2;
+		m_offsetCount--;
 	}
 
-	//std::cout << m_offset.x << std::endl;
+	std::cout << m_offset.x << ", " << m_offsetCount << std::endl;
 }
 
 void TileMap::Draw()
 {
 	for (const auto& layer : m_layers)
 	{
-		for (int i = 0; i < layer.size(); i++)
+		for (int row = 0; row < m_mapHeight; row++)
 		{
-			s32 globalID = layer[i];
-			if (globalID == 0) continue;
-		
-			const TilesetInfo* usedTileset = nullptr;
-			for (const auto& ts : m_tilesets)
+			for (int col = 0; col < m_mapWidth; col++)
 			{
-				if (ts.contains(globalID))
+				s32 globalID = layer[row][col];
+				if (globalID == 0) continue;
+
+				const TilesetInfo* usedTileset = nullptr;
+				for (const auto& ts : m_tilesets)
 				{
-					usedTileset = &ts;
-					break;
+					if (ts.contains(globalID))
+					{
+						usedTileset = &ts;
+						break;
+					}
 				}
+				if (!usedTileset) continue;
+
+				s32 localID = globalID - usedTileset->firstGId;
+				s32 tx = localID % usedTileset->columns;
+				s32 ty = localID / usedTileset->columns;
+
+				float u0 = (tx * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
+				float v0 = (ty * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
+				float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
+				float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
+
+				int x = col * m_tileSize * m_tileScale - kHalfWindowWidth + m_tileSize * m_tileScale / 2.f + m_offset.x;
+				int y = row * m_tileSize * m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
+
+				AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+				AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
+
+				AEMtx33 scale = { 0 };
+				AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+
+				AEMtx33 rotate = { 0 };
+				AEMtx33Rot(&rotate, 0);
+
+				AEMtx33 translate = { 0 };
+				AEMtx33Trans(&translate, x, y);
+
+				AEMtx33 transform = { 0 };
+				AEMtx33Concat(&transform, &rotate, &scale);
+				AEMtx33Concat(&transform, &translate, &transform);
+
+				AEGfxSetTransform(transform.m);
+
+				std::pair<f32, f32> keyPiar{ usedTileset->imageWidth, usedTileset->imageHeight };
+				AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
 			}
-			if (!usedTileset) continue;
-
-			s32 localID = globalID - usedTileset->firstGId;
-			s32 tx = localID % usedTileset->columns;
-			s32 ty = localID / usedTileset->columns;
-
-			float u0 = (tx * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
-			float v0 = (ty * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
-			float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
-			float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
-
-			int x = (i % m_mapWidth) * m_tileSize - kHalfWindowWidth + m_tileSize/2.0f + m_offset.x;
-			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize - kHalfWindowHeight + m_tileSize / 2.0f;
-
-			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-			AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
-
-			AEMtx33 scale = { 0 };
-			AEMtx33Scale(&scale, m_tileSize, m_tileSize);
-
-			AEMtx33 rotate = { 0 };
-			AEMtx33Rot(&rotate, 0);
-
-			AEMtx33 translate = { 0 };
-			AEMtx33Trans(&translate, x, y);
-
-			AEMtx33 transform = { 0 };
-			AEMtx33Concat(&transform, &rotate, &scale);
-			AEMtx33Concat(&transform, &translate, &transform);
-
-			AEGfxSetTransform(transform.m);
-
-			std::pair<f32, f32> keyPiar{usedTileset->imageWidth, usedTileset->imageHeight};
-			AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
-
 		}
 	}
 }
 
 void TileMap::Destroy()
 {
-	for (auto& m_mesh : m_meshes) 
+	for (auto& m_mesh : m_meshes)
 	{
 		AEGfxMeshFree(m_mesh.second);
 	}
 	m_meshes.clear();
 }
 
-s32 TileMap::GetMapWidth()
+bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
-	return m_mapWidth*m_tileSize;
+	bool result = false;
+
+	int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth);
+	int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth);
+	int playerTop = position.y + kHalfWindowHeight;
+	int playerBottom = position.y - (size.y * 1 / 2.f) + kHalfWindowHeight;
+
+	for (auto& tileMap : TileMaps) {
+		if (tileMap.m_offset.x > playerRight
+			|| tileMap.m_offset.x + tileMap.GetMapTotalWidth() < playerLeft)
+		{
+			continue;
+		}
+		else
+		{
+			std::cout << tileMap.m_offset.x << ", " << playerLeft << std::endl;
+
+			for (auto& box : tileMap.m_collisionBoxes)
+			{
+				if (!(playerRight < box.x + tileMap.m_offset.x ||
+					playerLeft > box.x + box.width + tileMap.m_offset.x ||
+					playerTop < box.y ||
+					playerBottom > box.y + box.height))
+				{
+					result = true;
+					break;
+				}
+			}
+		}
+	}
+	return result;
+}
+
+s32 TileMap::GetMapTotalWidth()
+{
+	return m_mapWidth * m_tileSize * m_tileScale;
+}
+
+s32 TileMap::GetMapHeight()
+{
+	return m_mapHeight;
+}
+
+std::vector<std::vector<int>> TileMap::GetLayer(s32 idx)
+{
+	return m_layers[idx];
 }
 
 AEVec2 TileMap::GetOffset()
@@ -119,7 +178,7 @@ AEVec2 TileMap::GetOffset()
 
 void TileMap::SetOffset(f32 offsetX, f32 offsetY)
 {
-	m_offset = AEVec2{offsetX, offsetY};
+	m_offset = AEVec2{ offsetX, offsetY };
 }
 
 void TileMap::LoadJson(const char* jsonfile)
@@ -164,19 +223,19 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 
 		s32 channels;
 		tilesetInfo.tilesetTexture = LoadImageAsset(imagePath);
-		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight};
+		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight };
 
 		if (m_meshes.find(keyPair) == m_meshes.end()) {
 			AEGfxVertexList* m_mesh;
 			AEGfxTriAdd(
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize/ (f32)tilesetInfo.imageHeight,
-				0.5f, -0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, m_tileOffsetSize / (f32)tilesetInfo.imageHeight,
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight,
+				0.5f, -0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, m_tileSize / (f32)tilesetInfo.imageHeight,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f);
 
 			AEGfxTriAdd(
-				0.5f, 0.5f, 0xFFFFFFFF, m_tileOffsetSize / (f32)tilesetInfo.imageWidth, 0.f,
+				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f,
 				-0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f,
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileOffsetSize / (f32)tilesetInfo.imageHeight);
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight);
 
 			m_mesh = AEGfxMeshEnd();
 
@@ -187,21 +246,23 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 		{
 			s32 tileID = tile->IntAttribute("id");
 
+			std::vector<CollisionBox> boxes;
+
 			auto* objGroup = tile->FirstChildElement("objectgroup");
 			if (!objGroup) continue;
 
 			for (auto* obj = objGroup->FirstChildElement("object"); obj; obj = obj->NextSiblingElement("object"))
 			{
 				f32 x = obj->FloatAttribute("x");
-				f32 y= obj->FloatAttribute("y");
+				f32 y = obj->FloatAttribute("y");
 				f32 w = obj->FloatAttribute("width");
 				f32 h = obj->FloatAttribute("height");
 
-				tilesetInfo.collisions[tileID].push_back({x, y, w*2, h*2});
+				boxes.push_back({ x, y, w * m_tileScale, h * m_tileScale });
 			}
+			tilesetInfo.collisions[tilesetInfo.firstGId + tileID] = boxes;
+
 		}
-
-
 		m_tilesets.push_back(tilesetInfo);
 	}
 }
@@ -211,7 +272,48 @@ void TileMap::PrepareLayerData()
 	for (const auto& layer : m_mapJson["layers"])
 	{
 		if (layer["type"] != "tilelayer") continue;
-		std::vector<int> layerData = layer["data"].get<std::vector<int>>();
+
+		std::vector<std::vector<int>> layerData(m_mapHeight, std::vector<int>(m_mapWidth, 0));
+		const auto& data = layer["data"];
+
+		for (int i = 0; i < data.size(); i++)
+		{
+			int x = i % m_mapWidth;
+			int y = i / m_mapWidth;
+			layerData[m_mapHeight - 1 - y][x] = data[i];
+		}
+
 		m_layers.push_back(layerData);
+	}
+}
+
+void TileMap::ExtractWorldColliders()
+{
+	for (auto& layer : m_layers)
+	{
+		for (int y = 0; y < m_mapHeight; y++)
+		{
+			for (int x = 0; x < m_mapWidth; x++) {
+				int globalID = layer[y][x];
+				if (globalID == 0) continue;
+
+				for (auto& tileset : m_tilesets)
+				{
+					auto it = tileset.collisions.find(globalID);
+					if (it == tileset.collisions.end()) continue;
+
+					for (auto& box : it->second)
+					{
+						CollisionBox worldBox;
+						worldBox.x = x * m_tileSize * m_tileScale + box.x;
+						worldBox.y = y * m_tileSize * m_tileScale + box.y;
+						worldBox.width = box.width;
+						worldBox.height = box.height;
+
+						m_collisionBoxes.push_back(worldBox);
+					}
+				}
+			}
+		}
 	}
 }

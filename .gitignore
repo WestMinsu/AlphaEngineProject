@@ -1,3 +1,5 @@
 /game/.vs
 /game/.tmp
 /game/bin
+/game/UnitTest
+/game/packages

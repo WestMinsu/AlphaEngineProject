@@ -3,10 +3,11 @@
 #include "Utility.h"
 #include "AssetManager.h"
 #include <iostream>
+#include "TileMap.h"
 
 PlayerCharacter::PlayerCharacter()
 {
-	m_position = { 0,0 };
+	m_position = { 0, };
 	m_size = { 200.f, 200.f };
 	m_hitboxSize = { m_size.x * 0.4f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
@@ -231,8 +232,31 @@ void PlayerCharacter::Update(f32 dt)
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
 
-	m_position.x += m_velocityX * dt;
-	m_position.y += m_velocityY * dt;
+	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.y += std::copysign(1.0f, m_velocityY);
+		std::cout << "Call Y" << std::endl;
+	}
+	
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.y -= std::copysign(1.0f, m_velocityY);
+	}
+
+	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.x += std::copysign(1.0f, m_velocityX);
+		std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.x -= std::copysign(1.0f, m_velocityX);
+	}
 
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{

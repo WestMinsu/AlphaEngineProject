@@ -35,9 +35,6 @@ private:
 	std::vector<Projectile> m_enemyProjectiles;
 	std::vector<VisualEffect> m_visualEffects;
 
-	TileMap m_TileMap;
-	std::vector<TileMap> m_TileMaps;
-
 	Background m_Background;
 
 	AEGfxTexture* m_pUiSlot;      
