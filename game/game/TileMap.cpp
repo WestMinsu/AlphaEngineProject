@@ -5,6 +5,8 @@
 #include "AssetManager.h"
 #include "Constants.h"
 
+std::vector<TileMap> TileMaps;
+
 TileMap::TileMap()
 {
 	m_offsetCount = 1;
@@ -22,6 +24,11 @@ TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 	LoadTilesets("Assets/FreeCuteTileset/");
 	PrepareLayerData();
 	ExtractWorldColliders();
+
+	for (auto& box : m_collisionBoxes)
+	{
+		std::cout << "Box: " << box.x / 32 << ", " << box.y /32 << std::endl;
+	}
 }
 
 TileMap::~TileMap()
@@ -50,55 +57,57 @@ void TileMap::Draw()
 {
 	for (const auto& layer : m_layers)
 	{
-		for (int i = 0; i < layer.size(); i++)
+		for (int row = 0; row < m_mapHeight; row++)
 		{
-			s32 globalID = layer[i];
-			if (globalID == 0) continue;
-		
-			const TilesetInfo* usedTileset = nullptr;
-			for (const auto& ts : m_tilesets)
+			for (int col = 0; col < m_mapWidth; col++)
 			{
-				if (ts.contains(globalID))
+				s32 globalID = layer[row][col];
+				if (globalID == 0) continue;
+
+				const TilesetInfo* usedTileset = nullptr;
+				for (const auto& ts : m_tilesets)
 				{
-					usedTileset = &ts;
-					break;
+					if (ts.contains(globalID))
+					{
+						usedTileset = &ts;
+						break;
+					}
 				}
+				if (!usedTileset) continue;
+
+				s32 localID = globalID - usedTileset->firstGId;
+				s32 tx = localID % usedTileset->columns;
+				s32 ty = localID / usedTileset->columns;
+
+				float u0 = (tx * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
+				float v0 = (ty * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
+				float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
+				float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
+
+				int x = col * m_tileSize * m_tileScale - kHalfWindowWidth + m_tileSize * m_tileScale / 2.f + m_offset.x;
+				int y = row * m_tileSize * m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
+
+				AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+				AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
+
+				AEMtx33 scale = { 0 };
+				AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+
+				AEMtx33 rotate = { 0 };
+				AEMtx33Rot(&rotate, 0);
+
+				AEMtx33 translate = { 0 };
+				AEMtx33Trans(&translate, x, y);
+
+				AEMtx33 transform = { 0 };
+				AEMtx33Concat(&transform, &rotate, &scale);
+				AEMtx33Concat(&transform, &translate, &transform);
+
+				AEGfxSetTransform(transform.m);
+
+				std::pair<f32, f32> keyPiar{ usedTileset->imageWidth, usedTileset->imageHeight };
+				AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
 			}
-			if (!usedTileset) continue;
-
-			s32 localID = globalID - usedTileset->firstGId;
-			s32 tx = localID % usedTileset->columns;
-			s32 ty = localID / usedTileset->columns;
-
-			float u0 = (tx * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
-			float v0 = (ty * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
-			float u1 = ((tx + 1) * usedTileset->tileWidth) / (float)usedTileset->imageWidth;
-			float v1 = ((ty + 1) * usedTileset->tileHeight) / (float)usedTileset->imageHeight;
-
-			int x = (i % m_mapWidth) * m_tileSize * m_tileScale - kHalfWindowWidth + m_tileSize * m_tileScale / 2.f + m_offset.x;
-			int y = (m_mapHeight - 1 - (i / m_mapWidth)) * m_tileSize*m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
-
-			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-			AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
-
-			AEMtx33 scale = { 0 };
-			AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
-
-			AEMtx33 rotate = { 0 };
-			AEMtx33Rot(&rotate, 0);
-
-			AEMtx33 translate = { 0 };
-			AEMtx33Trans(&translate, x, y);
-
-			AEMtx33 transform = { 0 };
-			AEMtx33Concat(&transform, &rotate, &scale);
-			AEMtx33Concat(&transform, &translate, &transform);
-
-			AEGfxSetTransform(transform.m);
-
-			std::pair<f32, f32> keyPiar{usedTileset->imageWidth, usedTileset->imageHeight};
-			AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
-
 		}
 	}
 }
@@ -112,56 +121,69 @@ void TileMap::Destroy()
 	m_meshes.clear();
 }
 
-bool TileMap::checkCollisionTileMap(AEVec2 position, AEVec2 size)
+bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
 	bool result = false;
 
-	//int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth) / (m_tileSize * m_tileScale);
-	//int playerRight = (int)(position.x + (size.x/4.f) + kHalfWindowWidth) / (m_tileSize * m_tileScale);
-	//int playerTop = (int)(position.y + (size.x / 2.f) +  kHalfWindowHeight) / (m_tileSize * m_tileScale);
-	//int playerBottom= (int)(position.y - (size.x / 2.f) + kHalfWindowHeight) / (m_tileSize * m_tileScale);
+	for (auto& tileMap : TileMaps) {
+		int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth) % (2*tileMap.GetMapTotalWidth());
+		int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth) % (2 * tileMap.GetMapTotalWidth());
+		int playerTop = position.y + kHalfWindowHeight;
+		int playerBottom = position.y - (size.y * 1/ 2.f) + kHalfWindowHeight;
 
-	int playerLeft = (int)((position.x - (size.x / 4.f) + kHalfWindowWidth) / (m_tileSize * m_tileScale)) % m_mapWidth;
-	int playerRight = (int)((position.x + (size.x / 4.f) + kHalfWindowWidth) / (m_tileSize * m_tileScale)) % m_mapWidth;
-	int playerTop = m_mapHeight - (int)(position.y + (size.y / 3.f) + kHalfWindowHeight) / (m_tileSize * m_tileScale);
-	int playerBottom = m_mapHeight - (int)(position.y - (size.y / 3.f) + kHalfWindowHeight) / (m_tileSize * m_tileScale);
+		
+		//if (tileTop > tileMap.GetMapHeight()) return result;
 
-	if (!(m_offset.x / (m_tileSize*m_tileScale) >= playerRight 
-		|| m_offset.x / (m_tileSize*m_tileScale) + m_mapWidth <= playerLeft))
-	{
-		for (int ty = playerTop; ty <= playerBottom; ty++)
+		/*std::cout << "[" << tileLeft << ", "
+			<< tileBottom << "] : "
+			<< tileMap.m_layers[0][tileBottom][tileLeft] << std::endl;*/
+
+		if (!(tileMap.m_offset.x > playerRight
+			|| tileMap.m_offset.x + tileMap.GetMapTotalWidth() < playerLeft))
 		{
-			for (int tx = playerLeft; tx <= playerRight; tx++) {
-				f32 tileID = m_layers[1][tx + ty * m_mapWidth];
-				std::cout << "[" << tx << ", " << ty << "] : " << tileID << std::endl;
+			int tileLeft = (int)(playerLeft / (tileMap.m_tileSize * tileMap.m_tileScale));
+			int tileRight = (int)(playerRight / (tileMap.m_tileSize * tileMap.m_tileScale));
+			int tileTop = playerTop / (tileMap.m_tileSize * tileMap.m_tileScale);
+			int tileBottom = playerBottom / (tileMap.m_tileSize * tileMap.m_tileScale);
 
-				const TilesetInfo* tilesetInfo = nullptr;
-				for (const auto& ts : m_tilesets)
-				{
-					if (ts.contains(tileID))
+			for (int ty = tileBottom; ty <= tileTop; ty++)
+			{
+				for (int tx = tileLeft; tx <= tileRight; tx++) {
+					if (ty >= tileMap.m_mapHeight ||
+						ty < 0 ||
+						tx >= tileMap.m_mapWidth ||
+						tx < 0 ) continue;
+					f32 tileID = tileMap.m_layers[0][ty][tx];
+					/*std::cout << "[" << tx << ", "
+						<< ty << "] : "
+						<< tileMap.m_layers[0][tx + ty * tileMap.m_mapWidth] << std::endl;*/
+
+					const TilesetInfo* tilesetInfo = nullptr;
+					for (const auto& ts : tileMap.m_tilesets)
 					{
-						tilesetInfo = &ts;
-						break;
-					}
-				}
-
-				if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
-				{
-					for (auto& box : m_collisionBoxes)
-					{
-
-						if (!(playerRight <= box.x ||
-							playerLeft >= box.x + box.width ||
-							playerTop <= box.y ||
-							playerBottom >= box.y + box.height
-							))
+						if (ts.contains(tileID))
 						{
-							result = true;
+							tilesetInfo = &ts;
 							break;
 						}
 					}
+
+					if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
+					{
+						for (auto& box : tileMap.m_collisionBoxes)
+						{
+							if (!(playerRight < box.x ||
+								playerLeft > box.x + box.width ||
+								playerTop < box.y ||
+								playerBottom > box.y + box.height))
+							{
+								result = true;
+								break;
+							}
+						}
+					}
+
 				}
-				
 			}
 		}
 	}
@@ -178,7 +200,7 @@ s32 TileMap::GetMapHeight()
 	return m_mapHeight;
 }
 
-std::vector<int> TileMap::GetLayer(s32 idx)
+std::vector<std::vector<int>> TileMap::GetLayer(s32 idx)
 {
 	return m_layers[idx];
 }
@@ -284,7 +306,17 @@ void TileMap::PrepareLayerData()
 	for (const auto& layer : m_mapJson["layers"])
 	{
 		if (layer["type"] != "tilelayer") continue;
-		std::vector<int> layerData = layer["data"].get<std::vector<int>>();
+
+		std::vector<std::vector<int>> layerData(m_mapHeight, std::vector<int>(m_mapWidth,0));
+		const auto& data = layer["data"];
+
+		for (int i = 0; i < data.size(); i++)
+		{
+			int x = i % m_mapWidth;
+			int y = i / m_mapWidth;
+			layerData[m_mapHeight - 1 - y][x] = data[i];
+		}
+
 		m_layers.push_back(layerData);
 	}
 }
@@ -293,34 +325,29 @@ void TileMap::ExtractWorldColliders()
 {
 	for (auto& layer : m_layers)
 	{
-		for (int i = 0; i < layer.size(); i++)
+		for (int y = 0; y < m_mapHeight; y++)
 		{
-			int globalID = layer[i];
-			if (globalID == 0) continue;
+			for (int x = 0; x < m_mapWidth; x++) {
+				int globalID = layer[y][x];
+				if (globalID == 0) continue;
 
-			int x = i % m_mapWidth;
-			int y = i / m_mapWidth;
-
-			for (auto& tileset : m_tilesets)
-			{
-				auto it = tileset.collisions.find(globalID);
-				if (it == tileset.collisions.end()) continue;
-
-				for (auto& box : it->second)
+				for (auto& tileset : m_tilesets)
 				{
-					CollisionBox worldBox;
-					//worldBox.x = x * m_tileSize * m_tileScale + box.x + m_offset.x;
-					//worldBox.y = y * m_tileSize * m_tileScale + box.y;
-					worldBox.x = x + box.x + ((int)m_offset.x % m_mapWidth);
-					worldBox.y = y + box.y;
-					worldBox.width = box.width * m_tileScale;
-					worldBox.height = box.height * m_tileScale;
+					auto it = tileset.collisions.find(globalID);
+					if (it == tileset.collisions.end()) continue;
 
-					m_collisionBoxes.push_back(worldBox);
+					for (auto& box : it->second)
+					{
+						CollisionBox worldBox;
+						worldBox.x = x * m_tileSize * m_tileScale + box.x + m_offset.x;
+						worldBox.y = y * m_tileSize * m_tileScale + box.y;
+						worldBox.width = box.width;
+						worldBox.height = box.height;
+
+						m_collisionBoxes.push_back(worldBox);
+					}
 				}
 			}
-
-
 		}
 	}
 }

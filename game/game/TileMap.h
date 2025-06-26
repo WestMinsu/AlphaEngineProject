@@ -5,7 +5,6 @@
 #include <string>
 #include "json.hpp"
 
-
 struct CollisionBox
 {
     f32 x, y, width, height;
@@ -38,14 +37,14 @@ public:
     void Draw();
     void Destroy();
 
-    bool checkCollisionTileMap(AEVec2 position, AEVec2 size);
+    friend bool checkCollisionTileMap(AEVec2 position, AEVec2 size);
 
     AEVec2 GetOffset();
     void SetOffset(f32 offsetX, f32 offsetY);
 
     s32 GetMapTotalWidth();
     s32 GetMapHeight();
-    std::vector<int> GetLayer(s32 idx);
+    std::vector<std::vector<int>> GetLayer(s32 idx);
     
 private:
     AEVec2 m_offset;
@@ -58,7 +57,7 @@ private:
 
     
     std::vector<TilesetInfo> m_tilesets;
-    std::vector<std::vector<int>> m_layers;
+    std::vector<std::vector<std::vector<int>>> m_layers;
     std::vector<CollisionBox> m_collisionBoxes;
     std::map<std::pair<f32, f32>, AEGfxVertexList*> m_meshes;
     
@@ -68,3 +67,5 @@ private:
     void ExtractWorldColliders();
 };
 
+bool checkCollisionTileMap(AEVec2 position, AEVec2 size);
+extern std::vector<TileMap> TileMaps;
