@@ -55,6 +55,8 @@ private:
     
     nlohmann::json m_mapJson;
 
+    AEGfxTexture* wireframe;
+    AEGfxVertexList* wireframe_mesh;
     
     std::vector<TilesetInfo> m_tilesets;
     std::vector<std::vector<std::vector<int>>> m_layers;

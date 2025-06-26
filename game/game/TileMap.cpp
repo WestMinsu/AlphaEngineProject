@@ -25,6 +25,22 @@ TileMap::TileMap(const std::string& mapfileDir, f32 tileScale, f32 x, f32 y)
 	PrepareLayerData();
 	ExtractWorldColliders();
 
+	wireframe = LoadImageAsset("Assets/wireframe.png");
+
+	AEGfxMeshStart();
+
+	AEGfxTriAdd(
+		-0.5f, -0.5f, 0xFFFFFFFF, 0.f,1.0f,
+		0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
+		0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.f);
+
+	AEGfxTriAdd(
+		0.5f, 0.5f, 0xFFFFFFFF, 1.0f, 0.f,
+		-0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f,
+		-0.5f, -0.5f, 0xFFFFFFFF, 0.f, 1.0f);
+
+	wireframe_mesh = AEGfxMeshEnd();
+
 	for (auto& box : m_collisionBoxes)
 	{
 		std::cout << "Box: " << box.x / 32 << ", " << box.y /32 << std::endl;
@@ -86,7 +102,8 @@ void TileMap::Draw()
 				int y = row * m_tileSize * m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
 
 				AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-				AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
+				//AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
+				AEGfxTextureSet(wireframe, 0, 0);
 
 				AEMtx33 scale = { 0 };
 				AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
@@ -104,7 +121,8 @@ void TileMap::Draw()
 				AEGfxSetTransform(transform.m);
 
 				std::pair<f32, f32> keyPiar{ usedTileset->imageWidth, usedTileset->imageHeight };
-				AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
+				//AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
+				AEGfxMeshDraw(wireframe_mesh, AE_GFX_MDM_TRIANGLES);
 			}
 		}
 	}
@@ -112,11 +130,24 @@ void TileMap::Draw()
 
 void TileMap::Destroy()
 {
+	AEGfxMeshFree(wireframe_mesh);
+
 	for (auto& m_mesh : m_meshes) 
 	{
 		AEGfxMeshFree(m_mesh.second);
 	}
 	m_meshes.clear();
+}
+
+bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVec2& Bmin, const AEVec2& Bmax)
+{
+	if (Amin.x > Bmax.x || Amax.x < Bmin.x ||
+		Amin.y > Bmax.y || Amax.y < Bmin.y)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool checkCollisionTileMap(AEVec2 position, AEVec2 size)

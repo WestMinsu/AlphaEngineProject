@@ -19,7 +19,7 @@ AssetManager::~AssetManager()
 	}
 }
 
-AEGfxTexture* LoadImageAsset(std::string file)
+AEGfxTexture* LoadImageAsset(const std::string& file)
 {
 	if (assetManager.m_imageAssets.find(file) == assetManager.m_imageAssets.end())
 	{

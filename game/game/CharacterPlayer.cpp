@@ -5,6 +5,12 @@
 #include <iostream>
 #include "TileMap.h"
 
+std::ostream& operator<<(std::ostream& os, const AEVec2& vec)
+{
+	os << "(" << vec.x << ", " << vec.y << ")";
+	return os;
+}
+
 CharacterPlayer::CharacterPlayer()
 {
 	m_position = { 0, };
@@ -197,39 +203,51 @@ void CharacterPlayer::Update(f32 dt)
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
 
-	//m_position.x += m_velocityX * dt;
-	//m_position.y += m_velocityY * dt;
-
-	//std::cout << m_position.x << ", " << m_position.y << std::endl;
-
-	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
-
-	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.y += std::copysign(1.0f, m_velocityY);
-		std::cout << "Call Y" << std::endl;
-	}
+// Begin Tilemap <-> Player Collision
 	
-	if (checkCollisionTileMap(m_position, m_size))
+	AEVec2 desiredNextPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	static bool enableCollisionDetection = false;
+
+	if (AEInputCheckTriggered(AEVK_T))
+		enableCollisionDetection = !enableCollisionDetection;
+
+	std::cout << m_position << std::endl;
+
+	AEVec2 new_position = m_position;
+
+	if (enableCollisionDetection)
 	{
-		m_position.y -= std::copysign(1.0f, m_velocityY);
+		while (m_velocityY >= 0 ? m_position.y < desiredNextPosition.y : m_position.y > desiredNextPosition.y)
+		{
+			if (checkCollisionTileMap(m_position, m_size)) break;
+			new_position.y += std::copysign(1.0f, m_velocityY);
+		}
+	
+		if (checkCollisionTileMap(m_position, m_size))
+		{
+			new_position.y -= std::copysign(1.0f, m_velocityY);
+		}
+
+		while (m_velocityX >= 0 ? m_position.x < desiredNextPosition.x : m_position.x > desiredNextPosition.x)
+		{
+			if (checkCollisionTileMap(m_position, m_size)) break;
+			new_position.x += std::copysign(1.0f, m_velocityX);
+		}
+
+		if (checkCollisionTileMap(m_position, m_size))
+		{
+			new_position.x -= std::copysign(1.0f, m_velocityX);
+		}
+
+		m_position = new_position;
+	}
+	else
+	{
+		m_position = desiredNextPosition;
 	}
 
-	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.x += std::copysign(1.0f, m_velocityX);
-		std::cout << "Call X" << std::endl;
-	}
-
-	if (checkCollisionTileMap(m_position, m_size))
-	{
-		m_position.x -= std::copysign(1.0f, m_velocityX);
-	}
-
-	//m_position.x = tempPosition.x;
-	//m_position.y = tempPosition.y;
+// End Tilemap <-> Player Collision
 
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{
