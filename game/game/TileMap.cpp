@@ -9,14 +9,14 @@ std::vector<TileMap> TileMaps;
 
 TileMap::TileMap()
 {
-	m_offsetCount = 1;
+	m_offsetCount = 0;
 	m_tileSize = 16;
 	m_tileScale = 2.f;
 }
 
 TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 {
-	m_offsetCount = 1;
+	m_offsetCount = 0;
 	m_tileSize = 16;
 	m_tileScale = tileScale;
 	m_offset = AEVec2{ x, y };
@@ -27,7 +27,7 @@ TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 
 	for (auto& box : m_collisionBoxes)
 	{
-		std::cout << "Box: " << box.x / 32 << ", " << box.y /32 << std::endl;
+		std::cout << "Box: " << box.x << ", " << box.y << std::endl;
 	}
 }
 
@@ -45,12 +45,12 @@ void TileMap::Update(f32 dt)
 		m_offset.x += mapPixelWidth * 2;
 		m_offsetCount++;
 	}
-	else if (m_offset.x > xCAM + kWindowWidth) {
+	else if (m_offset.x > xCAM + mapPixelWidth) {
 		m_offset.x -= mapPixelWidth * 2;
 		m_offsetCount--;
 	}
 
-	//std::cout << m_offset.x << std::endl;
+	std::cout << m_offset.x << ", " << m_offsetCount << std::endl;
 }
 
 void TileMap::Draw()
@@ -126,29 +126,37 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 	bool result = false;
 
 	for (auto& tileMap : TileMaps) {
-		int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth) % (2*tileMap.GetMapTotalWidth());
-		int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth) % (2 * tileMap.GetMapTotalWidth());
+		int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth);
+		int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth);
 		int playerTop = position.y + kHalfWindowHeight;
 		int playerBottom = position.y - (size.y * 1/ 2.f) + kHalfWindowHeight;
 
-		
 		//if (tileTop > tileMap.GetMapHeight()) return result;
 
 		/*std::cout << "[" << tileLeft << ", "
 			<< tileBottom << "] : "
 			<< tileMap.m_layers[0][tileBottom][tileLeft] << std::endl;*/
 
-		if (!(tileMap.m_offset.x > playerRight
-			|| tileMap.m_offset.x + tileMap.GetMapTotalWidth() < playerLeft))
+		if ((int)tileMap.m_offset.x > playerRight
+			|| (int)(tileMap.m_offset.x + tileMap.GetMapTotalWidth()) < playerLeft)
 		{
-			int tileLeft = (int)(playerLeft / (tileMap.m_tileSize * tileMap.m_tileScale));
-			int tileRight = (int)(playerRight / (tileMap.m_tileSize * tileMap.m_tileScale));
+			continue;
+		}
+		else
+		{
+			std::cout << "offsetCnt: " << tileMap.m_offsetCount << std::endl;
+			int tileLeft = (int)(playerLeft / (tileMap.m_tileSize * tileMap.m_tileScale)) % (2 * tileMap.m_mapWidth);
+			int tileRight = (int)(playerRight / (tileMap.m_tileSize * tileMap.m_tileScale)) % (2 * tileMap.m_mapWidth);
 			int tileTop = playerTop / (tileMap.m_tileSize * tileMap.m_tileScale);
 			int tileBottom = playerBottom / (tileMap.m_tileSize * tileMap.m_tileScale);
 
 			for (int ty = tileBottom; ty <= tileTop; ty++)
 			{
 				for (int tx = tileLeft; tx <= tileRight; tx++) {
+					if (tileMap.m_offsetCount > 0) {
+						std::cout << "check" << std::endl;
+					}
+
 					if (ty >= tileMap.m_mapHeight ||
 						ty < 0 ||
 						tx >= tileMap.m_mapWidth ||
@@ -159,21 +167,21 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 						<< tileMap.m_layers[0][tx + ty * tileMap.m_mapWidth] << std::endl;*/
 
 					const TilesetInfo* tilesetInfo = nullptr;
-					for (const auto& ts : tileMap.m_tilesets)
-					{
-						if (ts.contains(tileID))
-						{
-							tilesetInfo = &ts;
-							break;
-						}
-					}
+					//for (const auto& ts : tileMap.m_tilesets)
+					//{
+					//	if (ts.contains(tileID))
+					//	{
+					//		tilesetInfo = &ts;
+					//		break;
+					//	}
+					//}
 
-					if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
-					{
+					//if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
+					//{
 						for (auto& box : tileMap.m_collisionBoxes)
 						{
-							if (!(playerRight < box.x ||
-								playerLeft > box.x + box.width ||
+							if (!(playerRight < box.x + tileMap.m_offset.x ||
+								playerLeft > box.x + box.width + tileMap.m_offset.x ||
 								playerTop < box.y ||
 								playerBottom > box.y + box.height))
 							{
@@ -181,7 +189,7 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 								break;
 							}
 						}
-					}
+					//}
 
 				}
 			}
@@ -339,7 +347,7 @@ void TileMap::ExtractWorldColliders()
 					for (auto& box : it->second)
 					{
 						CollisionBox worldBox;
-						worldBox.x = x * m_tileSize * m_tileScale + box.x + m_offset.x;
+						worldBox.x = x * m_tileSize * m_tileScale + box.x;
 						worldBox.y = y * m_tileSize * m_tileScale + box.y;
 						worldBox.width = box.width;
 						worldBox.height = box.height;
