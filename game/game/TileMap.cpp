@@ -41,7 +41,7 @@ void TileMap::Update(f32 dt)
 	f32 xCAM, yCAM;
 	AEGfxGetCamPosition(&xCAM, &yCAM);
 
-	if (m_offset.x + mapPixelWidth < xCAM ) {
+	if (m_offset.x + mapPixelWidth < xCAM) {
 		m_offset.x += mapPixelWidth * 2;
 		m_offsetCount++;
 	}
@@ -114,7 +114,7 @@ void TileMap::Draw()
 
 void TileMap::Destroy()
 {
-	for (auto& m_mesh : m_meshes) 
+	for (auto& m_mesh : m_meshes)
 	{
 		AEGfxMeshFree(m_mesh.second);
 	}
@@ -125,72 +125,30 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
 	bool result = false;
 
+	int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth);
+	int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth);
+	int playerTop = position.y + kHalfWindowHeight;
+	int playerBottom = position.y - (size.y * 1 / 2.f) + kHalfWindowHeight;
+
 	for (auto& tileMap : TileMaps) {
-		int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth);
-		int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth);
-		int playerTop = position.y + kHalfWindowHeight;
-		int playerBottom = position.y - (size.y * 1/ 2.f) + kHalfWindowHeight;
-
-		//if (tileTop > tileMap.GetMapHeight()) return result;
-
-		/*std::cout << "[" << tileLeft << ", "
-			<< tileBottom << "] : "
-			<< tileMap.m_layers[0][tileBottom][tileLeft] << std::endl;*/
-
-		if ((int)tileMap.m_offset.x > playerRight
-			|| (int)(tileMap.m_offset.x + tileMap.GetMapTotalWidth()) < playerLeft)
+		if (tileMap.m_offset.x > playerRight
+			|| tileMap.m_offset.x + tileMap.GetMapTotalWidth() < playerLeft)
 		{
 			continue;
 		}
 		else
 		{
-			std::cout << "offsetCnt: " << tileMap.m_offsetCount << std::endl;
-			int tileLeft = (int)(playerLeft / (tileMap.m_tileSize * tileMap.m_tileScale)) % (2 * tileMap.m_mapWidth);
-			int tileRight = (int)(playerRight / (tileMap.m_tileSize * tileMap.m_tileScale)) % (2 * tileMap.m_mapWidth);
-			int tileTop = playerTop / (tileMap.m_tileSize * tileMap.m_tileScale);
-			int tileBottom = playerBottom / (tileMap.m_tileSize * tileMap.m_tileScale);
+			std::cout << tileMap.m_offset.x << ", " << playerLeft << std::endl;
 
-			for (int ty = tileBottom; ty <= tileTop; ty++)
+			for (auto& box : tileMap.m_collisionBoxes)
 			{
-				for (int tx = tileLeft; tx <= tileRight; tx++) {
-					if (tileMap.m_offsetCount > 0) {
-						std::cout << "check" << std::endl;
-					}
-
-					if (ty >= tileMap.m_mapHeight ||
-						ty < 0 ||
-						tx >= tileMap.m_mapWidth ||
-						tx < 0 ) continue;
-					f32 tileID = tileMap.m_layers[0][ty][tx];
-					/*std::cout << "[" << tx << ", "
-						<< ty << "] : "
-						<< tileMap.m_layers[0][tx + ty * tileMap.m_mapWidth] << std::endl;*/
-
-					const TilesetInfo* tilesetInfo = nullptr;
-					//for (const auto& ts : tileMap.m_tilesets)
-					//{
-					//	if (ts.contains(tileID))
-					//	{
-					//		tilesetInfo = &ts;
-					//		break;
-					//	}
-					//}
-
-					//if (tilesetInfo && tilesetInfo->collisions.find(tileID) != tilesetInfo->collisions.end())
-					//{
-						for (auto& box : tileMap.m_collisionBoxes)
-						{
-							if (!(playerRight < box.x + tileMap.m_offset.x ||
-								playerLeft > box.x + box.width + tileMap.m_offset.x ||
-								playerTop < box.y ||
-								playerBottom > box.y + box.height))
-							{
-								result = true;
-								break;
-							}
-						}
-					//}
-
+				if (!(playerRight < box.x + tileMap.m_offset.x ||
+					playerLeft > box.x + box.width + tileMap.m_offset.x ||
+					playerTop < box.y ||
+					playerBottom > box.y + box.height))
+				{
+					result = true;
+					break;
 				}
 			}
 		}
@@ -200,7 +158,7 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 
 s32 TileMap::GetMapTotalWidth()
 {
-	return m_mapWidth*m_tileSize*m_tileScale;
+	return m_mapWidth * m_tileSize * m_tileScale;
 }
 
 s32 TileMap::GetMapHeight()
@@ -220,7 +178,7 @@ AEVec2 TileMap::GetOffset()
 
 void TileMap::SetOffset(f32 offsetX, f32 offsetY)
 {
-	m_offset = AEVec2{offsetX, offsetY};
+	m_offset = AEVec2{ offsetX, offsetY };
 }
 
 void TileMap::LoadJson(const char* jsonfile)
@@ -265,12 +223,12 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 
 		s32 channels;
 		tilesetInfo.tilesetTexture = LoadImageAsset(imagePath);
-		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight};
+		std::pair<f32, f32> keyPair{ tilesetInfo.imageWidth , tilesetInfo.imageHeight };
 
 		if (m_meshes.find(keyPair) == m_meshes.end()) {
 			AEGfxVertexList* m_mesh;
 			AEGfxTriAdd(
-				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize/ (f32)tilesetInfo.imageHeight,
+				-0.5f, -0.5f, 0xFFFFFFFF, 0.f, m_tileSize / (f32)tilesetInfo.imageHeight,
 				0.5f, -0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, m_tileSize / (f32)tilesetInfo.imageHeight,
 				0.5f, 0.5f, 0xFFFFFFFF, m_tileSize / (f32)tilesetInfo.imageWidth, 0.f);
 
@@ -296,7 +254,7 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 			for (auto* obj = objGroup->FirstChildElement("object"); obj; obj = obj->NextSiblingElement("object"))
 			{
 				f32 x = obj->FloatAttribute("x");
-				f32 y= obj->FloatAttribute("y");
+				f32 y = obj->FloatAttribute("y");
 				f32 w = obj->FloatAttribute("width");
 				f32 h = obj->FloatAttribute("height");
 
@@ -315,7 +273,7 @@ void TileMap::PrepareLayerData()
 	{
 		if (layer["type"] != "tilelayer") continue;
 
-		std::vector<std::vector<int>> layerData(m_mapHeight, std::vector<int>(m_mapWidth,0));
+		std::vector<std::vector<int>> layerData(m_mapHeight, std::vector<int>(m_mapWidth, 0));
 		const auto& data = layer["data"];
 
 		for (int i = 0; i < data.size(); i++)
