@@ -30,6 +30,14 @@ inline bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVe
     return true;
 }
 
+inline void GetPlayerAABB(const AEVec2& position, const AEVec2& size, AEVec2& min, AEVec2& max)
+{
+    min.x = (int)(position.x - (size.x * 0.25f));
+    max.x = (int)(position.x + (size.x * 0.25f));
+    max.y = position.y;
+    min.y = position.y - (size.y * 0.5f);
+}
+
 struct CollisionBox
 {
     f32 x, y, width, height;
@@ -78,6 +86,7 @@ public:
     AEVec2 GetTileWorldPosAt(int col, int row);
     AEVec2 GetTileIndexAt(const AEVec2& world_pos);
     void DrawRect(f32 x, f32 y, f32 color[3]);
+    void DrawRect(f32 x, f32 y, f32 size, f32 color[3]);
     f32 GetTileSize() const;
     bool HasTile(int col, int row) const;
     // End Test Vars

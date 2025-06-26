@@ -14,7 +14,7 @@ MainGameStateTest::~MainGameStateTest() {}
 void MainGameStateTest::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
-	m_Player.Init({ -kHalfWindowWidth + 200.f, 50.f });
+	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
@@ -27,9 +27,6 @@ void MainGameStateTest::Update(f32 dt)
 		tm.Update(dt);
 	}
 
-	// 플레이어의 타일 좌표를 찾아
-	// 그 타일 좌표에 박스를 그려봐
-	// 충돌 체크를 해
 	m_Player.Update(dt);
 
 	if (m_Player.GetPosition().x > 0.f)
@@ -56,9 +53,15 @@ void MainGameStateTest::Draw()
 
 	if (toggleDebugDraw)
 	{
+		AEVec2 min, max;
+		GetPlayerAABB(m_Player.GetPosition(), m_Player.GetSize(), min, max);
+
 		f32 green_color[] = { 0, 1, 0 };
 		f32 blue_color[] = { 0, 0, 1 };
 		f32 red_color[] = { 1, 0, 0 };
+
+		TileMaps.begin()->DrawRect(min.x, min.y, 2, blue_color);
+		TileMaps.begin()->DrawRect(max.x, max.y, 2, green_color);
 
 		for (auto& curr_tilemap : TileMaps)
 		{
@@ -70,7 +73,15 @@ void MainGameStateTest::Draw()
 
 					if (curr_tilemap.HasTile(col, row))
 					{
-						curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
+						AEVec2 tmin, tmax;
+						f32 tsize = curr_tilemap.GetTileSize();
+						GetAABBFrom(tile_position, {tsize, tsize}, tmin, tmax);
+
+						curr_tilemap.DrawRect(tile_position.x, tile_position.y, blue_color);
+						if (IntersectAABBAABB(min, max, tmin, tmax))
+						{
+							curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
+						}
 					}
 				}
 			}

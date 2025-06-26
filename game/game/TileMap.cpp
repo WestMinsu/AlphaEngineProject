@@ -149,7 +149,6 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 		int playerTop = position.y + kHalfWindowHeight;
 		int playerBottom = position.y - (size.y * 1/ 2.f) + kHalfWindowHeight;
 
-		
 		//if (tileTop > tileMap.GetMapHeight()) return result;
 
 		/*std::cout << "[" << tileLeft << ", "
@@ -243,13 +242,18 @@ AEVec2 TileMap::GetTileIndexAt(const AEVec2& world_pos)
 
 void TileMap::DrawRect(f32 x, f32 y, f32 color[3])
 {
+	DrawRect(x, y, GetTileSize(), color);
+}
+
+void TileMap::DrawRect(f32 x, f32 y, f32 size, f32 color[3])
+{
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 
 	AEGfxSetColorToMultiply(0, 0, 0, 1);
 	AEGfxSetColorToAdd(color[0], color[1], color[2], 1.0f);
-	
+
 	AEMtx33 scale = { 0 };
-	AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+	AEMtx33Scale(&scale, size, size);
 
 	AEMtx33 rotate = { 0 };
 	AEMtx33Rot(&rotate, 0);
@@ -262,9 +266,7 @@ void TileMap::DrawRect(f32 x, f32 y, f32 color[3])
 	AEMtx33Concat(&transform, &translate, &transform);
 
 	AEGfxSetTransform(transform.m);
-
 	AEGfxMeshDraw(wireframe_mesh, AE_GFX_MDM_TRIANGLES);
-
 
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 }
