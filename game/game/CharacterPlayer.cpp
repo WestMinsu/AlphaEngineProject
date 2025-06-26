@@ -206,11 +206,49 @@ void CharacterPlayer::Update(f32 dt)
 	if (AEInputCheckTriggered(AEVK_T))
 		enableCollisionDetection = !enableCollisionDetection;
 
-	AEVec2 new_position = m_position;
+	AEVec2 new_position = desiredNextPosition;
 
 	if (enableCollisionDetection)
 	{
-		
+		AEVec2 depth;
+		if (CheckCollisionTileMap(desiredNextPosition, m_size, depth))
+		{
+			std::cout << " x vel : " << m_velocityX << std::endl;
+			std::cout << " y vel : " << m_velocityY << std::endl;
+			std::cout << " depth : " << depth << std::endl;
+
+			if (!IsNearEqual(m_velocityY, 0.0))
+			{
+				if (m_velocityY > 0)
+				{
+					new_position.y -= depth.y;
+				}
+				else
+				{
+					new_position.y += depth.y;
+				}
+
+				// 이거 존나 어렵네요? ㅎㅎㅎ
+				if (m_velocityY < 0)
+				{
+					m_velocityX = 0.0f;
+					m_velocityY = 0.0f;
+					m_isGrounded = true;
+				}
+			}
+			if (!IsNearEqual(m_velocityX, 0.0))
+			{
+				if (m_velocityX > 0)
+				{
+					new_position.x -= depth.x;
+				}
+				else
+				{
+					new_position.x += depth.x;
+				}
+			}
+
+		}
 
 		m_position = new_position;
 	}

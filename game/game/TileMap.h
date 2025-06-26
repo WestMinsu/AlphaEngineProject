@@ -4,6 +4,14 @@
 #include <vector>
 #include <string>
 #include "json.hpp"
+#include <iostream>
+
+constexpr float default_epsilon = 0.01f;
+
+inline bool IsNearEqual(float a, float b, float epsilon = default_epsilon)
+{
+    return (std::abs(a - b) < epsilon);
+}
 
 inline std::ostream& operator<<(std::ostream& os, const AEVec2& vec)
 {
@@ -19,10 +27,10 @@ inline void GetAABBFrom(const AEVec2& position, const AEVec2& size, AEVec2& outM
     outMax.y = position.y + size.y * 0.5f;
 }
 
-inline bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVec2& Bmin, const AEVec2& Bmax)
+inline bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVec2& Bmin, const AEVec2& Bmax, float margin = default_epsilon)
 {
-    if (Amin.x > Bmax.x || Amax.x < Bmin.x ||
-        Amin.y > Bmax.y || Amax.y < Bmin.y)
+    if (Amin.x >= Bmax.x || Amax.x <= Bmin.x ||
+        Amin.y >= Bmax.y || Amax.y <= Bmin.y)
     {
         return false;
     }
@@ -49,6 +57,8 @@ inline void GetPlayerAABB(const AEVec2& position, const AEVec2& size, AEVec2& mi
     max.y = position.y;
     min.y = position.y - (size.y * 0.5f);
 }
+
+bool CheckCollisionTileMap(const AEVec2& position, const AEVec2& size, AEVec2& out_collision_depth);
 
 struct CollisionBox
 {

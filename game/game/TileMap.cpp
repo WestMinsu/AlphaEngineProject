@@ -139,6 +139,75 @@ void TileMap::Destroy()
 	m_meshes.clear();
 }
 
+template<typename T>
+T GetMax(const T& a, const T& b)
+{
+	return a > b ? a : b;
+}
+
+template<typename T>
+T GetMin(const T& a, const T& b)
+{
+	return a <= b ? a : b;
+}
+
+bool CheckCollisionTileMap(const AEVec2& position, const AEVec2& size, AEVec2& out_collision_depth)
+{
+	AEVec2 min, max;
+	GetPlayerAABB(position, size, min, max);
+	AEVec2 player_aabb_center = { (min.x + max.x) * 0.5f,(min.y + max.y) * 0.5f };
+
+	out_collision_depth.x = 0;
+	out_collision_depth.y = 0;
+
+	bool collided = false;
+
+	for (auto& curr_tilemap : TileMaps)
+	{
+		const AEVec2 player_standing_tile = curr_tilemap.GetTileIndexAt(player_aabb_center);
+
+		int num_adjacent = (size.x / curr_tilemap.GetTileSize()) * 0.5f; // 넉넉잡아
+		int row_begin = (int)player_standing_tile.y - num_adjacent;
+		int row_end = (int)player_standing_tile.y + num_adjacent + 1;
+		int col_begin = (int)player_standing_tile.x - num_adjacent;
+		int col_end = (int)player_standing_tile.x + num_adjacent + 1;
+
+		row_begin = Clamp(row_begin, 0, curr_tilemap.GetMapHeight());
+		row_end = Clamp(row_end, 0, curr_tilemap.GetMapHeight());
+		col_begin = Clamp(col_begin, 0, 58);
+		col_end = Clamp(col_end, 0, 58);
+
+		for (int row = row_begin; row < row_end; row++)
+		{
+			for (int col = col_begin; col < col_end; col++)
+			{
+				//std::cout << row << " " << col << std::endl;
+				if (curr_tilemap.HasTile(col, row))
+				{
+					AEVec2 tmin, tmax;
+					AEVec2 tile_position = curr_tilemap.GetTileWorldPosAt(col, row);
+					f32 tsize = curr_tilemap.GetTileSize();
+					GetAABBFrom(tile_position, { tsize, tsize }, tmin, tmax);
+
+					if (IntersectAABBAABB(min, max, tmin, tmax))
+					{
+						std::cout << "test aabbs: " << std::endl;
+						std::cout << min.x << " " << max.x << " " << tmin.x << " " << tmax.x << std::endl;
+						std::cout << min.y << " " << max.y << " " << tmin.y << " " << tmax.y << std::endl;
+
+						out_collision_depth.x = GetMax(out_collision_depth.x, GetMin(max.x - tmin.x, tmax.x - min.x));
+						out_collision_depth.y = GetMax(out_collision_depth.y, GetMin(max.y - tmin.y, tmax.y - min.y));
+
+						//std::cout << "true " << out_collision_depth << std::endl;
+						collided = true;
+					}
+				}
+			}
+		}
+	}
+	return collided;
+}
+
 bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
 	bool result = false;

@@ -88,17 +88,17 @@ void MainGameStateTest::Draw()
 				{
 					AEVec2 tile_position = curr_tilemap.GetTileWorldPosAt(col, row);
 
-					TileMaps.begin()->DrawRect(tile_position.x, tile_position.y, 5, red_color);
+					//TileMaps.begin()->DrawRect(tile_position.x, tile_position.y, 5, red_color);
 					if (curr_tilemap.HasTile(col, row))
 					{
 						AEVec2 tmin, tmax;
 						f32 tsize = curr_tilemap.GetTileSize();
 						GetAABBFrom(tile_position, {tsize, tsize}, tmin, tmax);
 
-						//curr_tilemap.DrawRect(tile_position.x, tile_position.y, blue_color);
+						curr_tilemap.DrawRect(tile_position.x, tile_position.y, blue_color);
 						if (IntersectAABBAABB(min, max, tmin, tmax))
 						{
-							//curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
+							curr_tilemap.DrawRect(tile_position.x, tile_position.y, red_color);
 						}
 					}
 				}
