@@ -5,12 +5,6 @@
 #include <iostream>
 #include "TileMap.h"
 
-std::ostream& operator<<(std::ostream& os, const AEVec2& vec)
-{
-	os << "(" << vec.x << ", " << vec.y << ")";
-	return os;
-}
-
 CharacterPlayer::CharacterPlayer()
 {
 	m_position = { 0, };
@@ -211,8 +205,6 @@ void CharacterPlayer::Update(f32 dt)
 
 	if (AEInputCheckTriggered(AEVK_T))
 		enableCollisionDetection = !enableCollisionDetection;
-
-	std::cout << m_position << std::endl;
 
 	AEVec2 new_position = m_position;
 

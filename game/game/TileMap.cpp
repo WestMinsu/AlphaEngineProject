@@ -139,17 +139,6 @@ void TileMap::Destroy()
 	m_meshes.clear();
 }
 
-bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVec2& Bmin, const AEVec2& Bmax)
-{
-	if (Amin.x > Bmax.x || Amax.x < Bmin.x ||
-		Amin.y > Bmax.y || Amax.y < Bmin.y)
-	{
-		return false;
-	}
-
-	return true;
-}
-
 bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 {
 	bool result = false;
@@ -232,6 +221,75 @@ s32 TileMap::GetMapHeight()
 std::vector<std::vector<int>> TileMap::GetLayer(s32 idx)
 {
 	return m_layers[idx];
+}
+
+AEVec2 TileMap::GetTileWorldPosAt(int col, int row)
+{
+	const f32 tile_world_size = m_tileSize * m_tileScale;
+	const f32 half_tile_world_size = tile_world_size * 0.5f;
+	f32 x = static_cast<f32>(col) * tile_world_size - kHalfWindowWidth + half_tile_world_size + m_offset.x;
+	f32 y = static_cast<f32>(row) * tile_world_size - kHalfWindowHeight + half_tile_world_size;
+	return { x, y };
+}
+
+AEVec2 TileMap::GetTileIndexAt(const AEVec2& world_pos)
+{
+	const f32 tile_world_size = m_tileSize * m_tileScale;
+	const f32 half_tile_world_size = tile_world_size * 0.5f;
+	f32 col = (world_pos.x + kHalfWindowWidth - half_tile_world_size - m_offset.x) / tile_world_size;
+	f32 row = (world_pos.y + kHalfWindowHeight - half_tile_world_size) / tile_world_size;
+	return { col, row };
+}
+
+void TileMap::DrawRect(f32 x, f32 y, f32 color[3])
+{
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+
+	AEGfxSetColorToMultiply(0, 0, 0, 1);
+	AEGfxSetColorToAdd(color[0], color[1], color[2], 1.0f);
+	
+	AEMtx33 scale = { 0 };
+	AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+
+	AEMtx33 rotate = { 0 };
+	AEMtx33Rot(&rotate, 0);
+
+	AEMtx33 translate = { 0 };
+	AEMtx33Trans(&translate, x, y);
+
+	AEMtx33 transform = { 0 };
+	AEMtx33Concat(&transform, &rotate, &scale);
+	AEMtx33Concat(&transform, &translate, &transform);
+
+	AEGfxSetTransform(transform.m);
+
+	AEGfxMeshDraw(wireframe_mesh, AE_GFX_MDM_TRIANGLES);
+
+
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+}
+
+f32 TileMap::GetTileSize() const
+{
+	return m_tileSize * m_tileScale;
+}
+
+bool TileMap::HasTile(int col, int row) const
+{
+	s32 globalID = m_layers[0][row][col];
+	if (globalID == 0) return false;
+
+	const TilesetInfo* usedTileset = nullptr;
+	for (const auto& ts : m_tilesets)
+	{
+		if (ts.contains(globalID))
+		{
+			usedTileset = &ts;
+			break;
+		}
+	}
+	if (!usedTileset) return false;
+	return true;
 }
 
 AEVec2 TileMap::GetOffset()

@@ -5,6 +5,31 @@
 #include <string>
 #include "json.hpp"
 
+inline std::ostream& operator<<(std::ostream& os, const AEVec2& vec)
+{
+    os << "(" << vec.x << ", " << vec.y << ")";
+    return os;
+}
+
+inline void GetAABBFrom(const AEVec2& position, const AEVec2& size, AEVec2& outMin, AEVec2& outMax)
+{
+    outMin.x = position.x - size.x * 0.5f;
+    outMax.x = position.x + size.x * 0.5f;
+    outMin.y = position.y - size.y * 0.5f;
+    outMax.y = position.y + size.y * 0.5f;
+}
+
+inline bool IntersectAABBAABB(const AEVec2& Amin, const AEVec2& Amax, const AEVec2& Bmin, const AEVec2& Bmax)
+{
+    if (Amin.x > Bmax.x || Amax.x < Bmin.x ||
+        Amin.y > Bmax.y || Amax.y < Bmin.y)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 struct CollisionBox
 {
     f32 x, y, width, height;
@@ -45,7 +70,17 @@ public:
     s32 GetMapTotalWidth();
     s32 GetMapHeight();
     std::vector<std::vector<int>> GetLayer(s32 idx);
-    
+
+
+    // Begin Test Vars
+    AEGfxTexture* wireframe;
+    AEGfxVertexList* wireframe_mesh;
+    AEVec2 GetTileWorldPosAt(int col, int row);
+    AEVec2 GetTileIndexAt(const AEVec2& world_pos);
+    void DrawRect(f32 x, f32 y, f32 color[3]);
+    f32 GetTileSize() const;
+    bool HasTile(int col, int row) const;
+    // End Test Vars
 private:
     AEVec2 m_offset;
     s32 m_offsetCount;
@@ -55,9 +90,6 @@ private:
     
     nlohmann::json m_mapJson;
 
-    AEGfxTexture* wireframe;
-    AEGfxVertexList* wireframe_mesh;
-    
     std::vector<TilesetInfo> m_tilesets;
     std::vector<std::vector<std::vector<int>>> m_layers;
     std::vector<CollisionBox> m_collisionBoxes;
