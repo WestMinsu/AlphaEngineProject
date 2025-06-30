@@ -83,7 +83,7 @@
     <ClInclude Include="GameOverState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AEnemyFactory.h">
+    <ClInclude Include="EnemyFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -146,6 +146,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameOverState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
