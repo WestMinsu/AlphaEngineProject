@@ -89,6 +89,17 @@ void BossCharacter::Update(f32 dt)
 	if (!m_pPlayer) 
 		return;
 
+	if (m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF)
+	{
+		if (m_animation.IsFinished())
+		{
+			m_isAttackable = true;
+			m_currentAIState = BossAIState::IDLE;
+		}
+		m_animation.Update(dt);
+		return;
+	}
+
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 
 	if (playerPos.x < m_position.x)
@@ -330,6 +341,8 @@ void BossCharacter::TakeDamage(s32 damage)
 		m_isInBuffState = true;
 		m_isAttackable = false;
 		m_currentAIState = BossAIState::BUFF;
+		m_currentAnimState = CharacterAnimationState::BUFF;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 	else if (m_healthPoint <= m_maxHealth * 0.5f && !m_hasGlowed)
 	{
@@ -337,6 +350,8 @@ void BossCharacter::TakeDamage(s32 damage)
 		m_healthPoint += static_cast<s32>(m_maxHealth * 0.15f);
 		m_isAttackable = false;
 		m_currentAIState = BossAIState::GLOWING;
+		m_currentAnimState = CharacterAnimationState::GLOWING;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 }
 
