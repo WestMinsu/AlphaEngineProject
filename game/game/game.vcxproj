@@ -103,6 +103,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ACharacter.h" />
+    <ClInclude Include="AEnemyFactory.h" />
     <ClInclude Include="AGameState.h" />
     <ClInclude Include="AIState.h" />
     <ClInclude Include="Animation.h" />
