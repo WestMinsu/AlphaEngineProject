@@ -30,9 +30,9 @@ void MainGameState::Init()
 	m_Background.Init();
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
-	m_weaponIconMap[WeaponType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
-	m_weaponIconMap[WeaponType::ICE] = LoadImageAsset("Assets/MagicArrow/ice_icon.png");
-	m_weaponIconMap[WeaponType::LIGHTNING] = LoadImageAsset("Assets/Thunder Strike/lightning_icon.png");
+	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
+	m_weaponIconMap[DamageType::ICE] = LoadImageAsset("Assets/MagicArrow/ice_icon.png");
+	m_weaponIconMap[DamageType::LIGHTNING] = LoadImageAsset("Assets/Thunder Strike/lightning_icon.png");
 
 	m_lightningEffectData.texturePath = "Assets/Thunder Strike/Thunderstrike w blur.png";
 	m_lightningEffectData.pTexture = LoadImageAsset(m_lightningEffectData.texturePath.c_str());
@@ -130,11 +130,11 @@ void MainGameState::Update(f32 dt)
 	bool canPlayerFire = m_Player.GetAnimation().GetCurrentFrame() == 4 && !m_Player.HasFiredProjectile();
 	if (isPlayerCasting && canPlayerFire)
 	{
-		WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
+		DamageType currentWeapon = m_Player.GetCurrentWeaponType();
 		CharacterDirection playerDir = m_Player.GetDirection();
 		AEVec2 directionVec = { (playerDir == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
 
-		if (currentWeapon == WeaponType::FIRE || currentWeapon == WeaponType::ICE)
+		if (currentWeapon == DamageType::FIRE || currentWeapon == DamageType::ICE)
 		{
 			m_playerProjectiles.emplace_back();
 			Projectile& newProjectile = m_playerProjectiles.back();
@@ -150,7 +150,7 @@ void MainGameState::Update(f32 dt)
 			newProjectile.Init(spawnPos, directionVec, projData);
 			m_Player.SetFiredProjectile(true);
 		}
-		else if (currentWeapon == WeaponType::LIGHTNING)
+		else if (currentWeapon == DamageType::LIGHTNING)
 		{
 			ACharacter* target = FindClosestEnemyInFront();
 			if (target)
@@ -442,12 +442,12 @@ void MainGameState::DrawUI()
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-	WeaponType currentWeapon = m_Player.GetCurrentWeaponType();
+	DamageType currentWeapon = m_Player.GetCurrentWeaponType();
 
 	for (size_t i = 0; i < totalSlots; ++i)
 	{
 		float posX = startX + i * (slotSize + slotMargin) + xCam;
-		WeaponType slotWeaponType = availableWeapons[i];
+		DamageType slotWeaponType = availableWeapons[i];
 
 		DrawRect(posX, posY, slotSize, slotSize, 1.f, 1.f, 1.f, 0.7f, m_pUiSlot);
 

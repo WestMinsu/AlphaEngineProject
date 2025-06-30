@@ -111,6 +111,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="BossCharacter.h" />
     <ClInclude Include="GameClearState.h" />
     <ClInclude Include="GameOverState.h" />
+    <ClInclude Include="GameTypes.h" />
     <ClInclude Include="MeleeEnemyCharacter.h" />
     <ClInclude Include="MageEnemyCharacter.h" />
     <ClInclude Include="PlayerCharacter.h" />

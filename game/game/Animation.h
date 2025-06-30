@@ -1,22 +1,10 @@
 #pragma once
-#include <AEEngine.h>
-#include "ACharacter.h"
+#include "AEEngine.h"
 #include <string>
 #include <map>
+#include "GameTypes.h" 
 
-enum class SpriteSheetOrientation { HORIZONTAL, VERTICAL };
-
-struct AnimData
-{
-	std::string texturePath;
-	AEGfxTexture* pTexture = nullptr;
-	s32 frameCount = 0;
-	SpriteSheetOrientation orientation = SpriteSheetOrientation::VERTICAL;
-	f32 frameDuration = 0.1f;
-	bool loop = true;
-};
-
-class Animation
+class Animation	
 {
 public:
 	static int COUNT;

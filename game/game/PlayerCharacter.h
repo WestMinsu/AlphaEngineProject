@@ -5,12 +5,6 @@
 #include <map>
 #include "WeaponData.h"
 
-struct AttackHitbox
-{
-	AEVec2 offset;
-	AEVec2 size;
-};
-
 class PlayerCharacter : public ACharacter
 {
 public:
@@ -59,11 +53,11 @@ public:
 		return m_hasHitEnemyThisAttack;
 	}
 	const ProjectileData& GetCurrentProjectileData() const;
-	WeaponType GetCurrentWeaponType() const 
+	DamageType GetCurrentWeaponType() const 
 	{ 
 		return m_currentWeapon; 
 	}
-	const std::vector<WeaponType>& GetAvailableWeapons() const 
+	const std::vector<DamageType>& GetAvailableWeapons() const 
 	{
 		return m_availableWeapons;
 	}
@@ -91,9 +85,9 @@ private:
 
 	CharacterAnimationState m_currentAnimState;
 
-	std::map<WeaponType, ProjectileData> m_projectileDataMap;
-	std::vector<WeaponType> m_availableWeapons;
-	WeaponType m_currentWeapon;
+	std::map<DamageType, ProjectileData> m_projectileDataMap;
+	std::vector<DamageType> m_availableWeapons;
+	DamageType m_currentWeapon;
 	int m_currentWeaponIndex;
 
 	bool m_isInvincible;

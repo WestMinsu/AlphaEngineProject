@@ -34,7 +34,7 @@ PlayerCharacter::PlayerCharacter()
 	m_isDashing = false;
 	m_dashSpeed = 800.f;
 
-	m_currentWeapon = WeaponType::FIRE;
+	m_currentWeapon = DamageType::FIRE;
 	m_currentWeaponIndex = 0;
 
 	m_isInvincible = false;
@@ -65,14 +65,14 @@ void PlayerCharacter::Init(AEVec2 position)
 	fireData.damage = 10;
 	fireData.size = { 200.f, 200.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[WeaponType::FIRE] = fireData;
+	m_projectileDataMap[DamageType::FIRE] = fireData;
 
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 100;
 	iceData.size = { 200.f, 200.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[WeaponType::ICE] = iceData;
+	m_projectileDataMap[DamageType::ICE] = iceData;
 
 
 	for (auto& pair : m_animDataMap)
@@ -84,9 +84,9 @@ void PlayerCharacter::Init(AEVec2 position)
 		pair.second.animData.pTexture = LoadImageAsset(pair.second.animData.texturePath.c_str());
 	}
 
-	m_availableWeapons.push_back(WeaponType::FIRE);
-	m_availableWeapons.push_back(WeaponType::ICE);
-	m_availableWeapons.push_back(WeaponType::LIGHTNING);
+	m_availableWeapons.push_back(DamageType::FIRE);
+	m_availableWeapons.push_back(DamageType::ICE);
+	m_availableWeapons.push_back(DamageType::LIGHTNING);
 
 	m_attackHitboxes.resize(8);
 	m_attackHitboxes[3] = { { m_size.x * 0.25f, m_size.y * -0.15f },  { m_size.x * 0.40f, m_size.y * 0.70f } };

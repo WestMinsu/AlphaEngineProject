@@ -38,7 +38,7 @@ private:
 	Background m_Background;
 
 	AEGfxTexture* m_pUiSlot;      
-	std::map<WeaponType, AEGfxTexture*> m_weaponIconMap;
+	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
 	AnimData m_lightningEffectData;
 
 	AEGfxTexture* m_pHealthBarFrame;
