@@ -44,3 +44,6 @@ https://drive.google.com/file/d/11PfgaqduD3h8pQlVvXl4tRaPJUkzD9Bo/view?usp=shari
 
 2주차 영상
 https://drive.google.com/file/d/10DRyd-ret1Mp1GASrjwPJAG_jIGx_9WR/view?usp=sharing
+
+3주차 영상
+https://drive.google.com/file/d/1QG-5-tDYHgvXnyqn8M5EJY4n6xrfaXEy/view?usp=sharing
