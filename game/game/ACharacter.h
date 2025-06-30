@@ -7,9 +7,17 @@ enum class CharacterAnimationState
 	WALK,
 	JUMP,
 	MELEE_ATTACK,
-	PROJECTILE_ATTACK,
+	RANGED_ATTACK,
 	DASH,
-	DEATH
+	DEATH,
+	HURT,
+
+	//for boss
+	APPEARANCE,
+	GLOWING,
+	LASER_CAST,
+	LASER_SHEET,
+	BUFF
 };
 
 enum class CharacterDirection
@@ -46,10 +54,20 @@ public:
 	{ 
 		return m_healthPoint;
 	}	
+	const AEVec2& GetHitboxSize() const
+	{
+		return m_hitboxSize;
+	}
+	const AEVec2& GetHitboxOffset() const
+	{
+		return m_hitboxOffset;
+	}
 
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
+	AEVec2 m_hitboxSize;
+	AEVec2 m_hitboxOffset;
 
 	s32 m_healthPoint;
 	f32 m_characterSpeed;

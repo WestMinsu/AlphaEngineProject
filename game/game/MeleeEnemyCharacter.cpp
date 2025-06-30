@@ -1,11 +1,11 @@
-#include "CharacterMeleeEnemy.h"
+#include "MeleeEnemyCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
-#include "CharacterPlayer.h"
+#include "PlayerCharacter.h"
 #include "AssetManager.h"
 
-CharacterEnemy::CharacterEnemy()
+MeleeEnemyCharacter::MeleeEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
@@ -19,17 +19,21 @@ CharacterEnemy::CharacterEnemy()
 	m_attackRange = 150.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
+
+	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
+	m_hitboxOffset = { 0.f, 0.f };
+	m_isHurt = false;
 }
 
-CharacterEnemy::~CharacterEnemy() 
+MeleeEnemyCharacter::~MeleeEnemyCharacter() 
 {
 }
 
-void CharacterEnemy::Init(AEVec2 position)
+void MeleeEnemyCharacter::Init(AEVec2 position)
 {
 }
 
-void CharacterEnemy::Init(AEVec2 position, CharacterPlayer* player)
+void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {
 	m_position = position;
 	m_pPlayer = player; 
@@ -39,28 +43,34 @@ void CharacterEnemy::Init(AEVec2 position, CharacterPlayer* player)
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/warrior/death.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/warrior/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/warrior/attack.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fantasy Skeleton Enemies/warrior/hurt.PNG", nullptr, 5, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 
-	for (auto& pair : m_animDataMap) 
+	for (auto& pair : m_animDataMap)
 	{
-		pair.second.pTexture = LoadImageAsset(pair.second.texturePath.c_str());
+		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
 
-void CharacterEnemy::Update(f32 dt)
+void MeleeEnemyCharacter::Update(f32 dt)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		m_animation.Update(dt);
 		return;
 	}
+
 	if (!m_pPlayer) 
 		return;
 
-	const AEVec2& playerPosConst = m_pPlayer->GetPosition();
-	AEVec2 playerPos = playerPosConst;
+	if (m_isHurt && m_animation.IsFinished())
+	{
+		m_isHurt = false;
+	}
+
+	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
 
 	switch (m_currentAIState)
@@ -118,6 +128,10 @@ void CharacterEnemy::Update(f32 dt)
 	{
 		desiredAnimState = CharacterAnimationState::MELEE_ATTACK;
 	}
+	else if (m_isHurt) 
+	{
+		desiredAnimState = CharacterAnimationState::HURT;
+	}
 
 	m_position.x += velocityX * dt;
 
@@ -130,18 +144,18 @@ void CharacterEnemy::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void CharacterEnemy::Move(f32 dt)
+void MeleeEnemyCharacter::Move(f32 dt)
 {
 	// TODO
 }
 
-void CharacterEnemy::Attack()
+void MeleeEnemyCharacter::Attack()
 {
 	// TODO
 }
 
 
-void CharacterEnemy::Draw()
+void MeleeEnemyCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
 	if (m_currentDirection == CharacterDirection::LEFT)
@@ -160,15 +174,15 @@ void CharacterEnemy::Draw()
 	AEMtx33Concat(&transform, &translate, &transform);
 
 	m_animation.Draw(transform);
-	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.f, 1.f, 0.f);
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
-void CharacterEnemy::Destroy()
+void MeleeEnemyCharacter::Destroy()
 {
 	m_animation.Destroy();
 }
 
-void CharacterEnemy::TakeDamage(s32 damage)
+void MeleeEnemyCharacter::TakeDamage(s32 damage)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -177,6 +191,8 @@ void CharacterEnemy::TakeDamage(s32 damage)
 
 	m_healthPoint -= damage;
 	std::cout << "Enemy takes damage! HP: " << m_healthPoint << std::endl;
+
+	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
 	{

@@ -1,14 +1,16 @@
-﻿#include "CharacterPlayer.h"
+﻿#include "PlayerCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include "AssetManager.h"
 #include <iostream>
 #include "TileMap.h"
 
-CharacterPlayer::CharacterPlayer()
+PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0, };
 	m_size = { 200.f, 200.f };
+	m_hitboxSize = { m_size.x * 0.4f, m_size.y * 0.6f };
+	m_hitboxOffset = { 0.0f, -40.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
@@ -34,13 +36,17 @@ CharacterPlayer::CharacterPlayer()
 
 	m_currentWeapon = WeaponType::FIRE;
 	m_currentWeaponIndex = 0;
+
+	m_isInvincible = false;
+	m_invincibilityTimer = 0.0f;
+	m_isHurt = false;
 }
 
-CharacterPlayer::~CharacterPlayer()
+PlayerCharacter::~PlayerCharacter()
 {
 }
 
-void CharacterPlayer::Init(AEVec2 position)
+void PlayerCharacter::Init(AEVec2 position)
 {
 	m_position = position;
 	m_animation.Init();
@@ -49,10 +55,11 @@ void CharacterPlayer::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
-	m_animDataMap[CharacterAnimationState::PROJECTILE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-
+	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Hurt/hurt.png", nullptr, 2, SpriteSheetOrientation::HORIZONTAL, 0.2f, false };
+	
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
 	fireData.damage = 10;
@@ -79,7 +86,7 @@ void CharacterPlayer::Init(AEVec2 position)
 
 	m_availableWeapons.push_back(WeaponType::FIRE);
 	m_availableWeapons.push_back(WeaponType::ICE);
-	//m_availableWeapons.push_back(WeaponType::LIGHTNING);
+	m_availableWeapons.push_back(WeaponType::LIGHTNING);
 
 	m_attackHitboxes.resize(8);
 	m_attackHitboxes[3] = { { m_size.x * 0.25f, m_size.y * -0.15f },  { m_size.x * 0.40f, m_size.y * 0.70f } };
@@ -90,10 +97,28 @@ void CharacterPlayer::Init(AEVec2 position)
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
-void CharacterPlayer::Update(f32 dt)
+void PlayerCharacter::Update(f32 dt)
 {
-	if (m_animation.GetCurrentState() == CharacterAnimationState::DEATH && m_animation.IsFinished())
-		return;
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
+	{
+		m_animation.Update(dt);
+		return; 
+	}
+
+	if (m_isInvincible)
+	{
+		m_invincibilityTimer += dt;
+		if (m_invincibilityTimer >= m_invincibilityDuration)
+		{
+			m_isInvincible = false;
+			m_invincibilityTimer = 0.0f;
+		}
+	}
+
+	if (m_isHurt && m_animation.IsFinished())
+	{
+		m_isHurt = false;
+	}
 
 	bool isAttacking = m_isMeleeAttacking || m_isProjectileAttacking;
 
@@ -110,7 +135,14 @@ void CharacterPlayer::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-
+	if (AEInputCheckTriggered(AEVK_3))
+	{
+		if (m_availableWeapons.size() > 2)
+		{
+			m_currentWeaponIndex = 2;
+			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
+		}
+	}
 	if (AEInputCheckCurr(AEVK_A) && !isAttacking)
 	{
 		m_isMeleeAttacking = true;
@@ -124,6 +156,9 @@ void CharacterPlayer::Update(f32 dt)
 	if (AEInputCheckTriggered(AEVK_LSHIFT) && !m_isDashing && !isAttacking)
 	{
 		m_isDashing = true;
+
+		m_isInvincible = true;
+		m_invincibilityTimer = 0.0f;
 	}
 	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isAttacking && !m_isDashing)
 	{
@@ -197,11 +232,6 @@ void CharacterPlayer::Update(f32 dt)
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
 
-	//m_position.x += m_velocityX * dt;
-	//m_position.y += m_velocityY * dt;
-
-	//std::cout << m_position.x << ", " << m_position.y << std::endl;
-
 	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
 
 	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
@@ -228,9 +258,6 @@ void CharacterPlayer::Update(f32 dt)
 		m_position.x -= std::copysign(1.0f, m_velocityX);
 	}
 
-	//m_position.x = tempPosition.x;
-	//m_position.y = tempPosition.y;
-
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{
 		m_position.y = m_groundLevel;
@@ -249,9 +276,11 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_isMeleeAttacking)
 		desiredState = CharacterAnimationState::MELEE_ATTACK;
 	else if (m_isProjectileAttacking)
-		desiredState = CharacterAnimationState::PROJECTILE_ATTACK;
+		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)
 		desiredState = CharacterAnimationState::DASH;
+	else if (m_isHurt)
+		desiredState = CharacterAnimationState::HURT;
 	else if (!m_isGrounded)
 		desiredState = CharacterAnimationState::JUMP;
 	else
@@ -270,9 +299,6 @@ void CharacterPlayer::Update(f32 dt)
 	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
 		m_position.x = -kHalfWindowWidth + halfCharWidth;
 
-	//if (m_position.x > kHalfWindowWidth - halfCharWidth)
-	//	m_position.x = kHalfWindowWidth - halfCharWidth;
-
 	if (m_position.y > kHalfWindowHeight - halfCharHeight)
 	{
 		m_position.y = kHalfWindowHeight - halfCharHeight;
@@ -282,11 +308,11 @@ void CharacterPlayer::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void CharacterPlayer::Move(f32 dt)
+void PlayerCharacter::Move(f32 dt)
 {
 }
 
-void CharacterPlayer::Draw()
+void PlayerCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
 	AEMtx33 rotate = { 0 };
@@ -304,27 +330,28 @@ void CharacterPlayer::Draw()
 
 	if (m_isMeleeAttackHitboxActive)
 	{
-		const AttackHitbox& currentHitbox = GetCurrentAttackHitbox();
+		const AttackHitbox& currentHitbox = GetCurrentMeleeHitbox();
 		AEVec2 hitboxPos;
 		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
-	DrawHollowRect(m_position.x, m_position.y - m_size.y / 4.f, m_size.x / 2.f, m_size.y / 2.f, 1.0f, 0.0f, 0.0f, 0.5f);
+
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
-void CharacterPlayer::Destroy()
+void PlayerCharacter::Destroy()
 {
 	m_animDataMap.clear();
 	m_animation.Destroy();
 }
 
-s32 CharacterPlayer::GetCurrentAnimationFrame() const
+s32 PlayerCharacter::GetCurrentAnimationFrame() const
 {
 	return m_animation.GetCurrentFrame();
 }
 
-const AttackHitbox& CharacterPlayer::GetCurrentAttackHitbox() const
+const AttackHitbox& PlayerCharacter::GetCurrentMeleeHitbox() const
 {
 	s32 currentFrame = GetCurrentAnimationFrame();
 	if (currentFrame >= 0 && currentFrame < m_attackHitboxes.size())
@@ -334,16 +361,43 @@ const AttackHitbox& CharacterPlayer::GetCurrentAttackHitbox() const
 	return m_attackHitboxes[0];
 }
 
-void CharacterPlayer::Attack()
+void PlayerCharacter::Attack()
 {
 }
 
-void CharacterPlayer::TakeDamage(s32 damage)
+void PlayerCharacter::TakeDamage(s32 damage)
 {
+	if (m_isInvincible || m_currentAnimState == CharacterAnimationState::DEATH)
+	{
+		return;
+	}
+
 	m_healthPoint -= damage;
+	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
+
+	m_isInvincible = true;
+	m_invincibilityTimer = 0.0f;
+	m_isHurt = true;
+
+	if (m_healthPoint <= 0)
+	{
+		m_healthPoint = 0;
+		m_currentAnimState = CharacterAnimationState::DEATH;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
+	}
 }
 
-const ProjectileData& CharacterPlayer::GetCurrentProjectileData() const
+bool PlayerCharacter::IsCompletelyDead() const
+{
+	return (m_currentAnimState == CharacterAnimationState::DEATH && m_animation.IsFinished());
+}
+
+const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 {
 	return m_projectileDataMap.at(m_currentWeapon);
+}
+
+bool PlayerCharacter::IsInvincible() const
+{
+	return m_isInvincible;
 }

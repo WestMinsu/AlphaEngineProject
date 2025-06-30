@@ -11,11 +11,11 @@ struct AttackHitbox
 	AEVec2 size;
 };
 
-class CharacterPlayer : public ACharacter
+class PlayerCharacter : public ACharacter
 {
 public:
-	CharacterPlayer();
-	~CharacterPlayer();
+	PlayerCharacter();
+	~PlayerCharacter();
 
 	void Init(AEVec2 position) override;
 	void Update(f32 dt) override;
@@ -24,22 +24,49 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
+	bool IsCompletelyDead() const;
+	bool IsInvincible() const;
 
-	Animation& GetAnimation() { return m_animation; }
-	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }
+	Animation& GetAnimation() 
+	{
+		return m_animation; 
+	}
+	CharacterAnimationState GetCurrentAnimState() const 
+	{
+		return m_currentAnimState;
+	}
 	s32 GetCurrentAnimationFrame() const;
-	const AttackHitbox& GetCurrentAttackHitbox() const;
+	const AttackHitbox& GetCurrentMeleeHitbox() const;
 
-	bool HasFiredProjectile() const { return m_hasFiredProjectile; }
-	void SetFiredProjectile(bool fired) { m_hasFiredProjectile = fired; }
-
-	bool IsMeleeAttackHitboxActive() const { return m_isMeleeAttackHitboxActive; }
-	void RegisterHit() { m_hasHitEnemyThisAttack = true; }
-	bool HasHitEnemyThisAttack() const { return m_hasHitEnemyThisAttack; }
-
+	bool HasFiredProjectile() const 
+	{
+		return m_hasFiredProjectile;
+	}
+	void SetFiredProjectile(bool fired)
+	{
+		m_hasFiredProjectile = fired;
+	}
+	bool IsMeleeAttackHitboxActive() const 
+	{ 
+		return m_isMeleeAttackHitboxActive; 
+	}
+	void RegisterHit()
+	{
+		m_hasHitEnemyThisAttack = true; 
+	}
+	bool HasHitEnemyThisAttack() const
+	{
+		return m_hasHitEnemyThisAttack;
+	}
 	const ProjectileData& GetCurrentProjectileData() const;
-	WeaponType GetCurrentWeaponType() const { return m_currentWeapon; }
-	const std::vector<WeaponType>& GetAvailableWeapons() const { return m_availableWeapons; }
+	WeaponType GetCurrentWeaponType() const 
+	{ 
+		return m_currentWeapon; 
+	}
+	const std::vector<WeaponType>& GetAvailableWeapons() const 
+	{
+		return m_availableWeapons;
+	}
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -68,4 +95,9 @@ private:
 	std::vector<WeaponType> m_availableWeapons;
 	WeaponType m_currentWeapon;
 	int m_currentWeaponIndex;
+
+	bool m_isInvincible;
+	f32 m_invincibilityTimer;
+	const f32 m_invincibilityDuration = 0.7f;
+	bool m_isHurt;
 };

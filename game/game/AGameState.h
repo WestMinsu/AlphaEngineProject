@@ -6,7 +6,9 @@ enum class GameState
 	NONE,
 	INTRO,
 	MAIN_MENU,
-	MAIN_GAME
+	MAIN_GAME,
+	GAME_CLEAR,
+	GAME_OVER,
 };
 
 class AGameState

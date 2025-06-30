@@ -2,17 +2,17 @@
 #include "ACharacter.h"
 #include "Animation.h"
 #include <map>
-#include "CharacterPlayer.h"
+#include "PlayerCharacter.h"
 #include "AIState.h" 
 
-class CharacterMageEnemy : public ACharacter
+class MageEnemyCharacter : public ACharacter
 {
 public:
-	CharacterMageEnemy();
-	~CharacterMageEnemy();
+	MageEnemyCharacter();
+	~MageEnemyCharacter();
 
 	void Init(AEVec2 position) override;
-	void Init(AEVec2 position, CharacterPlayer* player);
+	void Init(AEVec2 position, PlayerCharacter* player);
 	void Update(f32 dt) override;
 	void Move(f32 dt) override;
 	void Attack() override;
@@ -32,7 +32,7 @@ private:
 	ProjectileData m_projectileData;
 
 	EnemyAIState m_currentAIState;
-	CharacterPlayer* m_pPlayer;
+	PlayerCharacter* m_pPlayer;
 
 	f32 m_detectionRange;
 	f32 m_attackRange;
@@ -41,4 +41,5 @@ private:
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
 	bool m_hasFiredProjectile;
+	bool m_isHurt;
 };
