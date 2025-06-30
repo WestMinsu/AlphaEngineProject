@@ -232,32 +232,6 @@ void PlayerCharacter::Update(f32 dt)
 	if (!m_isGrounded)
 		m_velocityY += m_gravity * dt;
 
-	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
-
-	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.y += std::copysign(1.0f, m_velocityY);
-		std::cout << "Call Y" << std::endl;
-	}
-	
-	if (checkCollisionTileMap(m_position, m_size))
-	{
-		m_position.y -= std::copysign(1.0f, m_velocityY);
-	}
-
-	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.x += std::copysign(1.0f, m_velocityX);
-		std::cout << "Call X" << std::endl;
-	}
-
-	if (checkCollisionTileMap(m_position, m_size))
-	{
-		m_position.x -= std::copysign(1.0f, m_velocityX);
-	}
-
 	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
 	{
 		m_position.y = m_groundLevel;
@@ -270,6 +244,33 @@ void PlayerCharacter::Update(f32 dt)
 				m_velocityX = 0.0f;
 			}
 		}
+	}
+
+	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.y += std::copysign(1.0f, m_velocityY);
+		std::cout << "Call Y" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.y -= std::copysign(1.0f, m_velocityY);
+		if(m_velocityY < 0) m_isGrounded = true;
+	}
+
+	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.x += std::copysign(1.0f, m_velocityX);
+		std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.x -= std::copysign(1.0f, m_velocityX);
 	}
 
 	CharacterAnimationState desiredState;
