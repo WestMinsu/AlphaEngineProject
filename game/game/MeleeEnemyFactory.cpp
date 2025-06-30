@@ -1,7 +1,9 @@
 #include "MeleeEnemyFactory.h"
 #include "MeleeEnemyCharacter.h"
 
-ACharacter* MeleeEnemyFactory::CreateEnemy(AEVec2 position)
+ACharacter* MeleeEnemyFactory::CreateEnemy(AEVec2 position, PlayerCharacter* player)
 {
-    return new MeleeEnemyCharacter();
+    MeleeEnemyCharacter* melee = new MeleeEnemyCharacter();
+    melee->Init(position, player);
+    return melee;
 }

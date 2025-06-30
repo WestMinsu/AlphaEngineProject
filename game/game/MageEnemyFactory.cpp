@@ -1,6 +1,9 @@
 #include "MageEnemyFactory.h"
+#include "MageEnemyCharacter.h"
 
-ACharacter* MageEnemyFactory::CreateEnemy(AEVec2 position)
+ACharacter* MageEnemyFactory::CreateEnemy(AEVec2 position, PlayerCharacter* player)
 {
-    return nullptr;
+    MageEnemyCharacter* mage = new MageEnemyCharacter();
+    mage->Init(position, player);
+    return mage;
 }
