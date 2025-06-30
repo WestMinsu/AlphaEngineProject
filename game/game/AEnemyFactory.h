@@ -4,8 +4,9 @@
 // Abstract Enemy Factory Class
 class AEnemyFactory
 {
+public:
 	~AEnemyFactory() {};
 
-	virtual ACharacter* CreateEnemy()=0;
+	virtual ACharacter* CreateEnemy(AEVec2 position)=0;
 };
 
