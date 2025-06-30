@@ -20,9 +20,9 @@ PlayerCharacter::PlayerCharacter()
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
-	m_jumpStrength = 600.0f;
-	m_isGrounded = true;
-	m_groundLevel = 0.0f;
+	m_jumpStrength = 800.0f;
+	m_isGrounded = false;
+	m_groundLevel = -kHalfWindowHeight + 100.0f;
 
 	m_isMeleeAttacking = false;
 	m_isMeleeAttackHitboxActive = false;
