@@ -258,7 +258,7 @@ void TileMap::LoadTilesets(const char* tilesetDir)
 				f32 w = obj->FloatAttribute("width");
 				f32 h = obj->FloatAttribute("height");
 
-				boxes.push_back({ x, y, w * m_tileScale, h * m_tileScale });
+				boxes.push_back({ x, y, w, h});
 			}
 			tilesetInfo.collisions[tilesetInfo.firstGId + tileID] = boxes;
 
@@ -307,8 +307,8 @@ void TileMap::ExtractWorldColliders()
 						CollisionBox worldBox;
 						worldBox.x = x * m_tileSize * m_tileScale + box.x;
 						worldBox.y = y * m_tileSize * m_tileScale + box.y;
-						worldBox.width = box.width;
-						worldBox.height = box.height;
+						worldBox.width = box.width * m_tileScale;
+						worldBox.height = box.height * m_tileScale;
 
 						m_collisionBoxes.push_back(worldBox);
 					}
