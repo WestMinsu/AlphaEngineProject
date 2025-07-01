@@ -1,5 +1,8 @@
 #include "SpawnEnemy.h"
+#include <AEEngine.h>
+#include <vector>
 #include "EnemyFactory.h"
+#include "ACharacter.h"
 
 SpawnEnemy::SpawnEnemy(AEVec2 pos)
 {
@@ -14,7 +17,7 @@ SpawnEnemy::~SpawnEnemy()
 
 }
 
-void SpawnEnemy::Update(f32 dt)
+void SpawnEnemy::Update(f32 dt, std::vector<ACharacter*>& enemies)
 {
 	
 }

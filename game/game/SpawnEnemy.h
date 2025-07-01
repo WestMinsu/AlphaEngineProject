@@ -1,6 +1,8 @@
 #pragma once
 #include <AEEngine.h>
 #include "EnemyFactory.h"
+#include <vector>
+#include "ACharacter.h"
 
 class SpawnEnemy
 {
@@ -8,8 +10,7 @@ public:
 	SpawnEnemy(AEVec2 pos);
 	~SpawnEnemy();
 
-	void Update(f32 dt);
-	void Draw();
+	void Update(f32 dt, std::vector<ACharacter*>&);
 	void Destroy();
 
 private:
