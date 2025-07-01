@@ -20,6 +20,8 @@ public:
 	void TakeDamage(s32 damage, DamageType damageType) override;
 	bool IsCompletelyDead() const;
 	bool IsInvincible() const;
+	// DUMP Do Not Use
+	PlayerCharacter* Clone() override;
 
 	int GetWeaponUseCount(DamageType type) const;
 	void ConsumeCurrentWeapon();
