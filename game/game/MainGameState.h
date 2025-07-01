@@ -10,6 +10,7 @@
 #include "Background.h"
 #include "BossCharacter.h"
 #include "VisualEffect.h"
+#include "EnemyFactory.h"
 
 class MainGameState : public AGameState
 {
@@ -29,6 +30,11 @@ private:
 	PlayerCharacter m_Player;
 	MeleeEnemyCharacter m_MeleeEnemy; 
 	MageEnemyCharacter m_MageEnemy;
+
+	//std::vector<MeleeEnemyCharacter*> m_MeleeEnemies;
+	//std::vector<MageEnemyCharacter*> m_MageEnemies;
+	std::vector<ACharacter*> m_Enemies;
+	
 	BossCharacter m_Boss;
 
 	std::vector<Projectile> m_playerProjectiles; 
@@ -36,6 +42,7 @@ private:
 	std::vector<VisualEffect> m_visualEffects;
 
 	Background m_Background;
+	EnemyFactory* m_factory;
 
 	AEGfxTexture* m_pUiSlot;      
 	std::map<WeaponType, AEGfxTexture*> m_weaponIconMap;
