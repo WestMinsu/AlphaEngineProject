@@ -9,6 +9,7 @@ class MageEnemyCharacter : public ACharacter
 {
 public:
 	MageEnemyCharacter();
+	MageEnemyCharacter(MageEnemyCharacter*);
 	~MageEnemyCharacter();
 
 	void Init(AEVec2 position) override;
@@ -19,6 +20,7 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
+	MageEnemyCharacter* Clone() override;
 
 	Animation& GetAnimation() { return m_animation; }
 	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }

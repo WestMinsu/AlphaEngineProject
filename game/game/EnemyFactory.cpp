@@ -23,7 +23,7 @@ ACharacter* EnemyFactory::Create(const std::string& name)
 	if (it != m_enemyPrototypes.end())
 	{
 		// To Do Fix
-		return it->second;
+		return it->second->Clone();	
 	}
 	return nullptr;
 }

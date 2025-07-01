@@ -37,6 +37,8 @@ public:
 	void Draw() override;
 	void TakeDamage(s32 damage) override;
 	void Destroy() override;
+	// DUMP, Do Not Use
+	BossCharacter* Clone();
 
 	Animation& GetAnimation() { return m_animation; }
 	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }

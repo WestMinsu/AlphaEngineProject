@@ -10,6 +10,7 @@ class MeleeEnemyCharacter : public ACharacter
 {
 public:
 	MeleeEnemyCharacter();
+	MeleeEnemyCharacter(MeleeEnemyCharacter*);
 	~MeleeEnemyCharacter();
 
 	void Init(AEVec2 position) override;
@@ -20,6 +21,7 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	void TakeDamage(s32 damage) override;
+	MeleeEnemyCharacter* Clone() override;
 
 private:
 	Animation m_animation;

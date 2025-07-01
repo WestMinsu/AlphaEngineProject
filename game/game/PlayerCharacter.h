@@ -26,6 +26,8 @@ public:
 	void TakeDamage(s32 damage) override;
 	bool IsCompletelyDead() const;
 	bool IsInvincible() const;
+	// DUMP
+	PlayerCharacter* Clone() override;
 
 	Animation& GetAnimation() 
 	{

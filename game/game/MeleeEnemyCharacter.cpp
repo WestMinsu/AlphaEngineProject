@@ -25,6 +25,26 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_isHurt = false;
 }
 
+MeleeEnemyCharacter::MeleeEnemyCharacter(MeleeEnemyCharacter* copy)
+{
+	m_size = { 200.f, 200.f };
+	m_healthPoint = 50;
+	m_characterSpeed = 100.f;
+	m_currentDirection = CharacterDirection::LEFT;
+	m_currentAnimState = CharacterAnimationState::IDLE;
+
+	m_currentAIState = EnemyAIState::IDLE;
+	m_pPlayer = nullptr;
+	m_detectionRange = 500.0f;
+	m_attackRange = 150.0f;
+	m_attackCooldownTimer = 0.0f;
+	m_attackCooldownDuration = 2.0f;
+
+	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
+	m_hitboxOffset = { 0.f, 0.f };
+	m_isHurt = false;
+}
+
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
 {
 }
@@ -200,4 +220,9 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage)
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
+}
+
+MeleeEnemyCharacter* MeleeEnemyCharacter::Clone()
+{
+	return new MeleeEnemyCharacter(*this);
 }

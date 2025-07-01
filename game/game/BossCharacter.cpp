@@ -344,6 +344,11 @@ void BossCharacter::Destroy()
 {
 }
 
+BossCharacter* BossCharacter::Clone()
+{
+	return nullptr;
+}
+
 bool BossCharacter::IsUnbeatable() const
 {
 	return m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF || !m_isAttackable;

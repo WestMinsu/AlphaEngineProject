@@ -402,3 +402,8 @@ bool PlayerCharacter::IsInvincible() const
 {
 	return m_isInvincible;
 }
+
+PlayerCharacter* PlayerCharacter::Clone()
+{
+	return nullptr;
+}
