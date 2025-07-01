@@ -28,6 +28,29 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_isHurt = false;
 }
 
+MageEnemyCharacter::MageEnemyCharacter(MageEnemyCharacter* prototype)
+{
+	m_size = prototype->m_size;
+	m_healthPoint = prototype->m_healthPoint;
+	m_characterSpeed = prototype->m_characterSpeed;
+	m_currentDirection = prototype->m_currentDirection;
+	m_currentAnimState = prototype->m_currentAnimState;
+
+	m_currentAIState = prototype->m_currentAIState;
+	m_pPlayer = prototype->m_pPlayer;
+	m_detectionRange = prototype->m_attackRange;
+	m_attackRange = prototype->m_attackRange;
+	m_idealRange = prototype->m_idealRange;
+
+	m_attackCooldownTimer = 0.0f;
+	m_attackCooldownDuration = prototype->m_attackCooldownDuration;
+	m_hasFiredProjectile = false;
+
+	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
+	m_hitboxOffset = { 0.f, 0.f };
+	m_isHurt = false;
+}
+
 MageEnemyCharacter::~MageEnemyCharacter() {}
 
 void MageEnemyCharacter::Init(AEVec2 position) {}
@@ -198,4 +221,9 @@ void MageEnemyCharacter::TakeDamage(s32 damage)
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
+}
+
+MageEnemyCharacter* MageEnemyCharacter::Clone()
+{
+	return new MageEnemyCharacter(*this);
 }

@@ -25,20 +25,20 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_isHurt = false;
 }
 
-MeleeEnemyCharacter::MeleeEnemyCharacter(MeleeEnemyCharacter* copy)
+MeleeEnemyCharacter::MeleeEnemyCharacter(MeleeEnemyCharacter* prototype)
 {
-	m_size = { 200.f, 200.f };
-	m_healthPoint = 50;
-	m_characterSpeed = 100.f;
-	m_currentDirection = CharacterDirection::LEFT;
-	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_size = prototype->m_size;
+	m_healthPoint = prototype->m_healthPoint;
+	m_characterSpeed = prototype->m_characterSpeed;
+	m_currentDirection = prototype->m_currentDirection;
+	m_currentAnimState = prototype->m_currentAnimState;
 
-	m_currentAIState = EnemyAIState::IDLE;
-	m_pPlayer = nullptr;
-	m_detectionRange = 500.0f;
-	m_attackRange = 150.0f;
+	m_currentAIState = prototype->m_currentAIState;
+	m_pPlayer = prototype->m_pPlayer;
+	m_detectionRange = prototype->m_attackRange;
+	m_attackRange = prototype->m_attackRange;
 	m_attackCooldownTimer = 0.0f;
-	m_attackCooldownDuration = 2.0f;
+	m_attackCooldownDuration = prototype->m_attackCooldownDuration;
 
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
