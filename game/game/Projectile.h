@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include "ACharacter.h"
 #include "WeaponData.h"
+#include "GameTypes.h"
 
 class Projectile
 {
@@ -21,7 +22,7 @@ public:
 	const AEVec2& GetPosition() const { return m_position; }
 	const AEVec2& GetSize() const { return m_size; }
 	s32 GetDamage() const { return m_damage; }
-
+	DamageType GetType() const { return m_type; }
 private:
 	AEVec2 m_position;
 	AEVec2 m_velocity;
@@ -29,5 +30,6 @@ private:
 	s32 m_damage;
 	Animation m_animation;
 	AnimData m_animData;
+	DamageType m_type;
 	bool m_isActive;
 };

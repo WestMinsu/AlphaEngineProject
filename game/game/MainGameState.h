@@ -11,6 +11,7 @@
 #include "BossCharacter.h"
 #include "VisualEffect.h"
 #include "EnemyFactory.h"
+#include "FireWormEnemyCharacter.h"
 
 class MainGameState : public AGameState
 {
@@ -35,6 +36,8 @@ private:
 	//std::vector<MageEnemyCharacter*> m_MageEnemies;
 	std::vector<ACharacter*> m_Enemies;
 	
+	FireWormEnemyCharacter m_FireWormEnemy;
+
 	BossCharacter m_Boss;
 
 	std::vector<Projectile> m_playerProjectiles; 
@@ -45,7 +48,7 @@ private:
 	EnemyFactory* m_factory;
 
 	AEGfxTexture* m_pUiSlot;      
-	std::map<WeaponType, AEGfxTexture*> m_weaponIconMap;
+	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
 	AnimData m_lightningEffectData;
 
 	AEGfxTexture* m_pHealthBarFrame;

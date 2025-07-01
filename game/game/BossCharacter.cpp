@@ -89,6 +89,17 @@ void BossCharacter::Update(f32 dt)
 	if (!m_pPlayer) 
 		return;
 
+	if (m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF)
+	{
+		if (m_animation.IsFinished())
+		{
+			m_isAttackable = true;
+			m_currentAIState = BossAIState::IDLE;
+		}
+		m_animation.Update(dt);
+		return;
+	}
+
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 
 	if (playerPos.x < m_position.x)
@@ -266,13 +277,12 @@ void BossCharacter::Draw()
 
 		if (m_isInBuffState)
 		{
-			// <<< 핵심 수정: 3방향 평행 레이저 그리기 >>>
-			float yOffsets[] = { 150.f, 0.f, -150.f }; // 위, 중간, 아래 Y축 오프셋
+			float yOffsets[] = { 150.f, 0.f, -150.f }; 
 			for (float yOffset : yOffsets)
 			{
 				AEMtx33 laserTransform;
 				AEMtx33Trans(&translate, basePosition.x, basePosition.y + yOffset);
-				AEMtx33Rot(&rotate, 0); // 회전 없음
+				AEMtx33Rot(&rotate, 0);
 				AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
 				AEMtx33Concat(&laserTransform, &rotate, &scale);
 				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
@@ -303,7 +313,7 @@ void BossCharacter::Draw()
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
-void BossCharacter::TakeDamage(s32 damage)
+void BossCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (!m_isAttackable) 
 		return;
@@ -330,6 +340,8 @@ void BossCharacter::TakeDamage(s32 damage)
 		m_isInBuffState = true;
 		m_isAttackable = false;
 		m_currentAIState = BossAIState::BUFF;
+		m_currentAnimState = CharacterAnimationState::BUFF;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 	else if (m_healthPoint <= m_maxHealth * 0.5f && !m_hasGlowed)
 	{
@@ -337,6 +349,8 @@ void BossCharacter::TakeDamage(s32 damage)
 		m_healthPoint += static_cast<s32>(m_maxHealth * 0.15f);
 		m_isAttackable = false;
 		m_currentAIState = BossAIState::GLOWING;
+		m_currentAnimState = CharacterAnimationState::GLOWING;
+		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 }
 

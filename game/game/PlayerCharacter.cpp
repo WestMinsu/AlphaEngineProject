@@ -34,7 +34,7 @@ PlayerCharacter::PlayerCharacter()
 	m_isDashing = false;
 	m_dashSpeed = 800.f;
 
-	m_currentWeapon = WeaponType::FIRE;
+	m_currentWeapon = DamageType::FIRE;
 	m_currentWeaponIndex = 0;
 
 	m_isInvincible = false;
@@ -65,14 +65,16 @@ void PlayerCharacter::Init(AEVec2 position)
 	fireData.damage = 10;
 	fireData.size = { 200.f, 200.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[WeaponType::FIRE] = fireData;
+	fireData.type = { DamageType::FIRE };
+	m_projectileDataMap[fireData.type] = fireData;
 
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 100;
 	iceData.size = { 200.f, 200.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[WeaponType::ICE] = iceData;
+	iceData.type = { DamageType::ICE };
+	m_projectileDataMap[iceData.type] = iceData;
 
 
 	for (auto& pair : m_animDataMap)
@@ -84,15 +86,19 @@ void PlayerCharacter::Init(AEVec2 position)
 		pair.second.animData.pTexture = LoadImageAsset(pair.second.animData.texturePath.c_str());
 	}
 
-	m_availableWeapons.push_back(WeaponType::FIRE);
-	m_availableWeapons.push_back(WeaponType::ICE);
-	m_availableWeapons.push_back(WeaponType::LIGHTNING);
+	m_availableWeapons.push_back(DamageType::FIRE);
+	m_availableWeapons.push_back(DamageType::ICE);
+	m_availableWeapons.push_back(DamageType::LIGHTNING);
 
 	m_attackHitboxes.resize(8);
 	m_attackHitboxes[3] = { { m_size.x * 0.25f, m_size.y * -0.15f },  { m_size.x * 0.40f, m_size.y * 0.70f } };
 	m_attackHitboxes[4] = { { m_size.x * 0.28f, m_size.y * -0.3f },   { m_size.x * 0.40f, m_size.y * 0.20f } };
 	m_attackHitboxes[5] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
 	m_attackHitboxes[6] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
+
+	m_weaponUseCounts[DamageType::FIRE] = 10;
+	m_weaponUseCounts[DamageType::ICE] = 10;
+	m_weaponUseCounts[DamageType::LIGHTNING] = 5;
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
@@ -148,7 +154,7 @@ void PlayerCharacter::Update(f32 dt)
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 	}
-	if (AEInputCheckCurr(AEVK_S) && !isAttacking)
+	if (AEInputCheckCurr(AEVK_S) && !isAttacking && (m_weaponUseCounts.at(m_currentWeapon) > 0))
 	{
 		m_isProjectileAttacking = true;
 		m_hasFiredProjectile = false;
@@ -252,7 +258,7 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.y += std::copysign(1.0f, m_velocityY);
-		std::cout << "Call Y" << std::endl;
+		//std::cout << "Call Y" << std::endl;
 	}
 
 	if (checkCollisionTileMap(m_position, m_size))
@@ -265,7 +271,7 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.x += std::copysign(1.0f, m_velocityX);
-		std::cout << "Call X" << std::endl;
+		//std::cout << "Call X" << std::endl;
 	}
 
 	if (checkCollisionTileMap(m_position, m_size))
@@ -366,7 +372,7 @@ void PlayerCharacter::Attack()
 {
 }
 
-void PlayerCharacter::TakeDamage(s32 damage)
+void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_isInvincible || m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -407,3 +413,24 @@ PlayerCharacter* PlayerCharacter::Clone()
 {
 	return nullptr;
 }
+
+int PlayerCharacter::GetWeaponUseCount(DamageType type) const
+{
+	if (m_weaponUseCounts.count(type))
+	{
+		return m_weaponUseCounts.at(type);
+	}
+	return 0;
+}
+
+void PlayerCharacter::ConsumeCurrentWeapon()
+{
+	if (m_weaponUseCounts.count(m_currentWeapon))
+	{
+		if (m_weaponUseCounts[m_currentWeapon] > 0)
+		{
+			m_weaponUseCounts[m_currentWeapon]--;
+		}
+	}
+}
+

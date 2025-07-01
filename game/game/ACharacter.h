@@ -1,30 +1,7 @@
 #pragma once
 #include "AEEngine.h"
-
-enum class CharacterAnimationState
-{
-	IDLE,
-	WALK,
-	JUMP,
-	MELEE_ATTACK,
-	RANGED_ATTACK,
-	DASH,
-	DEATH,
-	HURT,
-
-	//for boss
-	APPEARANCE,
-	GLOWING,
-	LASER_CAST,
-	LASER_SHEET,
-	BUFF
-};
-
-enum class CharacterDirection
-{
-	LEFT,
-	RIGHT
-};
+#include "WeaponData.h"
+#include "GameTypes.h"
 
 class ACharacter
 {
@@ -36,7 +13,7 @@ public:
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
 	virtual void Destroy() = 0;
-	virtual void TakeDamage(s32 damage) = 0;
+	virtual void TakeDamage(s32 damage, DamageType damageType) = 0;
 	virtual ACharacter* Clone() = 0;
 
 	const AEVec2& GetPosition() const 
@@ -63,7 +40,10 @@ public:
 	{
 		return m_hitboxOffset;
 	}
-
+	ElementType GetElement() const 
+	{ 
+		return m_element; 
+	} 
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
@@ -75,4 +55,5 @@ protected:
 	f32 m_airAcceleration;
 
 	CharacterDirection m_currentDirection;
+	ElementType m_element;
 };

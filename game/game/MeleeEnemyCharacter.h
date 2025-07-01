@@ -20,8 +20,10 @@ public:
 	void Attack() override;
 	void Draw() override;
 	void Destroy() override;
-	void TakeDamage(s32 damage) override;
+	void TakeDamage(s32 damage, DamageType damageType) override;
 	MeleeEnemyCharacter* Clone() override;
+
+
 
 private:
 	Animation m_animation;

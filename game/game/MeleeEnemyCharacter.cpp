@@ -202,7 +202,7 @@ void MeleeEnemyCharacter::Destroy()
 	m_animation.Destroy();
 }
 
-void MeleeEnemyCharacter::TakeDamage(s32 damage)
+void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -210,7 +210,7 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage)
 	}
 
 	m_healthPoint -= damage;
-	std::cout << "Enemy takes damage! HP: " << m_healthPoint << std::endl;
+	std::cout << "Melee Enemy takes damage! HP: " << m_healthPoint << std::endl;
 
 	m_isHurt = true;
 
