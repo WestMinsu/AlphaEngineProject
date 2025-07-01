@@ -96,6 +96,10 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_attackHitboxes[5] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
 	m_attackHitboxes[6] = { { m_size.x * 0.28f, m_size.y * -0.4f },  { m_size.x * 0.40f, m_size.y * 0.10f } };
 
+	m_weaponUseCounts[DamageType::FIRE] = 10;
+	m_weaponUseCounts[DamageType::ICE] = 10;
+	m_weaponUseCounts[DamageType::LIGHTNING] = 5;
+
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
@@ -150,7 +154,7 @@ void PlayerCharacter::Update(f32 dt)
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 	}
-	if (AEInputCheckCurr(AEVK_S) && !isAttacking)
+	if (AEInputCheckCurr(AEVK_S) && !isAttacking && (m_weaponUseCounts.at(m_currentWeapon) > 0))
 	{
 		m_isProjectileAttacking = true;
 		m_hasFiredProjectile = false;
@@ -403,4 +407,24 @@ const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 bool PlayerCharacter::IsInvincible() const
 {
 	return m_isInvincible;
+}
+
+int PlayerCharacter::GetWeaponUseCount(DamageType type) const
+{
+	if (m_weaponUseCounts.count(type))
+	{
+		return m_weaponUseCounts.at(type);
+	}
+	return 0;
+}
+
+void PlayerCharacter::ConsumeCurrentWeapon()
+{
+	if (m_weaponUseCounts.count(m_currentWeapon))
+	{
+		if (m_weaponUseCounts[m_currentWeapon] > 0)
+		{
+			m_weaponUseCounts[m_currentWeapon]--;
+		}
+	}
 }

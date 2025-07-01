@@ -151,6 +151,7 @@ void MainGameState::Update(f32 dt)
 			spawnPos.y = playerPos.y + playerSize.y * offsetY_Ratio;
 			const ProjectileData& projData = m_Player.GetCurrentProjectileData();
 			newProjectile.Init(spawnPos, directionVec, projData);
+			m_Player.ConsumeCurrentWeapon();
 			m_Player.SetFiredProjectile(true);
 		}
 		else if (currentWeapon == DamageType::LIGHTNING)
@@ -163,6 +164,7 @@ void MainGameState::Update(f32 dt)
 				VisualEffect& newEffect = m_visualEffects.back();
 				newEffect.Init(target->GetPosition(), m_lightningEffectData);
 			}
+			m_Player.ConsumeCurrentWeapon();
 			m_Player.SetFiredProjectile(true);
 		}
 	}
@@ -476,6 +478,7 @@ void MainGameState::DrawUI()
 
 	DamageType currentWeapon = m_Player.GetCurrentWeaponType();
 
+	char countStr[10];
 	for (size_t i = 0; i < totalSlots; ++i)
 	{
 		float posX = startX + i * (slotSize + slotMargin) + xCam;
@@ -492,6 +495,12 @@ void MainGameState::DrawUI()
 		{
 			DrawHollowRect(posX, posY, slotSize, slotSize, 1.0f, 1.0f, 0.0f, 1.0f);
 		}
+
+		f32 TextScale = 0.5f;
+		int useCount = m_Player.GetWeaponUseCount(slotWeaponType);
+		sprintf_s(countStr, "%d", useCount);
+		AEVec2 fontPos = GetNormalizedCoords(posX-xCam, posY);
+		AEGfxPrint(GameManager::m_font, countStr, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 	}
 
 	if (m_Boss.IsAttackable())

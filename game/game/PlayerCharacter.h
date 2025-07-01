@@ -21,6 +21,9 @@ public:
 	bool IsCompletelyDead() const;
 	bool IsInvincible() const;
 
+	int GetWeaponUseCount(DamageType type) const;
+	void ConsumeCurrentWeapon();
+
 	Animation& GetAnimation()
 	{
 		return m_animation;
@@ -89,6 +92,7 @@ private:
 	std::vector<DamageType> m_availableWeapons;
 	DamageType m_currentWeapon;
 	int m_currentWeaponIndex;
+	std::map<DamageType, int> m_weaponUseCounts;
 
 	bool m_isInvincible;
 	f32 m_invincibilityTimer;
