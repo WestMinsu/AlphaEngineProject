@@ -17,22 +17,22 @@ public:
 	void Attack() override;
 	void Draw() override;
 	void Destroy() override;
-	void TakeDamage(s32 damage) override;
+	void TakeDamage(s32 damage, DamageType damageType) override;
 	bool IsCompletelyDead() const;
 	bool IsInvincible() const;
 
-	Animation& GetAnimation() 
+	Animation& GetAnimation()
 	{
-		return m_animation; 
+		return m_animation;
 	}
-	CharacterAnimationState GetCurrentAnimState() const 
+	CharacterAnimationState GetCurrentAnimState() const
 	{
 		return m_currentAnimState;
 	}
 	s32 GetCurrentAnimationFrame() const;
 	const AttackHitbox& GetCurrentMeleeHitbox() const;
 
-	bool HasFiredProjectile() const 
+	bool HasFiredProjectile() const
 	{
 		return m_hasFiredProjectile;
 	}
@@ -40,24 +40,24 @@ public:
 	{
 		m_hasFiredProjectile = fired;
 	}
-	bool IsMeleeAttackHitboxActive() const 
-	{ 
-		return m_isMeleeAttackHitboxActive; 
+	bool IsMeleeAttackHitboxActive() const
+	{
+		return m_isMeleeAttackHitboxActive;
 	}
 	void RegisterHit()
 	{
-		m_hasHitEnemyThisAttack = true; 
+		m_hasHitEnemyThisAttack = true;
 	}
 	bool HasHitEnemyThisAttack() const
 	{
 		return m_hasHitEnemyThisAttack;
 	}
 	const ProjectileData& GetCurrentProjectileData() const;
-	DamageType GetCurrentWeaponType() const 
-	{ 
-		return m_currentWeapon; 
+	DamageType GetCurrentWeaponType() const
+	{
+		return m_currentWeapon;
 	}
-	const std::vector<DamageType>& GetAvailableWeapons() const 
+	const std::vector<DamageType>& GetAvailableWeapons() const
 	{
 		return m_availableWeapons;
 	}

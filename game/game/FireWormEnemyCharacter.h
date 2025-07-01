@@ -1,11 +1,11 @@
 #pragma once 
 #include "RangedEnemyCharacter.h"
 
-class MageEnemyCharacter : public RangedEnemyCharacter
+class FireWormEnemyCharacter : public RangedEnemyCharacter
 {
 public:
-	MageEnemyCharacter();
-	~MageEnemyCharacter();
+	FireWormEnemyCharacter();
+	~FireWormEnemyCharacter();
 
 	void Init(AEVec2 position, PlayerCharacter* player);
 	void TakeDamage(s32 damage, DamageType damageType) override;

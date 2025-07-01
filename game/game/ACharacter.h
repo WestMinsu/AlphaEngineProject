@@ -13,7 +13,7 @@ public:
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
 	virtual void Destroy() = 0;
-	virtual void TakeDamage(s32 damage) = 0;
+	virtual void TakeDamage(s32 damage, DamageType damageType) = 0;
 
 	const AEVec2& GetPosition() const 
 	{ 

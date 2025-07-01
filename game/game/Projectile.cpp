@@ -22,6 +22,7 @@ void Projectile::Init(AEVec2 startPos, AEVec2 direction, const ProjectileData& d
 	m_position = startPos;
 	m_size = data.size;
 	m_damage = data.damage;
+	m_type = data.type;
 
 	AEVec2Normalize(&direction, &direction);
 	m_velocity.x = direction.x * data.speed;

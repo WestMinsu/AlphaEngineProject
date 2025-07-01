@@ -60,7 +60,7 @@ struct ProjectileData
 {
 	DamageType type;
 	f32 speed;
-	s32 damage;
+	s32 damage;	
 	AEVec2 size;
 	AnimData animData;
 };

@@ -1,68 +1,52 @@
-#include "MeleeEnemyCharacter.h"
+#include "RangedEnemyCharacter.h"
+#include "PlayerCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
-#include "PlayerCharacter.h"
 #include "AssetManager.h"
 
-MeleeEnemyCharacter::MeleeEnemyCharacter()
+RangedEnemyCharacter::RangedEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
-	m_healthPoint = 50;
-	m_characterSpeed = 100.f;
+	m_healthPoint = 40;
+	m_characterSpeed = 80.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 500.0f;
-	m_attackRange = 150.0f;
+	m_detectionRange = 800.0f;
+	m_attackRange = 600.0f;
+	m_idealRange = 500.0f;
+
 	m_attackCooldownTimer = 0.0f;
-	m_attackCooldownDuration = 2.0f;
+	m_attackCooldownDuration = 3.0f;
+	m_hasFiredProjectile = false;
 
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
 }
 
-MeleeEnemyCharacter::~MeleeEnemyCharacter() 
-{
-}
+RangedEnemyCharacter::~RangedEnemyCharacter() {}
 
-void MeleeEnemyCharacter::Init(AEVec2 position)
-{
-}
+void RangedEnemyCharacter::Init(AEVec2 position) {}
 
-void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
+void RangedEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {
 	m_position = position;
-	m_pPlayer = player; 
+	m_pPlayer = player;
 	m_animation.Init();
-
-	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Fantasy Skeleton Enemies/warrior/idle.PNG", nullptr, 8, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/warrior/death.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/warrior/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/warrior/attack.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fantasy Skeleton Enemies/warrior/hurt.PNG", nullptr, 5, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-
-	for (auto& pair : m_animDataMap)
-	{
-		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
-	}
-
-	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
-
-void MeleeEnemyCharacter::Update(f32 dt)
+void RangedEnemyCharacter::Update(f32 dt)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		m_animation.Update(dt);
 		return;
 	}
-
-	if (!m_pPlayer) 
+	if (!m_pPlayer)
 		return;
 
 	if (m_isHurt && m_animation.IsFinished())
@@ -84,9 +68,14 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	case EnemyAIState::CHASE:
 	{
 		if (distanceToPlayer < m_attackRange)
+		{
 			m_currentAIState = EnemyAIState::ATTACK;
+			m_hasFiredProjectile = false;
+		}
 		else if (distanceToPlayer > m_detectionRange)
+		{
 			m_currentAIState = EnemyAIState::IDLE;
+		}
 		break;
 	}
 	case EnemyAIState::ATTACK:
@@ -102,7 +91,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	{
 		m_attackCooldownTimer += dt;
 		if (m_attackCooldownTimer >= m_attackCooldownDuration)
-			m_currentAIState = EnemyAIState::IDLE;
+			m_currentAIState = EnemyAIState::CHASE;
 		break;
 	}
 	}
@@ -110,25 +99,28 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	f32 velocityX = 0.0f;
 	CharacterAnimationState desiredAnimState = CharacterAnimationState::IDLE;
 
+	if (m_pPlayer->GetPosition().x < m_position.x)
+	{
+		m_currentDirection = CharacterDirection::LEFT;
+	}
+	else
+	{
+		m_currentDirection = CharacterDirection::RIGHT;
+	}
+
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
-		if (m_pPlayer->GetPosition().x < m_position.x)
+		if (distanceToPlayer > m_idealRange)
 		{
-			m_currentDirection = CharacterDirection::LEFT;
-			velocityX = -m_characterSpeed;
+			velocityX = (m_currentDirection == CharacterDirection::RIGHT ? m_characterSpeed : -m_characterSpeed);
+			desiredAnimState = CharacterAnimationState::WALK;
 		}
-		else
-		{
-			m_currentDirection = CharacterDirection::RIGHT;
-			velocityX = m_characterSpeed;
-		}
-		desiredAnimState = CharacterAnimationState::WALK;
 	}
 	else if (m_currentAIState == EnemyAIState::ATTACK)
 	{
-		desiredAnimState = CharacterAnimationState::MELEE_ATTACK;
+		desiredAnimState = CharacterAnimationState::RANGED_ATTACK;
 	}
-	else if (m_isHurt) 
+	else if (m_isHurt)
 	{
 		desiredAnimState = CharacterAnimationState::HURT;
 	}
@@ -144,32 +136,20 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	m_animation.Update(dt);
 }
 
-void MeleeEnemyCharacter::Move(f32 dt)
-{
-	// TODO
-}
+void RangedEnemyCharacter::Move(f32 dt) {}
+void RangedEnemyCharacter::Attack() {}
 
-void MeleeEnemyCharacter::Attack()
-{
-	// TODO
-}
-
-
-void MeleeEnemyCharacter::Draw()
+void RangedEnemyCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
-	if (m_currentDirection == CharacterDirection::LEFT)
-		AEMtx33Scale(&scale, -m_size.x, m_size.y);
-	else
-		AEMtx33Scale(&scale, m_size.x, m_size.y);
-
 	AEMtx33 rotate = { 0 };
-	AEMtx33Rot(&rotate, 0);
-
 	AEMtx33 translate = { 0 };
-	AEMtx33Trans(&translate, m_position.x, m_position.y);
-
 	AEMtx33 transform = { 0 };
+
+	AEMtx33Trans(&translate, m_position.x, m_position.y);
+	AEMtx33Rot(&rotate, 0);
+	AEMtx33Scale(&scale, m_currentDirection == CharacterDirection::RIGHT ? m_size.x : -m_size.x, m_size.y);
+
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
 
@@ -177,12 +157,12 @@ void MeleeEnemyCharacter::Draw()
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
-void MeleeEnemyCharacter::Destroy()
+void RangedEnemyCharacter::Destroy()
 {
 	m_animation.Destroy();
 }
 
-void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
+void RangedEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
@@ -190,7 +170,7 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 
 	m_healthPoint -= damage;
-	std::cout << "Melee Enemy takes damage! HP: " << m_healthPoint << std::endl;
+	std::cout << "Enemy takes damage! HP: " << m_healthPoint << std::endl;
 
 	m_isHurt = true;
 

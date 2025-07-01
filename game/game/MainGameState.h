@@ -10,6 +10,7 @@
 #include "Background.h"
 #include "BossCharacter.h"
 #include "VisualEffect.h"
+#include "FireWormEnemyCharacter.h"
 
 class MainGameState : public AGameState
 {
@@ -29,6 +30,7 @@ private:
 	PlayerCharacter m_Player;
 	MeleeEnemyCharacter m_MeleeEnemy; 
 	MageEnemyCharacter m_MageEnemy;
+	FireWormEnemyCharacter m_FireWormEnemy;
 	BossCharacter m_Boss;
 
 	std::vector<Projectile> m_playerProjectiles; 

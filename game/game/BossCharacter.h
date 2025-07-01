@@ -35,7 +35,7 @@ public:
 	void Move(f32 dt) override;
 	void Attack() override;
 	void Draw() override;
-	void TakeDamage(s32 damage) override;
+	void TakeDamage(s32 damage, DamageType damageType) override;
 	void Destroy() override;
 
 	Animation& GetAnimation() { return m_animation; }

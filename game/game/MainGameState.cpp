@@ -22,6 +22,7 @@ void MainGameState::Init()
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
 	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
@@ -72,6 +73,7 @@ void MainGameState::Update(f32 dt)
 	m_MeleeEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 	m_Boss.Update(dt);
+	m_FireWormEnemy.Update(dt);
 
 	BossAIState currentBossState = m_Boss.GetCurrentAIState();
 	if (currentBossState != m_previousBossAIState)
@@ -103,6 +105,7 @@ void MainGameState::Update(f32 dt)
 		std::vector<ACharacter*> enemies;
 		if (m_MeleeEnemy.GetHealth() > 0) enemies.push_back(&m_MeleeEnemy);
 		if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
+		if (m_FireWormEnemy.GetHealth() > 0) enemies.push_back(&m_FireWormEnemy);
 		if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
 
 		AEVec2 playerHitboxPos = m_Player.GetPosition();
@@ -115,7 +118,7 @@ void MainGameState::Update(f32 dt)
 			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				std::cout << "collsion" << std::endl;
-				m_Player.TakeDamage(1); 
+				m_Player.TakeDamage(1, DamageType::NONE); 
 				break; 
 			}
 		}
@@ -155,7 +158,7 @@ void MainGameState::Update(f32 dt)
 			ACharacter* target = FindClosestEnemyInFront();
 			if (target)
 			{
-				target->TakeDamage(25);
+				target->TakeDamage(25, currentWeapon);
 				m_visualEffects.emplace_back();
 				VisualEffect& newEffect = m_visualEffects.back();
 				newEffect.Init(target->GetPosition(), m_lightningEffectData);
@@ -165,8 +168,7 @@ void MainGameState::Update(f32 dt)
 	}
 
 	bool isMageCasting = m_MageEnemy.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
-	bool canMageFire = m_MageEnemy.GetAnimation().GetCurrentFrame() == 15 && !m_MageEnemy.HasFiredProjectile();
-
+	bool canMageFire = m_MageEnemy.GetAnimation().GetCurrentFrame() == 13 && !m_MageEnemy.HasFiredProjectile();
 	if (isMageCasting && canMageFire)
 	{
 		m_enemyProjectiles.emplace_back();
@@ -179,9 +181,22 @@ void MainGameState::Update(f32 dt)
 		m_MageEnemy.SetFiredProjectile(true);
 	}
 
+	bool isFireWormCasting = m_FireWormEnemy.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
+	bool canFireWormFire = m_FireWormEnemy.GetAnimation().GetCurrentFrame() == 11 && !m_FireWormEnemy.HasFiredProjectile();
+	if (isFireWormCasting && canFireWormFire)
+	{
+		m_enemyProjectiles.emplace_back();
+		Projectile& newProjectile = m_enemyProjectiles.back();
+		const ProjectileData& projData = m_FireWormEnemy.GetProjectileData();
+		AEVec2 directionVec = { (m_FireWormEnemy.GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
+
+		newProjectile.Init(m_FireWormEnemy.GetPosition(), directionVec, projData);
+
+		m_FireWormEnemy.SetFiredProjectile(true);
+	}
+
 	bool isBossMeleeAttacking = m_Boss.GetCurrentAIState() == BossAIState::MELEE_ATTACK;
 	bool isBossHitboxActive = m_Boss.GetAnimation().GetCurrentFrame() >= 3;
-
 	if (isBossMeleeAttacking && isBossHitboxActive && !m_Boss.HasHitPlayerThisAttack() && m_Player.GetHealth() > 0)
 	{
 		const AttackHitbox& bossHitbox = m_Boss.GetCurrentMeleeHitbox();
@@ -197,7 +212,7 @@ void MainGameState::Update(f32 dt)
 
 		if (CheckAABBCollision(bossHitboxPos, bossHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
 		{
-			m_Player.TakeDamage(15);
+			m_Player.TakeDamage(15, DamageType::NONE);
 			m_Boss.RegisterPlayerHit();
 		}
 	}
@@ -256,7 +271,7 @@ void MainGameState::Update(f32 dt)
 				AEVec2 currentLaserPos = { laserBasePos.x, laserBasePos.y + yOffset };
 				if (CheckAABBCollision(currentLaserPos, laserData.size, playerHitboxPos, m_Player.GetHitboxSize()))
 				{
-					m_Player.TakeDamage(1);
+					m_Player.TakeDamage(1, DamageType::NONE);
 					break;
 				}
 			}
@@ -270,7 +285,7 @@ void MainGameState::Update(f32 dt)
 
 			if (CheckAABBCollision(finalLaserPos, laserData.size, playerHitboxPos, m_Player.GetHitboxSize()))
 			{
-				m_Player.TakeDamage(1);
+				m_Player.TakeDamage(1, DamageType::NONE);
 			}
 		}
 	}
@@ -283,7 +298,7 @@ void MainGameState::Update(f32 dt)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
 			{
-				m_MeleeEnemy.TakeDamage(proj->GetDamage());
+				m_MeleeEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 				hit = true;
 			}
@@ -292,7 +307,16 @@ void MainGameState::Update(f32 dt)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
 			{
-				m_MageEnemy.TakeDamage(proj->GetDamage());
+				m_MageEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				proj->Deactivate();
+			}
+		}
+
+		if (!hit && proj->IsActive() && m_FireWormEnemy.GetHealth() > 0)
+		{
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
+			{
+				m_FireWormEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 			}
 		}
@@ -301,7 +325,7 @@ void MainGameState::Update(f32 dt)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_Boss.GetPosition(), m_Boss.GetSize()))
 			{
-				m_Boss.TakeDamage(proj->GetDamage());
+				m_Boss.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 			}
 		}
@@ -326,7 +350,7 @@ void MainGameState::Update(f32 dt)
 
 			if (CheckAABBCollision(proj.GetPosition(), proj.GetSize(), playerHitboxPos, m_Player.GetHitboxSize()))
 			{
-				m_Player.TakeDamage(proj.GetDamage());
+				m_Player.TakeDamage(proj.GetDamage(), DamageType::NONE);
 				proj.Deactivate();
 			}
 		}
@@ -342,17 +366,22 @@ void MainGameState::Update(f32 dt)
 
 		if (m_MeleeEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
 		{
-			m_MeleeEnemy.TakeDamage(10);
+			m_MeleeEnemy.TakeDamage(10, DamageType::NONE);
 			m_Player.RegisterHit();
 		}
 		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
 		{
-			m_MageEnemy.TakeDamage(10);
+			m_MageEnemy.TakeDamage(10, DamageType::NONE);
+			m_Player.RegisterHit();
+		}
+		else if (m_FireWormEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
+		{
+			m_FireWormEnemy.TakeDamage(10, DamageType::NONE);
 			m_Player.RegisterHit();
 		}
 		else if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable() && CheckAABBCollision(hitboxPos, currentHitbox.size, m_Boss.GetPosition(), m_Boss.GetHitboxSize()))
 		{
-			m_Boss.TakeDamage(10);
+			m_Boss.TakeDamage(10, DamageType::NONE);
 			m_Player.RegisterHit();
 		}
 	}
@@ -368,6 +397,7 @@ void MainGameState::Draw()
 	m_Background.Draw();
 	m_MeleeEnemy.Draw();
 	m_MageEnemy.Draw();
+	m_FireWormEnemy.Draw();
 
 	for (auto tm : TileMaps)
 
@@ -418,6 +448,8 @@ void MainGameState::Exit()
 	m_Player.Destroy();
 	m_MeleeEnemy.Destroy();
 	m_MageEnemy.Destroy();
+	m_FireWormEnemy.Destroy();
+	m_Boss.Destroy();
 	for (auto& projectile : m_playerProjectiles) projectile.Destroy();
 	for (auto& projectile : m_enemyProjectiles) projectile.Destroy();
 	m_playerProjectiles.clear();
@@ -489,6 +521,8 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 		enemies.push_back(&m_MeleeEnemy);
 	if (m_MageEnemy.GetHealth() > 0)
 		enemies.push_back(&m_MageEnemy);
+	if (m_FireWormEnemy.GetHealth() > 0)
+		enemies.push_back(&m_FireWormEnemy);
 	if (m_Boss.GetHealth() > 0)
 		enemies.push_back(&m_Boss);
 

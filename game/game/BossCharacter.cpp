@@ -277,13 +277,12 @@ void BossCharacter::Draw()
 
 		if (m_isInBuffState)
 		{
-			// <<< 핵심 수정: 3방향 평행 레이저 그리기 >>>
-			float yOffsets[] = { 150.f, 0.f, -150.f }; // 위, 중간, 아래 Y축 오프셋
+			float yOffsets[] = { 150.f, 0.f, -150.f }; 
 			for (float yOffset : yOffsets)
 			{
 				AEMtx33 laserTransform;
 				AEMtx33Trans(&translate, basePosition.x, basePosition.y + yOffset);
-				AEMtx33Rot(&rotate, 0); // 회전 없음
+				AEMtx33Rot(&rotate, 0);
 				AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
 				AEMtx33Concat(&laserTransform, &rotate, &scale);
 				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
@@ -314,7 +313,7 @@ void BossCharacter::Draw()
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
-void BossCharacter::TakeDamage(s32 damage)
+void BossCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (!m_isAttackable) 
 		return;

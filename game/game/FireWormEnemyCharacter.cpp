@@ -1,11 +1,11 @@
-#include "MageEnemyCharacter.h"
+#include "FireWormEnemyCharacter.h"
 #include "PlayerCharacter.h"
 #include "Constants.h"
 #include "Utility.h"
 #include <iostream>
 #include "AssetManager.h"
 
-MageEnemyCharacter::MageEnemyCharacter()
+FireWormEnemyCharacter::FireWormEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 40;
@@ -28,17 +28,19 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_isHurt = false;
 }
 
-MageEnemyCharacter::~MageEnemyCharacter() {}
+FireWormEnemyCharacter::~FireWormEnemyCharacter()
+{
+}
 
-void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
+void FireWormEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {
 	RangedEnemyCharacter::Init(position, player);
 
-	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Fantasy Skeleton Enemies/mage/idle.PNG", nullptr, 8, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/mage/death.PNG", nullptr, 18, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/mage/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Fantasy Skeleton Enemies/mage/attack.PNG", nullptr, 21, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fantasy Skeleton Enemies/mage/hurt.PNG", nullptr, 5, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Fire Worm/Sprites/Worm/Idle.PNG", nullptr, 9, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
+	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fire Worm/Sprites/Worm/Death.png", nullptr, 8, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fire Worm/Sprites/Worm/Walk.png", nullptr, 9, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
+	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Fire Worm/Sprites/Worm/Attack.png", nullptr, 16, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fire Worm/Sprites/Worm/Get Hit.png", nullptr, 3, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	for (auto& pair : m_animDataMap)
 	{
 		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
@@ -47,21 +49,27 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_projectileData.speed = 800.0f;
 	m_projectileData.damage = 5;
 	m_projectileData.size = { 150.f, 150.f };
-	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
+	m_projectileData.animData = { "Assets/Fire Worm/Sprites/Fire Ball/Move.png", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
-void MageEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
+void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		return;
 	}
 
+	if (damageType == DamageType::FIRE)
+	{
+		std::cout << "Fire Mage is IMMUNE to fire!" << std::endl;
+		return;
+	}
+
 	m_healthPoint -= damage;
-	std::cout << "Mage Enemy takes damage! HP: " << m_healthPoint << std::endl;
+	std::cout << "Fire Worm Enemy takes damage! HP: " << m_healthPoint << std::endl;
 
 	m_isHurt = true;
 

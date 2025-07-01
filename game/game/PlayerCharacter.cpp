@@ -65,14 +65,16 @@ void PlayerCharacter::Init(AEVec2 position)
 	fireData.damage = 10;
 	fireData.size = { 200.f, 200.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[DamageType::FIRE] = fireData;
+	fireData.type = { DamageType::FIRE };
+	m_projectileDataMap[fireData.type] = fireData;
 
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 100;
 	iceData.size = { 200.f, 200.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
-	m_projectileDataMap[DamageType::ICE] = iceData;
+	iceData.type = { DamageType::ICE };
+	m_projectileDataMap[iceData.type] = iceData;
 
 
 	for (auto& pair : m_animDataMap)
@@ -252,7 +254,7 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.y += std::copysign(1.0f, m_velocityY);
-		std::cout << "Call Y" << std::endl;
+		//std::cout << "Call Y" << std::endl;
 	}
 
 	if (checkCollisionTileMap(m_position, m_size))
@@ -265,7 +267,7 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.x += std::copysign(1.0f, m_velocityX);
-		std::cout << "Call X" << std::endl;
+		//std::cout << "Call X" << std::endl;
 	}
 
 	if (checkCollisionTileMap(m_position, m_size))
@@ -366,7 +368,7 @@ void PlayerCharacter::Attack()
 {
 }
 
-void PlayerCharacter::TakeDamage(s32 damage)
+void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_isInvincible || m_currentAnimState == CharacterAnimationState::DEATH)
 	{
