@@ -1,8 +1,5 @@
 #include "SpawnEnemy.h"
-#include <AEEngine.h>
-#include <vector>
-#include "EnemyFactory.h"
-#include "ACharacter.h"
+
 
 SpawnEnemy::SpawnEnemy(AEVec2 pos)
 {
