@@ -106,5 +106,5 @@ void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 FireWormEnemyCharacter* FireWormEnemyCharacter::Clone()
 {
-	return nullptr;
+	return new FireWormEnemyCharacter(*this);
 }
