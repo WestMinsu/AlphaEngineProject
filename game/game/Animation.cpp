@@ -37,10 +37,10 @@ void Animation::Play(CharacterAnimationState state, const AnimData& clipData)
 
 	if (needsRebuild)
 	{
-		if (m_mesh)
-		{
-			AEGfxMeshFree(m_mesh);
-		}
+		//if (m_mesh)
+		//{
+		//	AEGfxMeshFree(m_mesh);
+		//}
 
 		float frameU = 1.0f;
 		float frameV = 1.0f;
