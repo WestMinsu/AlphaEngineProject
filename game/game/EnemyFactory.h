@@ -9,7 +9,7 @@ public:
 	EnemyFactory();
 	~EnemyFactory();
 
-	void RegisterPrototype(std::string& name, ACharacter* prototype);
+	void RegisterPrototype(std::string name, ACharacter* prototype);
 	ACharacter* Create(const std::string& name);
 
 private:
