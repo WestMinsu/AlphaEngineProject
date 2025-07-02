@@ -30,11 +30,17 @@ void MainGameState::Init()
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 
 	m_Background.Init();
-	
+	MeleeEnemyCharacter* melee = new MeleeEnemyCharacter();
+	melee->Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	MageEnemyCharacter* mage = new MageEnemyCharacter();
+	mage->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	FireWormEnemyCharacter* fire = new FireWormEnemyCharacter();
+	fire->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+
 	//m_factory = std::make_shared<EnemyFactory>();
-	m_factory.RegisterPrototype("Melee", &m_MeleeEnemy);
-	m_factory.RegisterPrototype("Mage", &m_MageEnemy);
-	m_factory.RegisterPrototype("Fire", &m_FireWormEnemy);
+	m_factory.RegisterPrototype("Melee", melee);
+	m_factory.RegisterPrototype("Mage", mage);
+	m_factory.RegisterPrototype("Fire", fire);
 
 	m_Spawns.push_back(new SpawnEnemy({ 1000,0 }, &m_factory, "Melee"));
 	m_Spawns.push_back(new SpawnEnemy({ 1500,0 }, &m_factory, "Mage"));
