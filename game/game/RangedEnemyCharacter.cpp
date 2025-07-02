@@ -30,7 +30,10 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 
 RangedEnemyCharacter::~RangedEnemyCharacter() {}
 
-void RangedEnemyCharacter::Init(AEVec2 position) {}
+void RangedEnemyCharacter::Init(AEVec2 position) 
+{
+	ACharacter::Init(position);
+}
 
 void RangedEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {

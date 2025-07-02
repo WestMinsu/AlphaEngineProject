@@ -25,21 +25,23 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_isHurt = false;
 }
 
-MeleeEnemyCharacter::MeleeEnemyCharacter(MeleeEnemyCharacter* prototype)
+MeleeEnemyCharacter::MeleeEnemyCharacter(const MeleeEnemyCharacter& prototype)
 {
-	m_size = prototype->m_size;
-	m_healthPoint = prototype->m_healthPoint;
-	m_characterSpeed = prototype->m_characterSpeed;
-	m_currentDirection = prototype->m_currentDirection;
-	m_currentAnimState = prototype->m_currentAnimState;
+	m_size = prototype.m_size;
+	m_healthPoint = prototype.m_healthPoint;
+	m_characterSpeed = prototype.m_characterSpeed;
+	m_currentDirection = prototype.m_currentDirection;
+	m_currentAnimState = prototype.m_currentAnimState;
 
-	m_currentAIState = prototype->m_currentAIState;
-	m_pPlayer = prototype->m_pPlayer;
-	m_detectionRange = prototype->m_attackRange;
-	m_attackRange = prototype->m_attackRange;
+	m_currentAIState = prototype.m_currentAIState;
+	m_pPlayer = prototype.m_pPlayer;
+	m_detectionRange = prototype.m_attackRange;
+	m_attackRange = prototype.m_attackRange;
 	m_attackCooldownTimer = 0.0f;
-	m_attackCooldownDuration = prototype->m_attackCooldownDuration;
+	m_attackCooldownDuration = prototype.m_attackCooldownDuration;
 
+	m_animation = prototype.m_animation;
+	m_animDataMap = prototype.m_animDataMap;
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
@@ -51,6 +53,7 @@ MeleeEnemyCharacter::~MeleeEnemyCharacter()
 
 void MeleeEnemyCharacter::Init(AEVec2 position)
 {
+	ACharacter::Init(position);
 }
 
 void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
