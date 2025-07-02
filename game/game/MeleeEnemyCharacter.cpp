@@ -4,6 +4,7 @@
 #include <iostream>
 #include "PlayerCharacter.h"
 #include "AssetManager.h"
+#include "TileMap.h"
 
 MeleeEnemyCharacter::MeleeEnemyCharacter()
 {
@@ -15,14 +16,19 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 500.0f;
-	m_attackRange = 150.0f;
+	m_detectionRange = 1000.0f;
+	m_attackRange = 100.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
+
+	m_velocityX = 0.0f;
+	m_velocityY = 0.0f;
+	m_gravity = -1200.0f;
+	m_isGrounded = false;
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -56,6 +62,7 @@ void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 void MeleeEnemyCharacter::Update(f32 dt)
 {
+
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		m_animation.Update(dt);
@@ -72,6 +79,51 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
+
+
+	AEVec2 groundCheckPos = m_position;
+	groundCheckPos.y -= 1.0f;
+
+	if (checkCollisionTileMap(groundCheckPos, m_size))
+	{
+		m_isGrounded = true;
+	}
+	else
+	{
+		m_isGrounded = false;
+	}
+
+	if (!m_isGrounded)
+	{
+		m_velocityY += m_gravity * dt;
+	}
+
+	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.y += std::copysign(1.0f, m_velocityY);
+		//std::cout << "Call Y" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.y -= std::copysign(1.0f, m_velocityY);
+		if (m_velocityY < 0) m_isGrounded = true;
+	}
+
+	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.x += std::copysign(1.0f, m_velocityX);
+		//std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.x -= std::copysign(1.0f, m_velocityX);
+	}
 
 	switch (m_currentAIState)
 	{
@@ -140,7 +192,6 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		m_currentAnimState = desiredAnimState;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
-
 	m_animation.Update(dt);
 }
 

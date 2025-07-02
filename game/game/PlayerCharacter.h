@@ -72,7 +72,6 @@ private:
 	f32 m_velocityY;
 	f32 m_gravity;
 	f32 m_jumpStrength;
-	f32 m_groundLevel;
 	bool m_isGrounded;
 
 	bool m_isMeleeAttacking;

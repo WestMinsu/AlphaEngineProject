@@ -21,8 +21,8 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 	m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
-	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
-	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
@@ -397,9 +397,6 @@ void MainGameState::Update(f32 dt)
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_MeleeEnemy.Draw();
-	m_MageEnemy.Draw();
-	m_FireWormEnemy.Draw();
 
 	for (auto tm : TileMaps)
 
@@ -409,6 +406,7 @@ void MainGameState::Draw()
 
 	m_MeleeEnemy.Draw();
 	m_MageEnemy.Draw();
+	m_FireWormEnemy.Draw();
 
 	if (!m_Boss.IsCompletelyDead())
 	{

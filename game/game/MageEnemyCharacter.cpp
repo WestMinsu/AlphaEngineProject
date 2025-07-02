@@ -17,7 +17,6 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-	m_idealRange = 500.0f;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
