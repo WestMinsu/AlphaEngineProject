@@ -38,7 +38,7 @@ FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& pro
 
 	m_currentAIState = prototype.m_currentAIState;
 	m_pPlayer = prototype.m_pPlayer;
-	m_detectionRange = prototype.m_attackRange;
+	m_detectionRange = prototype.m_detectionRange;
 	m_attackRange = prototype.m_attackRange;
 	m_idealRange = prototype.m_idealRange;
 

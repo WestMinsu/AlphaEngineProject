@@ -15,7 +15,7 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 500.0f;
+	m_detectionRange = 1000.0f;
 	m_attackRange = 150.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
@@ -35,7 +35,7 @@ MeleeEnemyCharacter::MeleeEnemyCharacter(const MeleeEnemyCharacter& prototype)
 
 	m_currentAIState = prototype.m_currentAIState;
 	m_pPlayer = prototype.m_pPlayer;
-	m_detectionRange = prototype.m_attackRange;
+	m_detectionRange = prototype.m_detectionRange;
 	m_attackRange = prototype.m_attackRange;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = prototype.m_attackCooldownDuration;
