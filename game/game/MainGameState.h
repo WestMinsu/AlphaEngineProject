@@ -11,6 +11,8 @@
 #include "BossCharacter.h"
 #include "VisualEffect.h"
 #include "FireWormEnemyCharacter.h"
+#include "WarriorEnemyCharacter.h"
+#include "NightBorneEnemyCharacter.h"
 
 class MainGameState : public AGameState
 {
@@ -28,9 +30,13 @@ private:
 	ACharacter* FindClosestEnemyInFront();
 	 
 	PlayerCharacter m_Player;
-	MeleeEnemyCharacter m_MeleeEnemy; 
+
+	WarriorEnemyCharacter m_WarriorEnemy;
+	NightBorneEnemyCharacter m_NightBorneEnemy;
+
 	MageEnemyCharacter m_MageEnemy;
 	FireWormEnemyCharacter m_FireWormEnemy;
+
 	BossCharacter m_Boss;
 
 	std::vector<Projectile> m_playerProjectiles; 

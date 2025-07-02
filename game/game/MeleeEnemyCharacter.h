@@ -19,9 +19,9 @@ public:
 	void Attack() override;
 	void Draw() override;
 	void Destroy() override;
-	void TakeDamage(s32 damage, DamageType damageType) override;
+	virtual void TakeDamage(s32 damage, DamageType damageType) override;
 
-private:
+protected:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;

@@ -27,7 +27,9 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_isHurt = false;
 }
 
-MageEnemyCharacter::~MageEnemyCharacter() {}
+MageEnemyCharacter::~MageEnemyCharacter() 
+{
+}
 
 void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {

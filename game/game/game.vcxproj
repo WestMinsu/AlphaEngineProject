@@ -115,6 +115,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="GameTypes.h" />
     <ClInclude Include="MeleeEnemyCharacter.h" />
     <ClInclude Include="MageEnemyCharacter.h" />
+    <ClInclude Include="NightBorneEnemyCharacter.h" />
     <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="GameManager.h" />
@@ -128,6 +129,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="VisualEffect.h" />
+    <ClInclude Include="WarriorEnemyCharacter.h" />
     <ClInclude Include="WeaponData.h" />
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +143,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="GameOverState.cpp" />
     <ClCompile Include="MeleeEnemyCharacter.cpp" />
     <ClCompile Include="MageEnemyCharacter.cpp" />
+    <ClCompile Include="NightBorneEnemyCharacter.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="IntroState.cpp" />
@@ -153,6 +156,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="VisualEffect.cpp" />
+    <ClCompile Include="WarriorEnemyCharacter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

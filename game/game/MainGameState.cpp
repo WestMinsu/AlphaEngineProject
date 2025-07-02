@@ -20,7 +20,8 @@ void MainGameState::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
-	m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	m_WarriorEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	m_NightBorneEnemy.Init({ kHalfWindowWidth - 500.f, -100.f }, &m_Player);
 	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
@@ -70,7 +71,8 @@ void MainGameState::Update(f32 dt)
 	}
 
 	m_Player.Update(dt);
-	m_MeleeEnemy.Update(dt);
+	m_WarriorEnemy.Update(dt);
+	m_NightBorneEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 	m_Boss.Update(dt);
 	m_FireWormEnemy.Update(dt);
@@ -103,7 +105,9 @@ void MainGameState::Update(f32 dt)
 	if (!m_Player.IsInvincible() && m_Player.GetHealth() > 0)
 	{
 		std::vector<ACharacter*> enemies;
-		if (m_MeleeEnemy.GetHealth() > 0) enemies.push_back(&m_MeleeEnemy);
+		if (m_WarriorEnemy.GetHealth() > 0) enemies.push_back(&m_WarriorEnemy);
+		if (m_NightBorneEnemy.GetHealth() > 0) enemies.push_back(&m_NightBorneEnemy);
+
 		if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
 		if (m_FireWormEnemy.GetHealth() > 0) enemies.push_back(&m_FireWormEnemy);
 		if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
@@ -296,11 +300,20 @@ void MainGameState::Update(f32 dt)
 	{
 		proj->Update(dt);
 		bool hit = false;
-		if (proj->IsActive() && m_MeleeEnemy.GetHealth() > 0)
+		if (proj->IsActive() && m_WarriorEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
 			{
-				m_MeleeEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				m_WarriorEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				proj->Deactivate();
+				hit = true;
+			}
+		}
+		if (proj->IsActive() && m_NightBorneEnemy.GetHealth() > 0)
+		{
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
+			{
+				m_NightBorneEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 				hit = true;
 			}
@@ -366,9 +379,14 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
-		if (m_MeleeEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
+		if (m_WarriorEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
 		{
-			m_MeleeEnemy.TakeDamage(10, DamageType::NONE);
+			m_WarriorEnemy.TakeDamage(10, DamageType::NONE);
+			m_Player.RegisterHit();
+		}	
+		if (m_NightBorneEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
+		{
+			m_NightBorneEnemy.TakeDamage(10, DamageType::NONE);
 			m_Player.RegisterHit();
 		}
 		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
@@ -399,12 +417,13 @@ void MainGameState::Draw()
 	m_Background.Draw();
 
 	for (auto tm : TileMaps)
-
 	{
 		tm.Draw();
 	}
 
-	m_MeleeEnemy.Draw();
+	m_WarriorEnemy.Draw();
+	m_NightBorneEnemy.Draw();
+
 	m_MageEnemy.Draw();
 	m_FireWormEnemy.Draw();
 
@@ -446,7 +465,8 @@ void MainGameState::Exit()
 	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
-	m_MeleeEnemy.Destroy();
+	m_WarriorEnemy.Destroy();
+	m_NightBorneEnemy.Destroy();
 	m_MageEnemy.Destroy();
 	m_FireWormEnemy.Destroy();
 	m_Boss.Destroy();
@@ -524,8 +544,10 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 	CharacterDirection playerDir = m_Player.GetDirection();
 
 	std::vector<ACharacter*> enemies;
-	if (m_MeleeEnemy.GetHealth() > 0)
-		enemies.push_back(&m_MeleeEnemy);
+	if (m_WarriorEnemy.GetHealth() > 0)
+		enemies.push_back(&m_WarriorEnemy);	
+	if (m_NightBorneEnemy.GetHealth() > 0)
+		enemies.push_back(&m_NightBorneEnemy);
 	if (m_MageEnemy.GetHealth() > 0)
 		enemies.push_back(&m_MageEnemy);
 	if (m_FireWormEnemy.GetHealth() > 0)

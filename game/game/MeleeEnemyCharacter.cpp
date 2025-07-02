@@ -44,19 +44,6 @@ void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_position = position;
 	m_pPlayer = player; 
 	m_animation.Init();
-
-	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Fantasy Skeleton Enemies/warrior/idle.PNG", nullptr, 8, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Fantasy Skeleton Enemies/warrior/death.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Fantasy Skeleton Enemies/warrior/walk.PNG", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
-	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Fantasy Skeleton Enemies/warrior/attack.PNG", nullptr, 13, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Fantasy Skeleton Enemies/warrior/hurt.PNG", nullptr, 5, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
-
-	for (auto& pair : m_animDataMap)
-	{
-		pair.second.pTexture = LoadImageAsset(pair.second.texturePath);
-	}
-
-	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
 
