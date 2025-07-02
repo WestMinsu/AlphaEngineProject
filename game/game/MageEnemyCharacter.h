@@ -5,7 +5,7 @@ class MageEnemyCharacter : public RangedEnemyCharacter
 {
 public:
 	MageEnemyCharacter();
-	MageEnemyCharacter(MageEnemyCharacter*);
+	MageEnemyCharacter(const MageEnemyCharacter&);
 	~MageEnemyCharacter();
 
 	void Init(AEVec2 position, PlayerCharacter* player);

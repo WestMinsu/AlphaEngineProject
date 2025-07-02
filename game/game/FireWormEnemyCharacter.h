@@ -5,7 +5,7 @@ class FireWormEnemyCharacter : public RangedEnemyCharacter
 {
 public:
 	FireWormEnemyCharacter();
-	FireWormEnemyCharacter(FireWormEnemyCharacter*);
+	FireWormEnemyCharacter(const FireWormEnemyCharacter&);
 	~FireWormEnemyCharacter();
 
 	void Init(AEVec2 position, PlayerCharacter* player);
