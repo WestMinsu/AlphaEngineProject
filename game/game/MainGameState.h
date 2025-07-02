@@ -10,8 +10,9 @@
 #include "Background.h"
 #include "BossCharacter.h"
 #include "VisualEffect.h"
-#include "EnemyFactory.h"
 #include "FireWormEnemyCharacter.h"
+#include "EnemyFactory.h"
+#include "SpawnEnemy.h"
 
 class MainGameState : public AGameState
 {
@@ -45,7 +46,9 @@ private:
 	std::vector<VisualEffect> m_visualEffects;
 
 	Background m_Background;
-	EnemyFactory* m_factory;
+	//std::shared_ptr<EnemyFactory> m_factory;
+	EnemyFactory m_factory;
+	std::vector<SpawnEnemy*> m_Spawns;
 
 	AEGfxTexture* m_pUiSlot;      
 	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;

@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include "Utility.h"
 #include "AssetManager.h"
 #include "WeaponData.h"
@@ -29,6 +30,15 @@ void MainGameState::Init()
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 
 	m_Background.Init();
+	
+	//m_factory = std::make_shared<EnemyFactory>();
+	m_factory.RegisterPrototype("Melee", &m_MeleeEnemy);
+	m_factory.RegisterPrototype("Mage", &m_MageEnemy);
+	m_factory.RegisterPrototype("Fire", &m_FireWormEnemy);
+
+	m_Spawns.push_back(new SpawnEnemy({ 1000,0 }, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ 1500,0 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({2000,0}, &m_factory, "Fire"));
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
@@ -70,10 +80,20 @@ void MainGameState::Update(f32 dt)
 	}
 
 	m_Player.Update(dt);
-	m_MeleeEnemy.Update(dt);
-	m_MageEnemy.Update(dt);
+	//m_MeleeEnemy.Update(dt);
+	//m_MageEnemy.Update(dt);
 	m_Boss.Update(dt);
-	m_FireWormEnemy.Update(dt);
+	//m_FireWormEnemy.Update(dt);
+
+	for (auto& spawn : m_Spawns)
+	{
+		spawn->Update(dt, m_Enemies);
+	}
+
+	for (auto enemy : m_Enemies)
+	{
+		enemy->Update(dt);
+	}
 
 	BossAIState currentBossState = m_Boss.GetCurrentAIState();
 	if (currentBossState != m_previousBossAIState)
@@ -397,9 +417,9 @@ void MainGameState::Update(f32 dt)
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_MeleeEnemy.Draw();
-	m_MageEnemy.Draw();
-	m_FireWormEnemy.Draw();
+	//m_MeleeEnemy.Draw();
+	//m_MageEnemy.Draw();
+	//m_FireWormEnemy.Draw();
 
 	for (auto tm : TileMaps)
 
@@ -407,8 +427,13 @@ void MainGameState::Draw()
 		tm.Draw();
 	}
 
-	m_MeleeEnemy.Draw();
-	m_MageEnemy.Draw();
+	//m_MeleeEnemy.Draw();
+	//m_MageEnemy.Draw();
+
+	for (auto enemy : m_Enemies)
+	{
+		enemy->Draw();
+	}
 
 	if (!m_Boss.IsCompletelyDead())
 	{
