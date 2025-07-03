@@ -609,7 +609,7 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
 			(playerDir == CharacterDirection::LEFT && enemyPos.x < playerPos.x);
 
-		const float yTolerance = m_Player.GetHitboxSize().y / 2.0f;
+		const float yTolerance = m_Player.GetHitboxSize().y;
 		float yDistance = std::abs(playerPos.y - enemyPos.y);
 
 		if (isInFront && yDistance <= yTolerance)
