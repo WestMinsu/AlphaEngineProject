@@ -32,4 +32,7 @@ private:
 	AnimData m_animData;
 	DamageType m_type;
 	bool m_isActive;
+
+	AEVec2 m_startPosition;
+	f32 m_maxRange;
 };

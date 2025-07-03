@@ -11,6 +11,9 @@ Projectile::Projectile()
 	m_size = { 0,0 };
 	m_damage = 0;
 	m_isActive = true;
+	m_type = DamageType::NONE;
+	m_startPosition = { 0,0 };
+	m_maxRange = 800.f;
 }
 
 Projectile::~Projectile()
@@ -20,6 +23,7 @@ Projectile::~Projectile()
 void Projectile::Init(AEVec2 startPos, AEVec2 direction, const ProjectileData& data)
 {
 	m_position = startPos;
+	m_startPosition = startPos;
 	m_size = data.size;
 	m_damage = data.damage;
 	m_type = data.type;
@@ -41,7 +45,7 @@ void Projectile::Update(f32 dt)
 	m_position.y += m_velocity.y * dt;
 	m_animation.Update(dt);
 
-	if (m_position.x < -kHalfWindowWidth - m_size.x || m_position.x > kHalfWindowWidth + m_size.x)
+	if (AEVec2Distance(&m_position, &m_startPosition) > m_maxRange)
 	{
 		m_isActive = false;
 	}

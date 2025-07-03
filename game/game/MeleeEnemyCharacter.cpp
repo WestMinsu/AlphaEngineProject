@@ -21,8 +21,6 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
 
 	m_velocityX = 0.0f;
@@ -84,7 +82,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	{
 		m_velocityY += m_gravity * dt;
 	}
-
+	
 	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
 
 	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)

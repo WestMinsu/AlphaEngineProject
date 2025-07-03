@@ -27,8 +27,8 @@ BossCharacter::BossCharacter()
 	m_hasFired = false;
 	m_hasHitPlayerThisAttack = false;
 
-	m_hitboxSize = { m_size.x * 0.8f, m_size.y * 0.8f };
-	m_hitboxOffset = { 0.f, 0.f };
+	m_hitboxSize = { m_size.x * 0.5f, m_size.y * 0.5f };
+	m_hitboxOffset = { m_size.x * 0.01f, m_size.y * 0.02f };
 }
 
 BossCharacter::~BossCharacter() {}
@@ -61,7 +61,7 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 	m_projectileData.speed = 1200.0f;
 	m_projectileData.damage = 10;
-	m_projectileData.size = { 100.f, 50.f };
+	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/Boss/arm_projectile.png", nullptr, 1, SpriteSheetOrientation::HORIZONTAL, 1.0f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 

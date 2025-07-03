@@ -9,6 +9,8 @@ WarriorEnemyCharacter::WarriorEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
 	m_healthPoint = 50;
+	m_hitboxSize = { m_size.x * 0.45f, m_size.y * 0.75f };
+	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.1f };
 	m_characterSpeed = 100.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
@@ -20,8 +22,6 @@ WarriorEnemyCharacter::WarriorEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
 
 	m_velocityX = 0.0f;
@@ -58,7 +58,7 @@ void WarriorEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	{
 		return;
 	}
-
+		
 	m_healthPoint -= damage;
 	std::cout << "Warrior Enemy takes damage! HP: " << m_healthPoint << std::endl;
 

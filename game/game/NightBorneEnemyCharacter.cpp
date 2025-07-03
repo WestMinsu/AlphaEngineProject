@@ -7,21 +7,21 @@
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 {
-	m_size = { 200.f, 200.f };
+	m_size = { 250.f, 250.f };
 	m_healthPoint = 50;
+	m_hitboxSize = { m_size.x * 0.45f, m_size.y * 0.4f };
+	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.25f };
 	m_characterSpeed = 100.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 1000.0f;
+	m_detectionRange = 500.0f;
 	m_attackRange = 100.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
-
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
+	
 	m_isHurt = false;
 
 	m_velocityX = 0.0f;
@@ -54,6 +54,11 @@ void NightBorneEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 void NightBorneEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
+	if (m_currentAnimState == CharacterAnimationState::DEATH)
+	{
+		return;
+	}
+
 	m_healthPoint -= damage;
 	std::cout << "NightBorne takes damage! HP: " << m_healthPoint << std::endl;
 

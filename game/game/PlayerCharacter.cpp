@@ -442,3 +442,34 @@ void PlayerCharacter::ConsumeCurrentWeapon()
 		}
 	}
 }
+
+void PlayerCharacter::AddScore(s32 amount)
+{
+	m_score += amount;
+}
+
+void PlayerCharacter::BuyMagic(DamageType type)
+{
+	int cost = 1000;
+	//if (m_score >= cost)
+	//{
+	//	m_score -= cost;
+	//	if (type == DamageType::LIGHTNING)
+	//		m_weaponUseCounts[type] += 5;
+	//	else
+	//		m_weaponUseCounts[type] += 10;
+
+	//	std::cout << "Ammo purchased!" << std::endl;
+	//}
+	//else
+	//{
+	//	std::cout << "Not enough score!" << std::endl;
+	//}
+	m_score -= cost;
+	if (type == DamageType::LIGHTNING)
+		m_weaponUseCounts[type] += 5;
+	else
+		m_weaponUseCounts[type] += 10;
+
+	std::cout << "Ammo purchased!" << std::endl;
+}

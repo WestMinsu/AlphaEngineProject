@@ -43,6 +43,10 @@ public:
 	{ 
 		return m_element; 
 	} 
+	bool IsDead() const 
+	{ 
+		return m_healthPoint <= 0;
+	}
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;

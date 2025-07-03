@@ -64,6 +64,15 @@ public:
 	{
 		return m_availableWeapons;
 	}
+
+	s32 GetScore() const 
+	{ 
+		return m_score; 
+	}
+
+	void AddScore(s32 amount);
+	void BuyMagic(DamageType type);
+
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -98,4 +107,6 @@ private:
 	f32 m_invincibilityTimer;
 	const f32 m_invincibilityDuration = 0.7f;
 	bool m_isHurt;
+
+	s32 m_score;
 };

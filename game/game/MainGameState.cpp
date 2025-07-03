@@ -88,6 +88,13 @@ void MainGameState::Update(f32 dt)
 		tm.Update(dt);
 	}
 
+	if (AEInputCheckTriggered(AEVK_Q))
+		m_Player.BuyMagic(DamageType::FIRE);
+	if (AEInputCheckTriggered(AEVK_W))
+		m_Player.BuyMagic(DamageType::ICE);
+	if (AEInputCheckTriggered(AEVK_E))
+		m_Player.BuyMagic(DamageType::LIGHTNING);
+
 	m_Player.Update(dt);
 	m_WarriorEnemy.Update(dt);
 	m_NightBorneEnemy.Update(dt);
@@ -317,14 +324,12 @@ void MainGameState::Update(f32 dt)
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
-		bool hit = false;
 		if (proj->IsActive() && m_WarriorEnemy.GetHealth() > 0)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
 			{
 				m_WarriorEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
-				hit = true;
 			}
 		}
 		if (proj->IsActive() && m_NightBorneEnemy.GetHealth() > 0)
@@ -352,10 +357,9 @@ void MainGameState::Update(f32 dt)
 				else
 					m_NightBorneEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
-				hit = true;
 			}
 		}
-		if (!hit && proj->IsActive() && m_MageEnemy.GetHealth() > 0)
+		if (proj->IsActive() && m_MageEnemy.GetHealth() > 0)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
 			{
@@ -364,7 +368,7 @@ void MainGameState::Update(f32 dt)
 			}
 		}
 
-		if (!hit && proj->IsActive() && m_FireWormEnemy.GetHealth() > 0)
+		if (proj->IsActive() && m_FireWormEnemy.GetHealth() > 0)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
 			{
@@ -383,9 +387,9 @@ void MainGameState::Update(f32 dt)
 			}
 		}
 
-		if (!hit && proj->IsActive() && m_Boss.GetHealth() > 0 && m_Boss.IsAttackable())
+		if (proj->IsActive() && m_Boss.GetHealth() > 0 && m_Boss.IsAttackable())
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_Boss.GetPosition(), m_Boss.GetSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_Boss.GetPosition(), m_Boss.GetHitboxSize()))
 			{
 				m_Boss.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
@@ -573,6 +577,12 @@ void MainGameState::DrawUI()
 		AEVec2 fontPos = GetNormalizedCoords(posX - xCam, posY);
 		AEGfxPrint(GameManager::m_font, countStr, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 	}
+
+	f32 TextScale = 0.5f;
+	char scoreBuffer[100];
+	sprintf_s(scoreBuffer, "SCORE: %d", m_Player.GetScore());
+	AEVec2 fontPos = GetNormalizedCoords(kHalfWindowWidth * 0.5f, kHalfWindowHeight - 40.f);
+	AEGfxPrint(GameManager::m_font, scoreBuffer, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 
 	if (m_Boss.IsAttackable())
 	{

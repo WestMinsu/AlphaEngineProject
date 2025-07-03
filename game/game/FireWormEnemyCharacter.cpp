@@ -8,6 +8,8 @@
 FireWormEnemyCharacter::FireWormEnemyCharacter()
 {
 	m_size = { 200.f, 200.f };
+	m_hitboxSize = { m_size.x * 0.6f, m_size.y * 0.5f };
+	m_hitboxOffset = { 0.0f, -m_size.y * 0.25f };
 	m_healthPoint = 40;
 	m_characterSpeed = 80.f;
 	m_currentDirection = CharacterDirection::LEFT;
@@ -21,9 +23,6 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
-
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
 }
 
