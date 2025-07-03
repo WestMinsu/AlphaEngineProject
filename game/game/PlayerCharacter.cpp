@@ -307,12 +307,6 @@ void PlayerCharacter::Update(f32 dt)
 	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
 		m_position.x = -kHalfWindowWidth + halfCharWidth;
 
-	if (m_position.y > kHalfWindowHeight - halfCharHeight)
-	{
-		m_position.y = kHalfWindowHeight - halfCharHeight;
-		m_velocityY = 0;
-	}
-
 	m_animation.Update(dt);
 }
 
