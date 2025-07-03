@@ -42,9 +42,12 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Mage", mage);
 	m_factory.RegisterPrototype("Fire", fire);
 
-	m_Spawns.push_back(new SpawnEnemy({ 1000,0 }, &m_factory, "Melee"));
-	m_Spawns.push_back(new SpawnEnemy({ 1500,0 }, &m_factory, "Mage"));
-	m_Spawns.push_back(new SpawnEnemy({2000,0}, &m_factory, "Fire"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 740 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Fire"));
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");

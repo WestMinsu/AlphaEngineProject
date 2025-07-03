@@ -5,7 +5,7 @@
 SpawnEnemy::SpawnEnemy()
 {
 	m_position = {0,0};
-	m_spawnTimes = 20;
+	m_spawnTimes = 10;
 	m_spawnCurrentTime = 0.0f;
 	m_spawnTerm = 2.0f;
 	m_EnemyFactory = nullptr;
@@ -16,7 +16,7 @@ SpawnEnemy::SpawnEnemy()
 SpawnEnemy::SpawnEnemy(AEVec2 pos, EnemyFactory* factory, std::string name)
 {
 	m_position = pos;
-	m_spawnTimes = 20;
+	m_spawnTimes = 10;
 	m_spawnCurrentTime = 0.0f;
 	m_spawnTerm = 2.0f;
 	m_EnemyFactory = factory;
@@ -67,7 +67,7 @@ void SpawnEnemy::Reset()
 	if (camX > 2 * 1856 * (1 + m_resetCount) - kHalfWindowWidth && camX > m_position.x)
 	{
 		m_position.x += 2 * 1856;
-		m_spawnTimes = 20;
+		m_spawnTimes = 10;
 		m_spawnCurrentTime = 0.f;
 		m_resetCount++;
 	}
