@@ -184,3 +184,8 @@ void RangedEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
 }
+
+bool RangedEnemyCharacter::isReadytoFireRange()
+{
+	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK;
+}

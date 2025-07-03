@@ -110,3 +110,9 @@ FireWormEnemyCharacter* FireWormEnemyCharacter::Clone()
 {
 	return new FireWormEnemyCharacter(*this);
 }
+
+bool FireWormEnemyCharacter::isReadytoFireRange()
+{
+	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK
+		&& (m_animation.GetCurrentFrame() == 13 && !m_hasFiredProjectile);;
+}

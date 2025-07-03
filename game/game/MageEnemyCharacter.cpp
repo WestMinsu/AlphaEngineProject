@@ -98,6 +98,12 @@ void MageEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 }
 
+bool MageEnemyCharacter::isReadytoFireRange()
+{
+	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK
+	&& (m_animation.GetCurrentFrame() == 11 && !m_hasFiredProjectile);
+}
+
 MageEnemyCharacter* MageEnemyCharacter::Clone()
 {
 	return new MageEnemyCharacter(*this);

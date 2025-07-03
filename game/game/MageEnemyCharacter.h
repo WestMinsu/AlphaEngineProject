@@ -11,4 +11,5 @@ public:
 	void Init(AEVec2 position, PlayerCharacter* player);
 	MageEnemyCharacter* Clone() override;
 	void TakeDamage(s32 damage, DamageType damageType) override;
+	bool isReadytoFireRange() override;
 };

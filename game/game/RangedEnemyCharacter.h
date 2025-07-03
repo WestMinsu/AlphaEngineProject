@@ -19,6 +19,8 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	virtual void TakeDamage(s32 damage, DamageType damageType) override;
+	
+	virtual bool isReadytoFireRange();
 
 	Animation& GetAnimation() { return m_animation; }
 	CharacterAnimationState GetCurrentAnimState() const { return m_currentAnimState; }
