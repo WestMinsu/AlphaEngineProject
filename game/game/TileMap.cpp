@@ -49,8 +49,6 @@ void TileMap::Update(f32 dt)
 		m_offset.x -= mapPixelWidth * 2;
 		m_offsetCount--;
 	}
-
-	std::cout << m_offset.x << ", " << m_offsetCount << std::endl;
 }
 
 void TileMap::Draw()
@@ -138,8 +136,6 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 		}
 		else
 		{
-			std::cout << tileMap.m_offset.x << ", " << playerLeft << std::endl;
-
 			for (auto& box : tileMap.m_collisionBoxes)
 			{
 				if (!(playerRight < box.x + tileMap.m_offset.x ||

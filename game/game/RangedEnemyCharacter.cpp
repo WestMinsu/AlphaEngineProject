@@ -35,7 +35,10 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 
 RangedEnemyCharacter::~RangedEnemyCharacter() {}
 
-void RangedEnemyCharacter::Init(AEVec2 position) {}
+void RangedEnemyCharacter::Init(AEVec2 position) 
+{
+	ACharacter::Init(position);
+}
 
 void RangedEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 {
@@ -226,4 +229,9 @@ void RangedEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 	}
+}
+
+bool RangedEnemyCharacter::isReadytoFireRange()
+{
+	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK;
 }

@@ -7,13 +7,14 @@ class ACharacter
 {
 public:
 	virtual ~ACharacter() {};
-	virtual void Init(AEVec2 position) = 0;
+	virtual void Init(AEVec2 position);
 	virtual void Update(f32 dt) = 0;
 	virtual void Move(f32 dt) = 0;
 	virtual void Attack() = 0;
 	virtual void Draw() = 0;
 	virtual void Destroy() = 0;
 	virtual void TakeDamage(s32 damage, DamageType damageType) = 0;
+	virtual ACharacter* Clone() = 0;
 
 	const AEVec2& GetPosition() const 
 	{ 

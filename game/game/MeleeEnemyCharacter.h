@@ -10,6 +10,7 @@ class MeleeEnemyCharacter : public ACharacter
 {
 public:
 	MeleeEnemyCharacter();
+	MeleeEnemyCharacter(const MeleeEnemyCharacter&);
 	~MeleeEnemyCharacter();
 
 	void Init(AEVec2 position) override;

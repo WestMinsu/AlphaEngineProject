@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include "Utility.h"
 #include "AssetManager.h"
 #include "WeaponData.h"
@@ -20,16 +21,37 @@ void MainGameState::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
-	m_WarriorEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
-	m_NightBorneEnemy.Init({ kHalfWindowWidth - 500.f, -100.f }, &m_Player);
-	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
-	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+
+
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 
 	m_Background.Init();
+	WarriorEnemyCharacter* warrior = new WarriorEnemyCharacter();
+	warrior->Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	MageEnemyCharacter* mage = new MageEnemyCharacter();
+	mage->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	FireWormEnemyCharacter* fire = new FireWormEnemyCharacter();
+	fire->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	NightBorneEnemyCharacter* night = new NightBorneEnemyCharacter();
+	night->Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+
+	//m_factory = std::make_shared<EnemyFactory>();
+	m_factory.RegisterPrototype("Warrior", warrior);
+	m_factory.RegisterPrototype("Mage", mage);
+	m_factory.RegisterPrototype("Fire", fire);
+	m_factory.RegisterPrototype("Night", night);
+
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "Warrior"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Night"));
+
+	m_Enemies.push_back(&m_Boss);
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
@@ -96,11 +118,18 @@ void MainGameState::Update(f32 dt)
 		m_Player.BuyMagic(DamageType::LIGHTNING);
 
 	m_Player.Update(dt);
-	m_WarriorEnemy.Update(dt);
-	m_NightBorneEnemy.Update(dt);
-	m_MageEnemy.Update(dt);
+
 	m_Boss.Update(dt);
-	m_FireWormEnemy.Update(dt);
+
+	for (auto& spawn : m_Spawns)
+	{
+		spawn->Update(dt, m_Enemies);
+	}
+
+	for (auto enemy : m_Enemies)
+	{
+		enemy->Update(dt);
+	}
 
 	BossAIState currentBossState = m_Boss.GetCurrentAIState();
 	if (currentBossState != m_previousBossAIState)
@@ -129,20 +158,13 @@ void MainGameState::Update(f32 dt)
 
 	if (!m_Player.IsInvincible() && m_Player.GetHealth() > 0)
 	{
-		std::vector<ACharacter*> enemies;
-		if (m_WarriorEnemy.GetHealth() > 0) enemies.push_back(&m_WarriorEnemy);
-		if (m_NightBorneEnemy.GetHealth() > 0) enemies.push_back(&m_NightBorneEnemy);
-
-		if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
-		if (m_FireWormEnemy.GetHealth() > 0) enemies.push_back(&m_FireWormEnemy);
-		if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
-
 		AEVec2 playerHitboxPos = m_Player.GetPosition();
 		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
 		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
 		const AEVec2& playerHitboxSize = m_Player.GetHitboxSize();
 
-		for (auto* enemy : enemies)
+		for (auto* enemy : m_Enemies)
+
 		{
 			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
@@ -198,33 +220,26 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	bool isMageCasting = m_MageEnemy.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
-	bool canMageFire = m_MageEnemy.GetAnimation().GetCurrentFrame() == 13 && !m_MageEnemy.HasFiredProjectile();
-	if (isMageCasting && canMageFire)
+	for (auto enemy : m_Enemies)
 	{
-		m_enemyProjectiles.emplace_back();
-		Projectile& newProjectile = m_enemyProjectiles.back();
-		const ProjectileData& projData = m_MageEnemy.GetProjectileData();
-		AEVec2 directionVec = { (m_MageEnemy.GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
+		RangedEnemyCharacter* rangeEnemy = dynamic_cast<RangedEnemyCharacter*>(enemy);
+		if (rangeEnemy)
+		{
+			if (rangeEnemy->isReadytoFireRange())
+			{
 
-		newProjectile.Init(m_MageEnemy.GetPosition(), directionVec, projData);
+				m_enemyProjectiles.emplace_back();
+				Projectile& newProjectile = m_enemyProjectiles.back();
+				const ProjectileData& projData = rangeEnemy->GetProjectileData();
+				AEVec2 directionVec = { (rangeEnemy->GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
 
-		m_MageEnemy.SetFiredProjectile(true);
+				newProjectile.Init(rangeEnemy->GetPosition(), directionVec, projData);
+
+				rangeEnemy->SetFiredProjectile(true);
+			}
+		}
 	}
 
-	bool isFireWormCasting = m_FireWormEnemy.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
-	bool canFireWormFire = m_FireWormEnemy.GetAnimation().GetCurrentFrame() == 11 && !m_FireWormEnemy.HasFiredProjectile();
-	if (isFireWormCasting && canFireWormFire)
-	{
-		m_enemyProjectiles.emplace_back();
-		Projectile& newProjectile = m_enemyProjectiles.back();
-		const ProjectileData& projData = m_FireWormEnemy.GetProjectileData();
-		AEVec2 directionVec = { (m_FireWormEnemy.GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
-
-		newProjectile.Init(m_FireWormEnemy.GetPosition(), directionVec, projData);
-
-		m_FireWormEnemy.SetFiredProjectile(true);
-	}
 
 	bool isBossMeleeAttacking = m_Boss.GetCurrentAIState() == BossAIState::MELEE_ATTACK;
 	bool isBossHitboxActive = m_Boss.GetAnimation().GetCurrentFrame() >= 3;
@@ -324,75 +339,73 @@ void MainGameState::Update(f32 dt)
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
-		if (proj->IsActive() && m_WarriorEnemy.GetHealth() > 0)
-		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
-			{
-				m_WarriorEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
-				proj->Deactivate();
-			}
-		}
-		if (proj->IsActive() && m_NightBorneEnemy.GetHealth() > 0)
-		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
-			{
-				if (proj->GetType() == DamageType::FIRE)
-				{
-					m_feedbackText = "Immune to fire";
-					m_feedbackTextTimer = 1.0f;
-					m_feedbackTextPos = GetNormalizedCoords(m_NightBorneEnemy.GetPosition().x, m_NightBorneEnemy.GetPosition().y);
-					m_feedbackTextR = 1.0f;
-					m_feedbackTextG = 0.0f;
-					m_feedbackTextB = 0.0f;
-				}
-				else if (proj->GetType() == DamageType::ICE)
-				{
-					m_feedbackText = "Immune to ice";
-					m_feedbackTextTimer = 1.0f;
-					m_feedbackTextPos = GetNormalizedCoords(m_NightBorneEnemy.GetPosition().x, m_NightBorneEnemy.GetPosition().y);
-					m_feedbackTextR = 0.0f;
-					m_feedbackTextG = 0.0f;
-					m_feedbackTextB = 1.0f;
-				}
-				else
-					m_NightBorneEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
-				proj->Deactivate();
-			}
-		}
-		if (proj->IsActive() && m_MageEnemy.GetHealth() > 0)
-		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
-			{
-				m_MageEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
-				proj->Deactivate();
-			}
-		}
 
-		if (proj->IsActive() && m_FireWormEnemy.GetHealth() > 0)
+		for (auto enemy : m_Enemies)
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
+			NightBorneEnemyCharacter* nightEnemy = dynamic_cast<NightBorneEnemyCharacter*>(enemy);
+			if (nightEnemy) 
 			{
-				if (proj->GetType() == DamageType::FIRE)
-				{
-					m_feedbackText = "Immune to fire";
-					m_feedbackTextTimer = 1.0f;
-					m_feedbackTextPos = GetNormalizedCoords(m_FireWormEnemy.GetPosition().x, m_FireWormEnemy.GetPosition().y);
-					m_feedbackTextR = 1.0f;
-					m_feedbackTextG = 0.0f;
-					m_feedbackTextB = 0.0f;
-				}
-				else
-					m_FireWormEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
-				proj->Deactivate();
-			}
-		}
 
-		if (proj->IsActive() && m_Boss.GetHealth() > 0 && m_Boss.IsAttackable())
-		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_Boss.GetPosition(), m_Boss.GetHitboxSize()))
+				if (proj->IsActive() && nightEnemy->GetHealth() > 0)
+				{
+					if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), nightEnemy->GetPosition(), nightEnemy->GetHitboxSize()))
+					{
+						if (proj->GetType() == DamageType::FIRE)
+						{
+							m_feedbackText = "Immune to fire";
+							m_feedbackTextTimer = 1.0f;
+							m_feedbackTextPos = GetNormalizedCoords(nightEnemy->GetPosition().x, nightEnemy->GetPosition().y);
+							m_feedbackTextR = 1.0f;
+							m_feedbackTextG = 0.0f;
+							m_feedbackTextB = 0.0f;
+						}
+						else if (proj->GetType() == DamageType::ICE)
+						{
+							m_feedbackText = "Immune to ice";
+							m_feedbackTextTimer = 1.0f;
+							m_feedbackTextPos = GetNormalizedCoords(nightEnemy->GetPosition().x, nightEnemy->GetPosition().y);
+							m_feedbackTextR = 0.0f;
+							m_feedbackTextG = 0.0f;
+							m_feedbackTextB = 1.0f;
+						}
+						else
+							nightEnemy->TakeDamage(proj->GetDamage(), proj->GetType());
+						proj->Deactivate();
+					}
+				}
+			}
+
+			FireWormEnemyCharacter* fireEnemy = dynamic_cast<FireWormEnemyCharacter*>(enemy);
+			if (fireEnemy)
 			{
-				m_Boss.TakeDamage(proj->GetDamage(), proj->GetType());
-				proj->Deactivate();
+				if (proj->IsActive() && fireEnemy->GetHealth() > 0)
+				{
+					if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), fireEnemy->GetPosition(), fireEnemy->GetHitboxSize()))
+					{
+						if (proj->GetType() == DamageType::FIRE)
+						{
+							m_feedbackText = "Immune to fire";
+							m_feedbackTextTimer = 1.0f;
+							m_feedbackTextPos = GetNormalizedCoords(fireEnemy->GetPosition().x, fireEnemy->GetPosition().y);
+							m_feedbackTextR = 1.0f;
+							m_feedbackTextG = 0.0f;
+							m_feedbackTextB = 0.0f;
+						}
+						else
+							fireEnemy->TakeDamage(proj->GetDamage(), proj->GetType());
+						proj->Deactivate();
+					}
+				}
+			}
+
+
+			if (proj->IsActive() && enemy->GetHealth() > 0)
+			{
+				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemy->GetPosition(), enemy->GetHitboxSize()))
+				{
+					enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+					proj->Deactivate();
+				}
 			}
 		}
 
@@ -430,30 +443,13 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
-		if (m_WarriorEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
+		for (auto enemy : m_Enemies)
 		{
-			m_WarriorEnemy.TakeDamage(10, DamageType::NONE);
-			m_Player.RegisterHit();
-		}
-		if (m_NightBorneEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
-		{
-			m_NightBorneEnemy.TakeDamage(10, DamageType::NONE);
-			m_Player.RegisterHit();
-		}
-		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
-		{
-			m_MageEnemy.TakeDamage(10, DamageType::NONE);
-			m_Player.RegisterHit();
-		}
-		else if (m_FireWormEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
-		{
-			m_FireWormEnemy.TakeDamage(10, DamageType::NONE);
-			m_Player.RegisterHit();
-		}
-		else if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable() && CheckAABBCollision(hitboxPos, currentHitbox.size, m_Boss.GetPosition(), m_Boss.GetHitboxSize()))
-		{
-			m_Boss.TakeDamage(10, DamageType::NONE);
-			m_Player.RegisterHit();
+			if ( enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
+			{
+				enemy->TakeDamage(10, DamageType::NONE);
+				m_Player.RegisterHit();
+			}
 		}
 	}
 
@@ -472,11 +468,10 @@ void MainGameState::Draw()
 		tm.Draw();
 	}
 
-	m_WarriorEnemy.Draw();
-	m_NightBorneEnemy.Draw();
-
-	m_MageEnemy.Draw();
-	m_FireWormEnemy.Draw();
+	for (auto enemy : m_Enemies)
+	{
+		enemy->Draw();
+	}
 
 	if (!m_Boss.IsCompletelyDead())
 	{
@@ -519,13 +514,16 @@ void MainGameState::Exit()
 	{
 		tm.Destroy();
 	}
+
+	//for (auto enemy : m_Enemies)
+	//{
+	//	enemy->Destroy();
+	//}
+
 	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
-	m_WarriorEnemy.Destroy();
-	m_NightBorneEnemy.Destroy();
-	m_MageEnemy.Destroy();
-	m_FireWormEnemy.Destroy();
+
 	m_Boss.Destroy();
 	for (auto& projectile : m_playerProjectiles) projectile.Destroy();
 	for (auto& projectile : m_enemyProjectiles) projectile.Destroy();
@@ -606,19 +604,7 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 	AEVec2 playerPos = m_Player.GetPosition();
 	CharacterDirection playerDir = m_Player.GetDirection();
 
-	std::vector<ACharacter*> enemies;
-	if (m_WarriorEnemy.GetHealth() > 0)
-		enemies.push_back(&m_WarriorEnemy);
-	if (m_NightBorneEnemy.GetHealth() > 0)
-		enemies.push_back(&m_NightBorneEnemy);
-	if (m_MageEnemy.GetHealth() > 0)
-		enemies.push_back(&m_MageEnemy);
-	if (m_FireWormEnemy.GetHealth() > 0)
-		enemies.push_back(&m_FireWormEnemy);
-	if (m_Boss.GetHealth() > 0)
-		enemies.push_back(&m_Boss);
-
-	for (ACharacter* enemy : enemies)
+	for (ACharacter* enemy : m_Enemies)
 	{
 		const AEVec2& enemyPos = enemy->GetPosition();
 

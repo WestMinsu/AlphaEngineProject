@@ -109,6 +109,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="BossCharacter.h" />
+    <ClInclude Include="EnemyFactory.h" />
     <ClInclude Include="FireWormEnemyCharacter.h" />
     <ClInclude Include="GameClearState.h" />
     <ClInclude Include="GameOverState.h" />
@@ -124,6 +125,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="MainGameState.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Projectile.h" />
+    <ClInclude Include="SpawnEnemy.h" />
     <ClInclude Include="RangedEnemyCharacter.h" />
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="tinyxml2.h" />
@@ -138,6 +140,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="BossCharacter.cpp" />
+    <ClCompile Include="EnemyFactory.cpp" />
     <ClCompile Include="FireWormEnemyCharacter.cpp" />
     <ClCompile Include="GameClearState.cpp" />
     <ClCompile Include="GameOverState.cpp" />
@@ -151,6 +154,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="MainGameState.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="SpawnEnemy.cpp" />
     <ClCompile Include="RangedEnemyCharacter.cpp" />
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="tinyxml2.cpp" />

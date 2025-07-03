@@ -417,6 +417,11 @@ bool PlayerCharacter::IsInvincible() const
 	return m_isInvincible;
 }
 
+PlayerCharacter* PlayerCharacter::Clone()
+{
+	return nullptr;
+}
+
 int PlayerCharacter::GetWeaponUseCount(DamageType type) const
 {
 	if (m_weaponUseCounts.count(type))
