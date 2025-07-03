@@ -30,16 +30,9 @@ private:
 	ACharacter* FindClosestEnemyInFront();
 	 
 	PlayerCharacter m_Player;
-	MeleeEnemyCharacter m_MeleeEnemy; 
-	MageEnemyCharacter m_MageEnemy;
-
-	//std::vector<MeleeEnemyCharacter*> m_MeleeEnemies;
-	//std::vector<MageEnemyCharacter*> m_MageEnemies;
-	std::vector<ACharacter*> m_Enemies;
-	
-	FireWormEnemyCharacter m_FireWormEnemy;
-
 	BossCharacter m_Boss;
+
+	std::vector<ACharacter*> m_Enemies;
 
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
