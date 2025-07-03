@@ -39,7 +39,6 @@ FireWormEnemyCharacter::FireWormEnemyCharacter(FireWormEnemyCharacter* prototype
 	m_pPlayer = prototype->m_pPlayer;
 	m_detectionRange = prototype->m_attackRange;
 	m_attackRange = prototype->m_attackRange;
-	m_idealRange = prototype->m_idealRange;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = prototype->m_attackCooldownDuration;
