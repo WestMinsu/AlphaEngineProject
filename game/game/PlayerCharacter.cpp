@@ -17,12 +17,12 @@ PlayerCharacter::PlayerCharacter()
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 
+	m_maxHealth = 100;
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_jumpStrength = 800.0f;
 	m_isGrounded = false;
-	m_groundLevel = -kHalfWindowHeight + 100.0f;
 
 	m_isMeleeAttacking = false;
 	m_isMeleeAttackHitboxActive = false;
@@ -235,21 +235,21 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentDirection = CharacterDirection::RIGHT;
 	}
 
-	if (!m_isGrounded)
-		m_velocityY += m_gravity * dt;
+	AEVec2 groundCheckPos = m_position;
+	groundCheckPos.y -= 1.0f;
 
-	if (m_position.y <= m_groundLevel && m_velocityY <= 0.0f)
+	if (checkCollisionTileMap(groundCheckPos, m_size))
 	{
-		m_position.y = m_groundLevel;
-		m_velocityY = 0.0f;
-		if (!m_isGrounded)
-		{
-			m_isGrounded = true;
-			if (!AEInputCheckCurr(AEVK_LEFT) && !AEInputCheckCurr(AEVK_RIGHT))
-			{
-				m_velocityX = 0.0f;
-			}
-		}
+		m_isGrounded = true;
+	}
+	else
+	{
+		m_isGrounded = false;
+	}
+
+	if (!m_isGrounded)
+	{
+		m_velocityY += m_gravity * dt;
 	}
 
 	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
@@ -258,25 +258,26 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.y += std::copysign(1.0f, m_velocityY);
-		//std::cout << "Call Y" << std::endl;
 	}
-
 	if (checkCollisionTileMap(m_position, m_size))
 	{
 		m_position.y -= std::copysign(1.0f, m_velocityY);
-		if(m_velocityY < 0) m_isGrounded = true;
+		if (m_velocityY < 0)
+		{
+			m_isGrounded = true;
+		}
+		m_velocityY = 0;
 	}
 
 	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
 	{
 		if (checkCollisionTileMap(m_position, m_size)) break;
 		m_position.x += std::copysign(1.0f, m_velocityX);
-		//std::cout << "Call X" << std::endl;
 	}
-
 	if (checkCollisionTileMap(m_position, m_size))
 	{
 		m_position.x -= std::copysign(1.0f, m_velocityX);
+		m_velocityX = 0;
 	}
 
 	CharacterAnimationState desiredState;
@@ -343,6 +344,19 @@ void PlayerCharacter::Draw()
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
+
+	if (m_healthPoint > 0)
+	{
+		float barWidth = m_hitboxSize.x;
+		float barHeight = 10.f;
+		float barOffsetY = m_hitboxSize.y / 2.0f; 
+
+		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
+		float currentHealthWidth = barWidth * healthRatio;
+
+		DrawRect(m_position.x, m_position.y + barOffsetY, barWidth, barHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+	}	
 
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
 }

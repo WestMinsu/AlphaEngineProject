@@ -13,6 +13,8 @@
 #include "FireWormEnemyCharacter.h"
 #include "EnemyFactory.h"
 #include "SpawnEnemy.h"
+#include "WarriorEnemyCharacter.h"
+#include "NightBorneEnemyCharacter.h"
 
 class MainGameState : public AGameState
 {
@@ -54,4 +56,12 @@ private:
 	float m_bossMessageTimer;
 	const float m_bossMessageDuration = 2.5f;
 	BossAIState m_previousBossAIState;
+
+	std::string m_feedbackText;
+	float m_feedbackTextTimer;
+	AEVec2 m_feedbackTextPos;
+
+	f32 m_feedbackTextR;
+	f32 m_feedbackTextG;
+	f32 m_feedbackTextB;
 };

@@ -21,33 +21,39 @@ void MainGameState::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
-	//m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
-	//m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
-	//m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+
+	//m_WarriorEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	//m_NightBorneEnemy.Init({ kHalfWindowWidth - 500.f, -100.f }, &m_Player);
+	//m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+	//m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 
 	m_Background.Init();
-	MeleeEnemyCharacter* melee = new MeleeEnemyCharacter();
-	melee->Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	WarriorEnemyCharacter* warrior = new WarriorEnemyCharacter();
+	warrior->Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
 	MageEnemyCharacter* mage = new MageEnemyCharacter();
 	mage->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
 	FireWormEnemyCharacter* fire = new FireWormEnemyCharacter();
 	fire->Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	NightBorneEnemyCharacter* night = new NightBorneEnemyCharacter();
+	night->Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 
 	//m_factory = std::make_shared<EnemyFactory>();
-	m_factory.RegisterPrototype("Melee", melee);
+	m_factory.RegisterPrototype("Warrior", warrior);
 	m_factory.RegisterPrototype("Mage", mage);
 	m_factory.RegisterPrototype("Fire", fire);
+	m_factory.RegisterPrototype("Night", night);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "warrior"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "Melee"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "warrior"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 740 }, &m_factory, "Mage"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Melee"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Fire"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Night"));
 
 	m_Enemies.push_back(&m_Boss);
 
@@ -65,20 +71,38 @@ void MainGameState::Init()
 
 	m_pHealthBarFrame = LoadImageAsset("Assets/UI/healthbar_frame.png");
 	m_pHealthBar = LoadImageAsset("Assets/UI/healthbar_fill.png");
+
+	m_feedbackText = "";
+	m_feedbackTextTimer = 0.0f;
+
+	m_feedbackTextR = 0.0f;
+	m_feedbackTextG = 0.0f;
+	m_feedbackTextB = 0.0f;
 }
 
 void MainGameState::Update(f32 dt)
 {
+	if (m_feedbackTextTimer > 0.0f)
+	{
+		m_feedbackTextTimer -= dt;
+		if (m_feedbackTextTimer <= 0.0f)
+		{
+			m_feedbackText.clear();
+		}
+	}
+
 	if (m_Boss.IsCompletelyDead())
 	{
 		GameManager::ChangeState(GameState::GAME_CLEAR);
 		return;
 	}
+
 	if (m_Player.IsCompletelyDead())
 	{
 		GameManager::ChangeState(GameState::GAME_OVER);
 		return;
 	}
+
 	if (AEInputCheckTriggered(AEVK_R))
 	{
 		GameManager::ChangeState(GameState::MAIN_MENU);
@@ -91,10 +115,8 @@ void MainGameState::Update(f32 dt)
 	}
 
 	m_Player.Update(dt);
-	//m_MeleeEnemy.Update(dt);
-	//m_MageEnemy.Update(dt);
+
 	m_Boss.Update(dt);
-	//m_FireWormEnemy.Update(dt);
 
 	for (auto& spawn : m_Spawns)
 	{
@@ -111,7 +133,7 @@ void MainGameState::Update(f32 dt)
 	{
 		if (currentBossState == BossAIState::GLOWING)
 		{
-			m_pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png"); 
+			m_pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png");
 			m_bossMessageTimer = m_bossMessageDuration;
 		}
 		else if (currentBossState == BossAIState::BUFF)
@@ -127,32 +149,25 @@ void MainGameState::Update(f32 dt)
 		m_bossMessageTimer -= dt;
 		if (m_bossMessageTimer <= 0.0f)
 		{
-			m_pBossMessageTexture = nullptr; 
+			m_pBossMessageTexture = nullptr;
 		}
 	}
 
 	if (!m_Player.IsInvincible() && m_Player.GetHealth() > 0)
 	{
-		//std::vector<ACharacter*> enemies;
-		//if (m_MeleeEnemy.GetHealth() > 0) enemies.push_back(&m_MeleeEnemy);
-		//if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
-		//if (m_FireWormEnemy.GetHealth() > 0) enemies.push_back(&m_FireWormEnemy);
-		//if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
-
 		AEVec2 playerHitboxPos = m_Player.GetPosition();
 		playerHitboxPos.x += m_Player.GetHitboxOffset().x;
 		playerHitboxPos.y += m_Player.GetHitboxOffset().y;
 		const AEVec2& playerHitboxSize = m_Player.GetHitboxSize();
 
-		//for (auto* enemy : enemies)
 		for (auto* enemy : m_Enemies)
 
 		{
 			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				std::cout << "collsion" << std::endl;
-				m_Player.TakeDamage(1, DamageType::NONE); 
-				break; 
+				m_Player.TakeDamage(1, DamageType::NONE);
+				break;
 			}
 		}
 	}
@@ -321,6 +336,7 @@ void MainGameState::Update(f32 dt)
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
+
 		for (auto enemy : m_Enemies)
 		{
 			if (proj->IsActive() && enemy->GetHealth() > 0)
@@ -386,18 +402,11 @@ void MainGameState::Update(f32 dt)
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	//m_MeleeEnemy.Draw();
-	//m_MageEnemy.Draw();
-	//m_FireWormEnemy.Draw();
 
 	for (auto tm : TileMaps)
-
 	{
 		tm.Draw();
 	}
-
-	//m_MeleeEnemy.Draw();
-	//m_MageEnemy.Draw();
 
 	for (auto enemy : m_Enemies)
 	{
@@ -419,6 +428,12 @@ void MainGameState::Draw()
 		effect.Draw();
 
 	DrawUI();
+
+	if (m_feedbackTextTimer > 0.0f)
+	{
+		AEGfxPrint(GameManager::m_font, m_feedbackText.c_str(), m_feedbackTextPos.x, m_feedbackTextPos.y, 0.3f, m_feedbackTextR, m_feedbackTextG, m_feedbackTextB, 1.f);
+		std::cout << m_feedbackTextPos.x << m_feedbackTextPos.y << std::endl;
+	}
 
 	if (m_pBossMessageTexture)
 	{
@@ -448,6 +463,7 @@ void MainGameState::Exit()
 	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
+
 	m_Boss.Destroy();
 	for (auto& projectile : m_playerProjectiles) projectile.Destroy();
 	for (auto& projectile : m_enemyProjectiles) projectile.Destroy();
@@ -496,7 +512,7 @@ void MainGameState::DrawUI()
 		f32 TextScale = 0.5f;
 		int useCount = m_Player.GetWeaponUseCount(slotWeaponType);
 		sprintf_s(countStr, "%d", useCount);
-		AEVec2 fontPos = GetNormalizedCoords(posX-xCam, posY);
+		AEVec2 fontPos = GetNormalizedCoords(posX - xCam, posY);
 		AEGfxPrint(GameManager::m_font, countStr, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 	}
 

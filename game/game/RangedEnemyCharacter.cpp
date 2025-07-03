@@ -4,6 +4,7 @@
 #include "Utility.h"
 #include <iostream>
 #include "AssetManager.h"
+#include "TileMap.h"
 
 RangedEnemyCharacter::RangedEnemyCharacter()
 {
@@ -17,7 +18,6 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-	m_idealRange = 500.0f;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
@@ -26,6 +26,11 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
+
+	m_velocityX = 0.0f;
+	m_velocityY = 0.0f;
+	m_gravity = -1200.0f;
+	m_isGrounded = false;
 }
 
 RangedEnemyCharacter::~RangedEnemyCharacter() {}
@@ -59,6 +64,50 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
+
+	AEVec2 groundCheckPos = m_position;
+	groundCheckPos.y -= 1.0f;
+
+	if (checkCollisionTileMap(groundCheckPos, m_size))
+	{
+		m_isGrounded = true;
+	}
+	else
+	{
+		m_isGrounded = false;
+	}
+
+	if (!m_isGrounded)
+	{
+		m_velocityY += m_gravity * dt;
+	}
+
+	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.y += std::copysign(1.0f, m_velocityY);
+		//std::cout << "Call Y" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.y -= std::copysign(1.0f, m_velocityY);
+		if (m_velocityY < 0) m_isGrounded = true;
+	}
+
+	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(m_position, m_size)) break;
+		m_position.x += std::copysign(1.0f, m_velocityX);
+		//std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(m_position, m_size))
+	{
+		m_position.x -= std::copysign(1.0f, m_velocityX);
+	}
 
 	switch (m_currentAIState)
 	{
@@ -99,25 +148,22 @@ void RangedEnemyCharacter::Update(f32 dt)
 	}
 	}
 
-	f32 velocityX = 0.0f;
+	m_velocityX = 0;
 	CharacterAnimationState desiredAnimState = CharacterAnimationState::IDLE;
-
-	if (m_pPlayer->GetPosition().x < m_position.x)
-	{
-		m_currentDirection = CharacterDirection::LEFT;
-	}
-	else
-	{
-		m_currentDirection = CharacterDirection::RIGHT;
-	}
 
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
-		if (distanceToPlayer > m_idealRange)
+		if (m_pPlayer->GetPosition().x < m_position.x)
 		{
-			velocityX = (m_currentDirection == CharacterDirection::RIGHT ? m_characterSpeed : -m_characterSpeed);
-			desiredAnimState = CharacterAnimationState::WALK;
+			m_currentDirection = CharacterDirection::LEFT;
+			m_velocityX = -m_characterSpeed;
 		}
+		else
+		{
+			m_currentDirection = CharacterDirection::RIGHT;
+			m_velocityX = m_characterSpeed;
+		}
+		desiredAnimState = CharacterAnimationState::WALK;
 	}
 	else if (m_currentAIState == EnemyAIState::ATTACK)
 	{
@@ -128,7 +174,7 @@ void RangedEnemyCharacter::Update(f32 dt)
 		desiredAnimState = CharacterAnimationState::HURT;
 	}
 
-	m_position.x += velocityX * dt;
+	m_position.x += m_velocityX * dt;
 
 	if (m_currentAnimState != desiredAnimState)
 	{

@@ -20,12 +20,10 @@ public:
 	void Attack() override;
 	void Draw() override;
 	void Destroy() override;
-	void TakeDamage(s32 damage, DamageType damageType) override;
+	virtual void TakeDamage(s32 damage, DamageType damageType) override;
 	MeleeEnemyCharacter* Clone() override;
 
-
-
-private:
+protected:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -39,4 +37,9 @@ private:
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
 	bool m_isHurt;
+
+	f32 m_velocityX;
+	f32 m_velocityY;
+	f32 m_gravity;
+	bool m_isGrounded;
 };
