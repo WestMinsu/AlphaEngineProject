@@ -13,8 +13,9 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_healthPoint = 40;
 	m_characterSpeed = 80.f;
 	m_currentDirection = CharacterDirection::LEFT;
-	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_element = ElementType::NONE;
 
+	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
@@ -35,6 +36,7 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 	m_currentAnimState = prototype.m_currentAnimState;
 	m_animation = prototype.m_animation;
 	m_animDataMap = prototype.m_animDataMap;
+	m_element = prototype.m_element;
 
 	m_currentAIState = prototype.m_currentAIState;
 	m_pPlayer = prototype.m_pPlayer;

@@ -46,10 +46,10 @@ void MainGameState::Init()
 
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "Warrior"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330 }, &m_factory, "Warrior"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Night"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night"));
 
 	m_Enemies.push_back(&m_Boss);
 
@@ -168,7 +168,7 @@ void MainGameState::Update(f32 dt)
 		{
 			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
-				std::cout << "collsion" << std::endl;
+				//std::cout << "collsion" << std::endl;
 				m_Player.TakeDamage(1, DamageType::NONE);
 				break;
 			}
@@ -335,26 +335,49 @@ void MainGameState::Update(f32 dt)
 			}
 		}
 	}
-
+	
+	f32 xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
 
 		for (auto enemy : m_Enemies)
 		{
-			NightBorneEnemyCharacter* nightEnemy = dynamic_cast<NightBorneEnemyCharacter*>(enemy);
-			if (nightEnemy) 
+			if (proj->IsActive() && enemy->GetHealth() > 0)
 			{
-
-				if (proj->IsActive() && nightEnemy->GetHealth() > 0)
+				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemy->GetPosition(), enemy->GetHitboxSize()))
 				{
-					if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), nightEnemy->GetPosition(), nightEnemy->GetHitboxSize()))
+					switch (enemy->GetElement())
 					{
+					case ElementType::FIRE:
 						if (proj->GetType() == DamageType::FIRE)
 						{
 							m_feedbackText = "Immune to fire";
 							m_feedbackTextTimer = 1.0f;
-							m_feedbackTextPos = GetNormalizedCoords(nightEnemy->GetPosition().x, nightEnemy->GetPosition().y);
+							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x-xCam, enemy->GetPosition().y);
+							m_feedbackTextR = 1.0f;
+							m_feedbackTextG = 0.0f;
+							m_feedbackTextB = 0.0f;
+						}
+						break;
+					case ElementType::ICE:
+						if (proj->GetType() == DamageType::ICE)
+						{
+							m_feedbackText = "Immune to ice";
+							m_feedbackTextTimer = 1.0f;
+							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x - xCam, enemy->GetPosition().y);
+							m_feedbackTextR = 0.0f;
+							m_feedbackTextG = 0.0f;
+							m_feedbackTextB = 1.0f;
+						}
+						break;
+					case ElementType::DARK:
+						if (proj->GetType() == DamageType::FIRE)
+						{
+							m_feedbackText = "Immune to fire";
+							m_feedbackTextTimer = 1.0f;
+							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x - xCam, enemy->GetPosition().y);
 							m_feedbackTextR = 1.0f;
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 0.0f;
@@ -363,47 +386,16 @@ void MainGameState::Update(f32 dt)
 						{
 							m_feedbackText = "Immune to ice";
 							m_feedbackTextTimer = 1.0f;
-							m_feedbackTextPos = GetNormalizedCoords(nightEnemy->GetPosition().x, nightEnemy->GetPosition().y);
+							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x - xCam, enemy->GetPosition().y);
 							m_feedbackTextR = 0.0f;
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 1.0f;
 						}
-						else
-							nightEnemy->TakeDamage(proj->GetDamage(), proj->GetType());
-						proj->Deactivate();
+						break;
+					default:
+						enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+						break;
 					}
-				}
-			}
-
-			FireWormEnemyCharacter* fireEnemy = dynamic_cast<FireWormEnemyCharacter*>(enemy);
-			if (fireEnemy)
-			{
-				if (proj->IsActive() && fireEnemy->GetHealth() > 0)
-				{
-					if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), fireEnemy->GetPosition(), fireEnemy->GetHitboxSize()))
-					{
-						if (proj->GetType() == DamageType::FIRE)
-						{
-							m_feedbackText = "Immune to fire";
-							m_feedbackTextTimer = 1.0f;
-							m_feedbackTextPos = GetNormalizedCoords(fireEnemy->GetPosition().x, fireEnemy->GetPosition().y);
-							m_feedbackTextR = 1.0f;
-							m_feedbackTextG = 0.0f;
-							m_feedbackTextB = 0.0f;
-						}
-						else
-							fireEnemy->TakeDamage(proj->GetDamage(), proj->GetType());
-						proj->Deactivate();
-					}
-				}
-			}
-
-
-			if (proj->IsActive() && enemy->GetHealth() > 0)
-			{
-				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemy->GetPosition(), enemy->GetHitboxSize()))
-				{
-					enemy->TakeDamage(proj->GetDamage(), proj->GetType());
 					proj->Deactivate();
 				}
 			}
@@ -445,7 +437,7 @@ void MainGameState::Update(f32 dt)
 
 		for (auto enemy : m_Enemies)
 		{
-			if ( enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
+			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				enemy->TakeDamage(10, DamageType::NONE);
 				m_Player.RegisterHit();
@@ -492,7 +484,7 @@ void MainGameState::Draw()
 	if (m_feedbackTextTimer > 0.0f)
 	{
 		AEGfxPrint(GameManager::m_font, m_feedbackText.c_str(), m_feedbackTextPos.x, m_feedbackTextPos.y, 0.3f, m_feedbackTextR, m_feedbackTextG, m_feedbackTextB, 1.f);
-		std::cout << m_feedbackTextPos.x << m_feedbackTextPos.y << std::endl;
+		//std::cout << m_feedbackTextPos.x << m_feedbackTextPos.y << std::endl;
 	}
 
 	if (m_pBossMessageTexture)

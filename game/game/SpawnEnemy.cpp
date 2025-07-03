@@ -63,7 +63,7 @@ void SpawnEnemy::Reset()
 	f32 camX, camY;
 	AEGfxGetCamPosition(&camX, &camY);
 	//std::cout << m_position.x << "," << camX << std::endl;
-	std::cout << 2 * 1856 * (1 + m_resetCount) - kHalfWindowWidth << std::endl;
+	//std::cout << 2 * 1856 * (1 + m_resetCount) - kHalfWindowWidth << std::endl;
 	if (camX > 2 * 1856 * (1 + m_resetCount) - kHalfWindowWidth && camX > m_position.x)
 	{
 		m_position.x += 2 * 1856;

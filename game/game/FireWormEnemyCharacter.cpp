@@ -14,12 +14,12 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_characterSpeed = 80.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_element = ElementType::FIRE;
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
@@ -33,6 +33,7 @@ FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& pro
 	m_characterSpeed = prototype.m_characterSpeed;
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
+	m_element = prototype.m_element;
 
 	m_currentAIState = prototype.m_currentAIState;
 	m_pPlayer = prototype.m_pPlayer;

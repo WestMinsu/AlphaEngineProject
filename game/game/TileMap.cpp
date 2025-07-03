@@ -27,7 +27,7 @@ TileMap::TileMap(std::string mapfileDir, f32 tileScale, f32 x, f32 y)
 
 	for (auto& box : m_collisionBoxes)
 	{
-		std::cout << "Box: " << box.x << ", " << box.y << std::endl;
+		//std::cout << "Box: " << box.x << ", " << box.y << std::endl;
 	}
 }
 

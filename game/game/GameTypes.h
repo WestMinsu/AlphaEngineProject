@@ -5,7 +5,8 @@ enum class ElementType
 {
 	NONE,
 	FIRE,
-	ICE
+	ICE,
+	DARK
 };
 
 enum class DamageType

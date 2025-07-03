@@ -15,8 +15,9 @@ PlayerCharacter::PlayerCharacter()
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
-	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_element = ElementType::NONE;
 
+	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_maxHealth = 100;
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
@@ -40,6 +41,7 @@ PlayerCharacter::PlayerCharacter()
 	m_isInvincible = false;
 	m_invincibilityTimer = 0.0f;
 	m_isHurt = false;
+	m_score = 0;
 }
 
 PlayerCharacter::~PlayerCharacter()

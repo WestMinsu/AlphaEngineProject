@@ -13,15 +13,15 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.25f };
 	m_characterSpeed = 100.f;
 	m_currentDirection = CharacterDirection::LEFT;
-	m_currentAnimState = CharacterAnimationState::IDLE;
+	m_element = ElementType::DARK;
 
+	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 500.0f;
 	m_attackRange = 100.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
-	
 	m_isHurt = false;
 
 	m_velocityX = 0.0f;
@@ -37,6 +37,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_characterSpeed = prototype.m_characterSpeed;
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
+	m_element = prototype.m_element;
 
 	m_currentAIState = prototype.m_currentAIState;
 	m_pPlayer = prototype.m_pPlayer;
