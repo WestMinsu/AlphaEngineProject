@@ -17,7 +17,6 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-	m_idealRange = 500.0f;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
@@ -82,12 +81,6 @@ void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
-		return;
-	}
-
-	if (damageType == DamageType::FIRE)
-	{
-		std::cout << "Fire Mage is IMMUNE to fire!" << std::endl;
 		return;
 	}
 

@@ -17,7 +17,6 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-	m_idealRange = 500.0f;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
@@ -40,7 +39,6 @@ MageEnemyCharacter::MageEnemyCharacter(MageEnemyCharacter* prototype)
 	m_pPlayer = prototype->m_pPlayer;
 	m_detectionRange = prototype->m_attackRange;
 	m_attackRange = prototype->m_attackRange;
-	m_idealRange = prototype->m_idealRange;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = prototype->m_attackCooldownDuration;

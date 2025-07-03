@@ -12,6 +12,8 @@
 #include "VisualEffect.h"
 #include "EnemyFactory.h"
 #include "FireWormEnemyCharacter.h"
+#include "WarriorEnemyCharacter.h"
+#include "NightBorneEnemyCharacter.h"
 
 class MainGameState : public AGameState
 {
@@ -29,7 +31,10 @@ private:
 	ACharacter* FindClosestEnemyInFront();
 	 
 	PlayerCharacter m_Player;
-	MeleeEnemyCharacter m_MeleeEnemy; 
+
+	WarriorEnemyCharacter m_WarriorEnemy;
+	NightBorneEnemyCharacter m_NightBorneEnemy;
+
 	MageEnemyCharacter m_MageEnemy;
 
 	//std::vector<MeleeEnemyCharacter*> m_MeleeEnemies;
@@ -58,4 +63,12 @@ private:
 	float m_bossMessageTimer;
 	const float m_bossMessageDuration = 2.5f;
 	BossAIState m_previousBossAIState;
+
+	std::string m_feedbackText;
+	float m_feedbackTextTimer;
+	AEVec2 m_feedbackTextPos;
+
+	f32 m_feedbackTextR;
+	f32 m_feedbackTextG;
+	f32 m_feedbackTextB;
 };

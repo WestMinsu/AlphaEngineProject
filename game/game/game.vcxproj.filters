@@ -98,6 +98,12 @@
     <ClInclude Include="FireWormEnemyCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WarriorEnemyCharacter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NightBorneEnemyCharacter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ACharacter.cpp">
@@ -170,6 +176,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FireWormEnemyCharacter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WarriorEnemyCharacter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NightBorneEnemyCharacter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

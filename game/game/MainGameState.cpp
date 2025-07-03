@@ -20,9 +20,10 @@ void MainGameState::Init()
 {
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
-	m_MeleeEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
-	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
-	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 0.f }, &m_Player);
+	m_WarriorEnemy.Init({ kHalfWindowWidth - 700.f, 0.f }, &m_Player);
+	m_NightBorneEnemy.Init({ kHalfWindowWidth - 500.f, -100.f }, &m_Player);
+	m_MageEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
+	m_FireWormEnemy.Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
@@ -44,20 +45,38 @@ void MainGameState::Init()
 
 	m_pHealthBarFrame = LoadImageAsset("Assets/UI/healthbar_frame.png");
 	m_pHealthBar = LoadImageAsset("Assets/UI/healthbar_fill.png");
+
+	m_feedbackText = "";
+	m_feedbackTextTimer = 0.0f;
+
+	m_feedbackTextR = 0.0f;
+	m_feedbackTextG = 0.0f;
+	m_feedbackTextB = 0.0f;
 }
 
 void MainGameState::Update(f32 dt)
 {
+	if (m_feedbackTextTimer > 0.0f)
+	{
+		m_feedbackTextTimer -= dt;
+		if (m_feedbackTextTimer <= 0.0f)
+		{
+			m_feedbackText.clear();
+		}
+	}
+
 	if (m_Boss.IsCompletelyDead())
 	{
 		GameManager::ChangeState(GameState::GAME_CLEAR);
 		return;
 	}
+
 	if (m_Player.IsCompletelyDead())
 	{
 		GameManager::ChangeState(GameState::GAME_OVER);
 		return;
 	}
+
 	if (AEInputCheckTriggered(AEVK_R))
 	{
 		GameManager::ChangeState(GameState::MAIN_MENU);
@@ -70,7 +89,8 @@ void MainGameState::Update(f32 dt)
 	}
 
 	m_Player.Update(dt);
-	m_MeleeEnemy.Update(dt);
+	m_WarriorEnemy.Update(dt);
+	m_NightBorneEnemy.Update(dt);
 	m_MageEnemy.Update(dt);
 	m_Boss.Update(dt);
 	m_FireWormEnemy.Update(dt);
@@ -80,7 +100,7 @@ void MainGameState::Update(f32 dt)
 	{
 		if (currentBossState == BossAIState::GLOWING)
 		{
-			m_pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png"); 
+			m_pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png");
 			m_bossMessageTimer = m_bossMessageDuration;
 		}
 		else if (currentBossState == BossAIState::BUFF)
@@ -96,14 +116,16 @@ void MainGameState::Update(f32 dt)
 		m_bossMessageTimer -= dt;
 		if (m_bossMessageTimer <= 0.0f)
 		{
-			m_pBossMessageTexture = nullptr; 
+			m_pBossMessageTexture = nullptr;
 		}
 	}
 
 	if (!m_Player.IsInvincible() && m_Player.GetHealth() > 0)
 	{
 		std::vector<ACharacter*> enemies;
-		if (m_MeleeEnemy.GetHealth() > 0) enemies.push_back(&m_MeleeEnemy);
+		if (m_WarriorEnemy.GetHealth() > 0) enemies.push_back(&m_WarriorEnemy);
+		if (m_NightBorneEnemy.GetHealth() > 0) enemies.push_back(&m_NightBorneEnemy);
+
 		if (m_MageEnemy.GetHealth() > 0) enemies.push_back(&m_MageEnemy);
 		if (m_FireWormEnemy.GetHealth() > 0) enemies.push_back(&m_FireWormEnemy);
 		if (m_Boss.GetHealth() > 0 && m_Boss.IsAttackable()) enemies.push_back(&m_Boss);
@@ -118,8 +140,8 @@ void MainGameState::Update(f32 dt)
 			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				std::cout << "collsion" << std::endl;
-				m_Player.TakeDamage(1, DamageType::NONE); 
-				break; 
+				m_Player.TakeDamage(1, DamageType::NONE);
+				break;
 			}
 		}
 	}
@@ -296,11 +318,39 @@ void MainGameState::Update(f32 dt)
 	{
 		proj->Update(dt);
 		bool hit = false;
-		if (proj->IsActive() && m_MeleeEnemy.GetHealth() > 0)
+		if (proj->IsActive() && m_WarriorEnemy.GetHealth() > 0)
 		{
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
 			{
-				m_MeleeEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				m_WarriorEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				proj->Deactivate();
+				hit = true;
+			}
+		}
+		if (proj->IsActive() && m_NightBorneEnemy.GetHealth() > 0)
+		{
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
+			{
+				if (proj->GetType() == DamageType::FIRE)
+				{
+					m_feedbackText = "Immune to fire";
+					m_feedbackTextTimer = 1.0f;
+					m_feedbackTextPos = GetNormalizedCoords(m_NightBorneEnemy.GetPosition().x, m_NightBorneEnemy.GetPosition().y);
+					m_feedbackTextR = 1.0f;
+					m_feedbackTextG = 0.0f;
+					m_feedbackTextB = 0.0f;
+				}
+				else if (proj->GetType() == DamageType::ICE)
+				{
+					m_feedbackText = "Immune to ice";
+					m_feedbackTextTimer = 1.0f;
+					m_feedbackTextPos = GetNormalizedCoords(m_NightBorneEnemy.GetPosition().x, m_NightBorneEnemy.GetPosition().y);
+					m_feedbackTextR = 0.0f;
+					m_feedbackTextG = 0.0f;
+					m_feedbackTextB = 1.0f;
+				}
+				else
+					m_NightBorneEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 				hit = true;
 			}
@@ -318,7 +368,17 @@ void MainGameState::Update(f32 dt)
 		{
 			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), m_FireWormEnemy.GetPosition(), m_FireWormEnemy.GetHitboxSize()))
 			{
-				m_FireWormEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
+				if (proj->GetType() == DamageType::FIRE)
+				{
+					m_feedbackText = "Immune to fire";
+					m_feedbackTextTimer = 1.0f;
+					m_feedbackTextPos = GetNormalizedCoords(m_FireWormEnemy.GetPosition().x, m_FireWormEnemy.GetPosition().y);
+					m_feedbackTextR = 1.0f;
+					m_feedbackTextG = 0.0f;
+					m_feedbackTextB = 0.0f;
+				}
+				else
+					m_FireWormEnemy.TakeDamage(proj->GetDamage(), proj->GetType());
 				proj->Deactivate();
 			}
 		}
@@ -366,9 +426,14 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
-		if (m_MeleeEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MeleeEnemy.GetPosition(), m_MeleeEnemy.GetHitboxSize()))
+		if (m_WarriorEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_WarriorEnemy.GetPosition(), m_WarriorEnemy.GetHitboxSize()))
 		{
-			m_MeleeEnemy.TakeDamage(10, DamageType::NONE);
+			m_WarriorEnemy.TakeDamage(10, DamageType::NONE);
+			m_Player.RegisterHit();
+		}
+		if (m_NightBorneEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_NightBorneEnemy.GetPosition(), m_NightBorneEnemy.GetHitboxSize()))
+		{
+			m_NightBorneEnemy.TakeDamage(10, DamageType::NONE);
 			m_Player.RegisterHit();
 		}
 		else if (m_MageEnemy.GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, m_MageEnemy.GetPosition(), m_MageEnemy.GetHitboxSize()))
@@ -397,18 +462,17 @@ void MainGameState::Update(f32 dt)
 void MainGameState::Draw()
 {
 	m_Background.Draw();
-	m_MeleeEnemy.Draw();
-	m_MageEnemy.Draw();
-	m_FireWormEnemy.Draw();
 
 	for (auto tm : TileMaps)
-
 	{
 		tm.Draw();
 	}
 
-	m_MeleeEnemy.Draw();
+	m_WarriorEnemy.Draw();
+	m_NightBorneEnemy.Draw();
+
 	m_MageEnemy.Draw();
+	m_FireWormEnemy.Draw();
 
 	if (!m_Boss.IsCompletelyDead())
 	{
@@ -425,6 +489,12 @@ void MainGameState::Draw()
 		effect.Draw();
 
 	DrawUI();
+
+	if (m_feedbackTextTimer > 0.0f)
+	{
+		AEGfxPrint(GameManager::m_font, m_feedbackText.c_str(), m_feedbackTextPos.x, m_feedbackTextPos.y, 0.3f, m_feedbackTextR, m_feedbackTextG, m_feedbackTextB, 1.f);
+		std::cout << m_feedbackTextPos.x << m_feedbackTextPos.y << std::endl;
+	}
 
 	if (m_pBossMessageTexture)
 	{
@@ -448,7 +518,8 @@ void MainGameState::Exit()
 	TileMaps.clear();
 	m_Background.Destroy();
 	m_Player.Destroy();
-	m_MeleeEnemy.Destroy();
+	m_WarriorEnemy.Destroy();
+	m_NightBorneEnemy.Destroy();
 	m_MageEnemy.Destroy();
 	m_FireWormEnemy.Destroy();
 	m_Boss.Destroy();
@@ -499,7 +570,7 @@ void MainGameState::DrawUI()
 		f32 TextScale = 0.5f;
 		int useCount = m_Player.GetWeaponUseCount(slotWeaponType);
 		sprintf_s(countStr, "%d", useCount);
-		AEVec2 fontPos = GetNormalizedCoords(posX-xCam, posY);
+		AEVec2 fontPos = GetNormalizedCoords(posX - xCam, posY);
 		AEGfxPrint(GameManager::m_font, countStr, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 	}
 
@@ -526,8 +597,10 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 	CharacterDirection playerDir = m_Player.GetDirection();
 
 	std::vector<ACharacter*> enemies;
-	if (m_MeleeEnemy.GetHealth() > 0)
-		enemies.push_back(&m_MeleeEnemy);
+	if (m_WarriorEnemy.GetHealth() > 0)
+		enemies.push_back(&m_WarriorEnemy);
+	if (m_NightBorneEnemy.GetHealth() > 0)
+		enemies.push_back(&m_NightBorneEnemy);
 	if (m_MageEnemy.GetHealth() > 0)
 		enemies.push_back(&m_MageEnemy);
 	if (m_FireWormEnemy.GetHealth() > 0)
