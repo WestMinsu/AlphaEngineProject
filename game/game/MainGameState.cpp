@@ -48,10 +48,10 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Fire", fire);
 	m_factory.RegisterPrototype("Night", night);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "warrior"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "warrior"));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 740 }, &m_factory, "Mage"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2150, -kHalfWindowHeight + 330}, &m_factory, "Warrior"));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585}, &m_factory, "Night"));
 

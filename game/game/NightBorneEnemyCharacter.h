@@ -5,8 +5,10 @@ class NightBorneEnemyCharacter : public MeleeEnemyCharacter
 {
 public:
 	NightBorneEnemyCharacter();
+	NightBorneEnemyCharacter(const NightBorneEnemyCharacter&);
 	~NightBorneEnemyCharacter();
 
 	void Init(AEVec2 position, PlayerCharacter* player);
 	void TakeDamage(s32 damage, DamageType damageType) override;
+	NightBorneEnemyCharacter* Clone() override;
 };

@@ -21,7 +21,6 @@ public:
 	void Draw() override;
 	void Destroy() override;
 	virtual void TakeDamage(s32 damage, DamageType damageType) override;
-	MeleeEnemyCharacter* Clone() override;
 
 protected:
 	Animation m_animation;
