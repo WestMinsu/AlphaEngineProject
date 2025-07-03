@@ -10,8 +10,9 @@
 #include "Background.h"
 #include "BossCharacter.h"
 #include "VisualEffect.h"
-#include "EnemyFactory.h"
 #include "FireWormEnemyCharacter.h"
+#include "EnemyFactory.h"
+#include "SpawnEnemy.h"
 #include "WarriorEnemyCharacter.h"
 #include "NightBorneEnemyCharacter.h"
 
@@ -31,26 +32,18 @@ private:
 	ACharacter* FindClosestEnemyInFront();
 	 
 	PlayerCharacter m_Player;
-
-	WarriorEnemyCharacter m_WarriorEnemy;
-	NightBorneEnemyCharacter m_NightBorneEnemy;
-
-	MageEnemyCharacter m_MageEnemy;
-
-	//std::vector<MeleeEnemyCharacter*> m_MeleeEnemies;
-	//std::vector<MageEnemyCharacter*> m_MageEnemies;
-	std::vector<ACharacter*> m_Enemies;
-	
-	FireWormEnemyCharacter m_FireWormEnemy;
-
 	BossCharacter m_Boss;
+
+	std::vector<ACharacter*> m_Enemies;
 
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
 	std::vector<VisualEffect> m_visualEffects;
 
 	Background m_Background;
-	EnemyFactory* m_factory;
+	//std::shared_ptr<EnemyFactory> m_factory;
+	EnemyFactory m_factory;
+	std::vector<SpawnEnemy*> m_Spawns;
 
 	AEGfxTexture* m_pUiSlot;      
 	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
