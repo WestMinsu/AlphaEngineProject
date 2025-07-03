@@ -37,6 +37,7 @@ void Animation::Play(CharacterAnimationState state, const AnimData& clipData)
 
 	if (needsRebuild)
 	{
+		// To Do List
 		//if (m_mesh)
 		//{
 		//	AEGfxMeshFree(m_mesh);
