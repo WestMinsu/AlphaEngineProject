@@ -61,12 +61,6 @@ void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		return;
 	}
 
-	if (damageType == DamageType::FIRE)
-	{
-		std::cout << "Fire Worm is IMMUNE to fire!" << std::endl;
-		return;
-	}
-
 	m_healthPoint -= damage;
 	std::cout << "Fire Worm Enemy takes damage! HP: " << m_healthPoint << std::endl;
 

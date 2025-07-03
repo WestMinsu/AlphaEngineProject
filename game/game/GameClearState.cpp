@@ -21,7 +21,7 @@ void GameClearState::Draw()
 {
 	char strBuffer[100];
 	sprintf_s(strBuffer, "GAME CLEAR");
-	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f, 0, 1.2f, 1, 1, 1, 1);
+	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f, 0, 1.2f, 1.f, 1.f, 1.f, 1.f);
 }
 
 void GameClearState::Exit()

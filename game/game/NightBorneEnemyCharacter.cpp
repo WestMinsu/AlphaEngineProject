@@ -54,18 +54,6 @@ void NightBorneEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 void NightBorneEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
-	if (damageType == DamageType::FIRE)
-	{
-		std::cout << "NightBorne is IMMUNE to fire!" << std::endl;
-		return;
-	}
-
-	else if (damageType == DamageType::ICE)
-	{
-		std::cout << "NightBorne is IMMUNE to ice!" << std::endl;
-		return;
-	}
-
 	m_healthPoint -= damage;
 	std::cout << "NightBorne takes damage! HP: " << m_healthPoint << std::endl;
 

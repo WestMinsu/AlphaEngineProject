@@ -68,6 +68,7 @@ private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
 
+	int m_maxHealth;
 	f32 m_velocityX;
 	f32 m_velocityY;
 	f32 m_gravity;

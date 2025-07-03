@@ -17,6 +17,7 @@ PlayerCharacter::PlayerCharacter()
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_currentAnimState = CharacterAnimationState::IDLE;
 
+	m_maxHealth = 100;
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
@@ -343,6 +344,19 @@ void PlayerCharacter::Draw()
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
 		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
+
+	if (m_healthPoint > 0)
+	{
+		float barWidth = m_hitboxSize.x;
+		float barHeight = 10.f;
+		float barOffsetY = m_hitboxSize.y / 2.0f; 
+
+		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
+		float currentHealthWidth = barWidth * healthRatio;
+
+		DrawRect(m_position.x, m_position.y + barOffsetY, barWidth, barHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+	}	
 
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
