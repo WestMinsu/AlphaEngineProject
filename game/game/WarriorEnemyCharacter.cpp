@@ -49,8 +49,8 @@ WarriorEnemyCharacter::WarriorEnemyCharacter(const WarriorEnemyCharacter& protot
 
 	m_animation = prototype.m_animation;
 	m_animDataMap = prototype.m_animDataMap;
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_isHurt = false;
 
 	m_velocityX = prototype.m_velocityX;

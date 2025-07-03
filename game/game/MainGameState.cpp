@@ -393,7 +393,13 @@ void MainGameState::Update(f32 dt)
 						}
 						break;
 					default:
+						bool wasAlive = !enemy->IsDead();
 						enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+						if (wasAlive && enemy->IsDead())
+						{
+							m_Player.AddScore(1000);
+							//todo: m_Player.AddScore(enemy->score);
+						}
 						break;
 					}
 					proj->Deactivate();
