@@ -164,9 +164,9 @@ void MainGameState::Update(f32 dt)
 		const AEVec2& playerHitboxSize = m_Player.GetHitboxSize();
 
 		for (auto* enemy : m_Enemies)
-
 		{
-			if (CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
+			if (enemy->GetHealth() > 0 
+				&& CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				//std::cout << "collsion" << std::endl;
 				m_Player.TakeDamage(1, DamageType::NONE);
