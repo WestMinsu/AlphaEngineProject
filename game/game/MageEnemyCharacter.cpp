@@ -50,6 +50,8 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 	m_hitboxSize = prototype.m_hitboxSize;
 	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_isHurt = false;
+
+	m_projectileData = prototype.m_projectileData;
 }
 
 MageEnemyCharacter::~MageEnemyCharacter() {}
