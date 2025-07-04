@@ -6,7 +6,7 @@ enum class ElementType
 	NONE,
 	FIRE,
 	ICE,
-	DARK
+	DARK,
 };
 
 enum class DamageType
