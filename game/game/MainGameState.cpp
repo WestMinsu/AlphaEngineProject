@@ -459,6 +459,7 @@ void MainGameState::Update(f32 dt)
 					//todo: m_Player.AddScore(enemy->score);
 				}
 				m_Player.RegisterHit();
+				break;
 			}
 		}
 	}
