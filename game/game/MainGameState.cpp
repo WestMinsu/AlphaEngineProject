@@ -207,13 +207,19 @@ void MainGameState::Update(f32 dt)
 		}
 		else if (currentWeapon == DamageType::LIGHTNING)
 		{
-			ACharacter* target = FindClosestEnemyInFront();
-			if (target)
+			ACharacter* enemy = FindClosestEnemyInFront();
+			if (enemy)
 			{
-				target->TakeDamage(25, currentWeapon);
+				bool wasAlive = !enemy->IsDead();
+				enemy->TakeDamage(25, currentWeapon);
+				if (wasAlive && enemy->IsDead())
+				{
+					m_Player.AddScore(1000);
+					//todo: m_Player.AddScore(enemy->score);
+				}
 				m_visualEffects.emplace_back();
 				VisualEffect& newEffect = m_visualEffects.back();
-				newEffect.Init(target->GetPosition(), m_lightningEffectData);
+				newEffect.Init(enemy->GetPosition(), m_lightningEffectData);
 			}
 			m_Player.ConsumeCurrentWeapon();
 			m_Player.SetFiredProjectile(true);
@@ -445,7 +451,13 @@ void MainGameState::Update(f32 dt)
 		{
 			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
+				bool wasAlive = !enemy->IsDead();
 				enemy->TakeDamage(10, DamageType::NONE);
+				if (wasAlive && enemy->IsDead())
+				{
+					m_Player.AddScore(1000);
+					//todo: m_Player.AddScore(enemy->score);
+				}
 				m_Player.RegisterHit();
 			}
 		}
