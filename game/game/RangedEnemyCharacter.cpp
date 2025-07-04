@@ -153,6 +153,9 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
+		float xDistance = playerPos.x - m_position.x;
+		float directionChangeThreshold = 5.0f;
+
 		if (m_pPlayer->GetPosition().x < m_position.x)
 		{
 			m_currentDirection = CharacterDirection::LEFT;

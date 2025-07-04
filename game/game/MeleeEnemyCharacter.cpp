@@ -167,20 +167,23 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	}
 	}
 
-	f32 velocityX = 0.0f;
+	f32 m_velocityX = 0.0f;
 	CharacterAnimationState desiredAnimState = CharacterAnimationState::IDLE;
 
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
-		if (m_pPlayer->GetPosition().x < m_position.x)
+		float xDistance = playerPos.x - m_position.x;
+		float directionChangeThreshold = 5.0f;
+
+		if (xDistance < -directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::LEFT;
-			velocityX = -m_characterSpeed;
+			m_velocityX = -m_characterSpeed;
 		}
-		else
+		else if (xDistance > directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::RIGHT;
-			velocityX = m_characterSpeed;
+			m_velocityX = m_characterSpeed;
 		}
 		desiredAnimState = CharacterAnimationState::WALK;
 	}
@@ -193,7 +196,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		desiredAnimState = CharacterAnimationState::HURT;
 	}
 
-	m_position.x += velocityX * dt;
+	m_position.x += m_velocityX * dt;
 
 	if (m_currentAnimState != desiredAnimState)
 	{
