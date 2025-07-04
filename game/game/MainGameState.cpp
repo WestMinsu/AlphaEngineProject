@@ -616,6 +616,9 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 
 	for (ACharacter* enemy : m_Enemies)
 	{
+		if (enemy->GetHealth() <= 0)
+			continue;
+		
 		const AEVec2& enemyPos = enemy->GetPosition();
 
 		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
