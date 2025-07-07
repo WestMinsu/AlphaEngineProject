@@ -27,6 +27,7 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_isGrounded = false;
+	killScore = 1000;
 }
 
 MeleeEnemyCharacter::MeleeEnemyCharacter(const MeleeEnemyCharacter& prototype)
@@ -49,6 +50,7 @@ MeleeEnemyCharacter::MeleeEnemyCharacter(const MeleeEnemyCharacter& prototype)
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
 	m_isHurt = false;
+	killScore = prototype.killScore;
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 

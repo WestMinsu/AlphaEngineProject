@@ -48,6 +48,10 @@ public:
 	{ 
 		return m_healthPoint <= 0;
 	}
+	int GetKillScore() const
+	{
+		return killScore;
+	}
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
@@ -60,4 +64,5 @@ protected:
 
 	CharacterDirection m_currentDirection;
 	ElementType m_element;
+	int killScore;
 };

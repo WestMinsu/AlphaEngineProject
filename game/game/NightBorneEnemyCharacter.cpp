@@ -28,12 +28,15 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_isGrounded = false;
+	killScore = 2500;
 }
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
 	m_healthPoint = prototype.m_healthPoint;
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_characterSpeed = prototype.m_characterSpeed;
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
@@ -56,6 +59,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_velocityY = prototype.m_velocityY;
 	m_gravity = prototype.m_gravity;
 	m_isGrounded = prototype.m_isGrounded;
+	killScore = prototype.killScore;
 }
 
 NightBorneEnemyCharacter::~NightBorneEnemyCharacter()

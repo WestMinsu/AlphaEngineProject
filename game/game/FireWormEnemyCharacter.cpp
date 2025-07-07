@@ -24,11 +24,15 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
 	m_isHurt = false;
+	m_projectileSpawnOffset = { 0.f, -25.f };
+	killScore = 2000;
 }
 
 FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_healthPoint = prototype.m_healthPoint;
 	m_characterSpeed = prototype.m_characterSpeed;
 	m_currentDirection = prototype.m_currentDirection;
@@ -46,12 +50,11 @@ FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& pro
 
 	m_animation = prototype.m_animation;
 	m_animDataMap = prototype.m_animDataMap;
-	m_hitboxSize = prototype.m_hitboxSize;
-	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_isHurt = false;
 
 	m_projectileData = prototype.m_projectileData;
-
+	m_projectileSpawnOffset = prototype.m_projectileSpawnOffset;
+	killScore = prototype.killScore;
 }
 
 FireWormEnemyCharacter::~FireWormEnemyCharacter()
@@ -74,7 +77,7 @@ void FireWormEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 	m_projectileData.speed = 800.0f;
 	m_projectileData.damage = 5;
-	m_projectileData.size = { 150.f, 150.f };
+	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/Fire Worm/Sprites/Fire Ball/Move.png", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 
@@ -109,5 +112,5 @@ FireWormEnemyCharacter* FireWormEnemyCharacter::Clone()
 bool FireWormEnemyCharacter::isReadytoFireRange()
 {
 	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK
-		&& (m_animation.GetCurrentFrame() == 13 && !m_hasFiredProjectile);;
+		&& (m_animation.GetCurrentFrame() == 13 && !m_hasFiredProjectile);
 }

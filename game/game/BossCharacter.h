@@ -66,12 +66,14 @@ private:
 	ProjectileData m_projectileData;
 	std::vector<AttackHitbox> m_meleeHitboxes;
 	AttackHitbox m_laserHitbox;
+	AEVec2 m_laserVisualSize;
+	AEVec2 m_laserVisualOffset;
 
 	Animation m_laserAnimation;
 
 	BossAIState m_currentAIState;
 	PlayerCharacter* m_pPlayer;
-
+		
 	f32 m_maxHealth;
 	bool m_isAttackable;
 	bool m_hasGlowed;

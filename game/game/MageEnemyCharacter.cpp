@@ -20,7 +20,6 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
 	m_attackRange = 600.0f;
-
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
@@ -30,6 +29,8 @@ MageEnemyCharacter::MageEnemyCharacter()
 MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_healthPoint = prototype.m_healthPoint;
 	m_characterSpeed = prototype.m_characterSpeed;
 	m_currentDirection = prototype.m_currentDirection;
@@ -46,12 +47,10 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = prototype.m_attackCooldownDuration;
 	m_hasFiredProjectile = false;
-
-	m_hitboxSize = prototype.m_hitboxSize;
-	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_isHurt = false;
 
 	m_projectileData = prototype.m_projectileData;
+	killScore = 1500;
 }
 
 MageEnemyCharacter::~MageEnemyCharacter() {}
@@ -72,7 +71,7 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 	m_projectileData.speed = 800.0f;
 	m_projectileData.damage = 5;
-	m_projectileData.size = { 150.f, 150.f };
+	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 

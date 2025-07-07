@@ -22,7 +22,6 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
-
 	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
@@ -214,8 +213,7 @@ void MainGameState::Update(f32 dt)
 				enemy->TakeDamage(25, currentWeapon);
 				if (wasAlive && enemy->IsDead())
 				{
-					m_Player.AddScore(1000);
-					//todo: m_Player.AddScore(enemy->score);
+					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_visualEffects.emplace_back();
 				VisualEffect& newEffect = m_visualEffects.back();
@@ -233,13 +231,15 @@ void MainGameState::Update(f32 dt)
 		{
 			if (rangeEnemy->isReadytoFireRange())
 			{
-
 				m_enemyProjectiles.emplace_back();
 				Projectile& newProjectile = m_enemyProjectiles.back();
 				const ProjectileData& projData = rangeEnemy->GetProjectileData();
 				AEVec2 directionVec = { (rangeEnemy->GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
-
-				newProjectile.Init(rangeEnemy->GetPosition(), directionVec, projData);
+				AEVec2 spawnPos = rangeEnemy->GetPosition();
+				spawnPos.x += rangeEnemy->GetProjectileSpawnOffset().x;
+				spawnPos.y += rangeEnemy->GetProjectileSpawnOffset().y;
+				std::cout << rangeEnemy->GetProjectileSpawnOffset().y << " " << spawnPos.y << std::endl;
+				newProjectile.Init(spawnPos, directionVec, projData);
 
 				rangeEnemy->SetFiredProjectile(true);
 			}
@@ -366,6 +366,15 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 0.0f;
 						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
+						}
 						break;
 					case ElementType::ICE:
 						if (proj->GetType() == DamageType::ICE)
@@ -376,6 +385,15 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextR = 0.0f;
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 1.0f;
+						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
 						}
 						break;
 					case ElementType::DARK:
@@ -397,14 +415,22 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 1.0f;
 						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
+						}
 						break;
 					default:
 						bool wasAlive = !enemy->IsDead();
 						enemy->TakeDamage(proj->GetDamage(), proj->GetType());
 						if (wasAlive && enemy->IsDead())
 						{
-							m_Player.AddScore(1000);
-							//todo: m_Player.AddScore(enemy->score);
+							m_Player.AddScore(enemy->GetKillScore());
 						}
 						break;
 					}
@@ -455,8 +481,7 @@ void MainGameState::Update(f32 dt)
 				enemy->TakeDamage(10, DamageType::NONE);
 				if (wasAlive && enemy->IsDead())
 				{
-					m_Player.AddScore(1000);
-					//todo: m_Player.AddScore(enemy->score);
+					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_Player.RegisterHit();
 				break;
