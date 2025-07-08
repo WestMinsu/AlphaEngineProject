@@ -51,6 +51,10 @@ BossCharacter::BossCharacter(const BossCharacter& bossCopy)
 	m_hitboxSize = bossCopy.m_hitboxSize;
 	m_hitboxOffset = bossCopy.m_hitboxOffset;
 
+	m_laserVisualSize = bossCopy.m_laserVisualSize;
+	m_laserVisualOffset = bossCopy.m_laserVisualOffset;
+	m_laserAnimation = bossCopy.m_laserAnimation;
+
 	m_isAttackable = bossCopy.m_isAttackable;
 	m_hasGlowed = false;
 	m_hasBuffed = false;
