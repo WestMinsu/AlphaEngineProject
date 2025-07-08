@@ -3,16 +3,19 @@
 #include "EnemyFactory.h"
 #include <vector>
 #include "ACharacter.h"
+#include "BossCharacter.h"
 
 class SpawnEnemy
 {
 public:
 	SpawnEnemy();
-	SpawnEnemy(AEVec2 pos, EnemyFactory* factory, std::string name);
+	SpawnEnemy(AEVec2 pos, EnemyFactory* factory, std::string name, s32 spawnTimes);
 	~SpawnEnemy();
 
-	void Init(AEVec2 pos, EnemyFactory* factory, std::string name);
-	void Update(f32 dt, std::vector<ACharacter*>& enemies);
+	void Init(AEVec2 pos, EnemyFactory* factory, std::string name, s32 spawnTimes);
+	
+	void Update(f32 dt, AEVec2 positionPlayer, std::vector<ACharacter*>& enemies);
+	void Update(f32 dt, AEVec2 positionPlayer, std::vector<BossCharacter*>& bosses);
 	void Destroy();
 
 	void Reset();

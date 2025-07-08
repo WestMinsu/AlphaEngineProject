@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include "PlayerCharacter.h" //for debugging
+#include "Projectile.h"
 
 // class PlayerCharacter;
 
@@ -27,6 +28,7 @@ class BossCharacter : public ACharacter
 {
 public:
 	BossCharacter();
+	BossCharacter(const BossCharacter& bossCopy);
 	~BossCharacter();
 
 	void Init(AEVec2 position) override;
@@ -59,6 +61,14 @@ public:
 	bool HasHitPlayerThisAttack() const { return m_hasHitPlayerThisAttack; }
 	void RegisterPlayerHit() { m_hasHitPlayerThisAttack = true; }
 	std::vector<AttackHitbox> GetCurrentActiveHitboxes();
+
+	void GetBossPattern(AEGfxTexture*& pBossMessageTexture, float& bossMessageTimer, BossAIState& previousBossAIState);
+	void AttackMelee(PlayerCharacter& player);
+	void AttackRange(PlayerCharacter& player, std::vector<Projectile>& enemyProjectiles);
+	void AttackLaser(PlayerCharacter& player);
+
+	void DrawBossHPUI();
+
 private:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
@@ -90,4 +100,6 @@ private:
 	bool m_hasFired;
 	AEVec2 m_laserTargetPos;
 	bool m_hasHitPlayerThisAttack;
+
+	const float m_bossMessageDuration = 2.5;
 };

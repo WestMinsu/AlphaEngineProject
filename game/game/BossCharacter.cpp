@@ -32,10 +32,46 @@ BossCharacter::BossCharacter()
 	killScore = 20000;
 }
 
+BossCharacter::BossCharacter(const BossCharacter& bossCopy)
+{
+	m_size = bossCopy.m_size;
+	m_maxHealth = bossCopy.m_maxHealth;
+	m_healthPoint = bossCopy.m_healthPoint;
+	m_characterSpeed = bossCopy.m_characterSpeed;
+	m_currentDirection = bossCopy.m_currentDirection;
+	m_currentAnimState = bossCopy.m_currentAnimState;
+	m_element = bossCopy.m_element;
+
+	m_currentAIState = bossCopy.m_currentAIState;
+	m_pPlayer = bossCopy.m_pPlayer;
+
+
+	m_animation = bossCopy.m_animation;
+	m_animDataMap = bossCopy.m_animDataMap;
+	m_hitboxSize = bossCopy.m_hitboxSize;
+	m_hitboxOffset = bossCopy.m_hitboxOffset;
+
+	m_isAttackable = bossCopy.m_isAttackable;
+	m_hasGlowed = false;
+	m_hasBuffed = false;
+	m_isInBuffState = false;
+	m_aiTimer = 0.0f;
+	m_meleeAttackRange = bossCopy.m_meleeAttackRange;
+	m_rangedAttackRange = bossCopy.m_rangedAttackRange;
+	m_cooldownDuration = bossCopy.m_cooldownDuration;
+	m_hasFired = false;
+	m_hasHitPlayerThisAttack = false;
+
+	m_projectileData = bossCopy.m_projectileData;
+	m_meleeHitboxes = bossCopy.m_meleeHitboxes;
+	m_laserHitbox = bossCopy.m_laserHitbox;
+}
+
 BossCharacter::~BossCharacter() {}
 
 void BossCharacter::Init(AEVec2 position)
 {
+	m_position = position;
 }
 
 void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
@@ -374,7 +410,7 @@ void BossCharacter::Destroy()
 
 BossCharacter* BossCharacter::Clone()
 {
-	return nullptr;
+	return new BossCharacter(*this);
 }
 
 bool BossCharacter::IsUnbeatable() const
@@ -395,4 +431,151 @@ const AttackHitbox& BossCharacter::GetCurrentMeleeHitbox() const
 bool BossCharacter::IsCompletelyDead() const
 {
 	return (m_currentAIState == BossAIState::DEATH && m_animation.IsFinished());
+}
+
+std::vector<AttackHitbox> BossCharacter::GetCurrentActiveHitboxes()
+{
+	return std::vector<AttackHitbox>();
+}
+
+void BossCharacter::GetBossPattern(AEGfxTexture*& pBossMessageTexture, float& bossMessageTimer, BossAIState& previousBossAIState)
+{
+	if (m_currentAIState != previousBossAIState)
+	{
+		if (m_currentAIState == BossAIState::GLOWING)
+		{
+			pBossMessageTexture = LoadImageAsset("Assets/UI/healtext.png");
+			bossMessageTimer = m_bossMessageDuration;
+		}
+		else if (m_currentAIState == BossAIState::BUFF)
+		{
+			pBossMessageTexture = LoadImageAsset("Assets/UI/enragetext.png");
+			bossMessageTimer = m_bossMessageDuration;
+		}
+		previousBossAIState = m_currentAIState;
+	}
+}
+
+void BossCharacter::AttackMelee(PlayerCharacter& player)
+{
+	bool isBossHitboxActive = m_animation.GetCurrentFrame() >= 3;
+	if (m_currentAIState == BossAIState::MELEE_ATTACK 
+		&& isBossHitboxActive 
+		&& !m_hasHitPlayerThisAttack
+		&& player.GetHealth() > 0)
+	{
+		const AttackHitbox& bossHitbox = GetCurrentMeleeHitbox();
+		AEVec2 bossHitboxPos;
+		bossHitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? bossHitbox.offset.x : -bossHitbox.offset.x);
+		bossHitboxPos.y = m_position.y + bossHitbox.offset.y;
+
+		AEVec2 playerHitboxPos = player.GetPosition();
+		playerHitboxPos.x += player.GetHitboxOffset().x;
+		playerHitboxPos.y += player.GetHitboxOffset().y;
+
+		if (CheckAABBCollision(bossHitboxPos, bossHitbox.size, playerHitboxPos, player.GetHitboxSize()))
+		{
+			player.TakeDamage(15, DamageType::NONE);
+			RegisterPlayerHit();
+			m_hasHitPlayerThisAttack = true;
+		}
+	}
+
+}
+
+void BossCharacter::AttackRange(PlayerCharacter& player, std::vector<Projectile>& enemyProjectiles)
+{
+	if (m_currentAIState == BossAIState::RANGED_ATTACK
+		&& m_animation.IsFinished() 
+		&& !m_hasFired)
+	{
+		m_hasFired = true;
+		AEVec2 playerPos = player.GetPosition();
+
+		if (m_isInBuffState)
+		{
+			// 3-Way Shot
+			float baseAngle = atan2(playerPos.y - m_position.y, playerPos.x - m_position.x);
+			AEVec2 dirMid = { cosf(baseAngle), sinf(baseAngle) };
+			AEVec2 dirUp = { cosf(baseAngle - 0.3f), sinf(baseAngle - 0.3f) };
+			AEVec2 dirDown = { cosf(baseAngle + 0.3f), sinf(baseAngle + 0.3f) };
+
+			enemyProjectiles.emplace_back().Init(m_position, dirUp, m_projectileData);
+			enemyProjectiles.emplace_back().Init(m_position, dirMid, m_projectileData);
+			enemyProjectiles.emplace_back().Init(m_position, dirDown, m_projectileData);
+		}
+		else
+		{
+			AEVec2 finalDir = { (m_currentDirection == CharacterDirection::RIGHT ? 1.f : -1.f), 0.f };
+			float yDiff = playerPos.y - m_position.y;
+			if (yDiff > 150.f) finalDir.y = 0.5f;
+			else if (yDiff < -150.f) finalDir.y = -0.5f;
+
+			AEVec2Normalize(&finalDir, &finalDir);
+			enemyProjectiles.emplace_back().Init(m_position, finalDir, m_projectileData);
+		}
+	}
+}
+
+void BossCharacter::AttackLaser(PlayerCharacter& player)
+{
+	bool isLaserHitboxActive = m_laserAnimation.GetCurrentFrame() >= 8;
+
+	if (m_currentAIState == BossAIState::LASER_BEAM
+		&& isLaserHitboxActive 
+		&& !IsUnbeatable() 
+		&& player.GetHealth() > 0)
+	{
+		float offsetDir = (m_currentDirection == CharacterDirection::RIGHT) ? 1.0f : -1.0f;
+		AEVec2 laserBasePos = { m_position.x + (m_laserHitbox.offset.x * offsetDir), m_position.y + m_laserHitbox.offset.y };
+
+		AEVec2 playerHitboxPos = player.GetPosition();
+		playerHitboxPos.x += player.GetHitboxOffset().x;
+		playerHitboxPos.y += player.GetHitboxOffset().y;
+
+		if (m_isInBuffState)
+		{
+			// 3-Way Laser
+			float yOffsets[] = { 150.f, 0.f, -150.f };
+			for (float yOffset : yOffsets)
+			{
+				AEVec2 currentLaserPos = { laserBasePos.x, laserBasePos.y + yOffset };
+				if (CheckAABBCollision(currentLaserPos, m_laserHitbox.size, playerHitboxPos, player.GetHitboxSize()))
+				{
+					player.TakeDamage(1, DamageType::NONE);
+					break;
+				}
+			}
+		}
+		else
+		{
+			AEVec2 finalLaserPos = laserBasePos;
+			float yDiff = player.GetPosition().y - m_position.y;
+			if (yDiff > 150.f) finalLaserPos.y += 100.f;
+			else if (yDiff < -150.f) finalLaserPos.y -= 100.f;
+
+			if (CheckAABBCollision(finalLaserPos, m_laserHitbox.size, playerHitboxPos, player.GetHitboxSize()))
+			{
+				player.TakeDamage(1, DamageType::NONE);
+			}
+		}
+	}
+}
+
+void BossCharacter::DrawBossHPUI()
+{
+	if (m_isAttackable)
+	{
+		f32 xCam, yCam;
+		AEGfxGetCamPosition(&xCam, &yCam);
+		const float barWidth = 500.f;
+		const float barHeight = 125.f;
+		const float barX = 0;
+		const float barY = kHalfWindowHeight - 150.f;
+		DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
+		float currentHealthWidth = barWidth * healthRatio;
+		DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
+		DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+	}
 }

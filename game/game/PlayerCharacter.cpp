@@ -307,6 +307,13 @@ void PlayerCharacter::Update(f32 dt)
 
 	const f32 halfCharWidth = m_size.x / 2.0f;
 	const f32 halfCharHeight = m_size.y / 2.0f;
+
+	f32 camX, camY;
+	AEGfxGetCamPosition(&camX, &camY);
+	m_position.x = std::clamp(m_position.x, -kHalfWindowWidth + camX,camX + kHalfWindowWidth - halfCharWidth);
+	//if (m_position.x < camX + halfCharWidth)
+	//	m_position.x = -kHalfWindowWidth + halfCharWidth;
+
 	if (m_position.x < -kHalfWindowWidth + halfCharWidth)
 		m_position.x = -kHalfWindowWidth + halfCharWidth;
 

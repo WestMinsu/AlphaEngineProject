@@ -26,3 +26,12 @@ ACharacter* EnemyFactory::Create(const std::string& name)
 	}
 	return nullptr;
 }
+
+void EnemyFactory::Destroy()
+{
+	for (auto& enemeyPrototype : m_enemyPrototypes)
+	{
+		enemeyPrototype.second->Destroy();
+	}
+	m_enemyPrototypes.clear();
+}

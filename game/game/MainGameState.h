@@ -32,18 +32,19 @@ private:
 	ACharacter* FindClosestEnemyInFront();
 	 
 	PlayerCharacter m_Player;
-	BossCharacter m_Boss;
+	//BossCharacter m_Boss;
 
 	std::vector<ACharacter*> m_Enemies;
+	std::vector<BossCharacter*> m_Bosses;
 
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
 	std::vector<VisualEffect> m_visualEffects;
 
 	Background m_Background;
-	//std::shared_ptr<EnemyFactory> m_factory;
 	EnemyFactory m_factory;
 	std::vector<SpawnEnemy*> m_Spawns;
+	SpawnEnemy m_SpawnBoss;
 
 	AEGfxTexture* m_pUiSlot;      
 	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
@@ -54,7 +55,6 @@ private:
 
 	AEGfxTexture* m_pBossMessageTexture;
 	float m_bossMessageTimer;
-	const float m_bossMessageDuration = 2.5f;
 	BossAIState m_previousBossAIState;
 
 	std::string m_feedbackText;
