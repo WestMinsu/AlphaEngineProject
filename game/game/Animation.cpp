@@ -88,12 +88,12 @@ void Animation::Update(f32 dt)
 	}
 }
 
-void Animation::Draw(AEMtx33 transform)
+void Animation::Draw(AEMtx33 transform, float r, float g, float b, float a)
 {
 	if (!m_currentClipData.pTexture || !m_mesh) return;
 
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-	AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+	AEGfxSetColorToMultiply(r, g, b, a);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetTransparency(1.0f);
 

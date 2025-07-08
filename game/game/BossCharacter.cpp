@@ -29,6 +29,7 @@ BossCharacter::BossCharacter()
 
 	m_hitboxSize = { m_size.x * 0.5f, m_size.y * 0.5f };
 	m_hitboxOffset = { m_size.x * 0.01f, m_size.y * 0.02f };
+	killScore = 20000;
 }
 
 BossCharacter::BossCharacter(const BossCharacter& bossCopy)
@@ -105,10 +106,14 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_meleeHitboxes[3] = { { m_size.x * 0.4f, m_size.y * 0.1f}, { m_size.x * 0.6f, m_size.y * 0.3f } };
 	m_meleeHitboxes[4] = { { m_size.x * 0.4f, m_size.y * 0.0f}, { m_size.x * 0.6f, m_size.y * 0.3f } };
 
-	float laserOffsetX = m_size.x;
-	float laserOffsetY = m_size.y * 0.01f;
+	m_laserVisualSize = { m_size.x * 3.0f, m_size.y * 0.5f };
+	m_laserVisualOffset = { m_size.x, -m_size.y * 0.15f };
+
 	float laserSizeX = m_size.x * 3.0f;
-	float laserSizeY = m_size.y * 0.2f;
+	float laserSizeY = m_size.y * 0.1f;
+	float laserOffsetX = m_laserVisualOffset.x;
+	float laserOffsetY = m_laserVisualOffset.y + laserSizeY * 0.8f;
+
 	m_laserHitbox = { { laserOffsetX, laserOffsetY }, { laserSizeX, laserSizeY } };
 
 	m_currentAnimState = CharacterAnimationState::APPEARANCE;
@@ -307,9 +312,9 @@ void BossCharacter::Draw()
 		const AttackHitbox& laserData = GetLaserHitbox();
 		float offsetDir = (m_currentDirection == CharacterDirection::RIGHT) ? 1.0f : -1.0f;
 
-		AEVec2 basePosition;
-		basePosition.x = m_position.x + (laserData.offset.x * offsetDir);
-		basePosition.y = m_position.y + laserData.offset.y;
+		AEVec2 visualPos = { m_position.x + (m_laserVisualOffset.x * offsetDir), m_position.y + m_laserVisualOffset.y };
+		const AttackHitbox& laserHitbox = GetLaserHitbox();
+		AEVec2 hitboxPos = { m_position.x + (laserHitbox.offset.x * offsetDir), m_position.y + laserHitbox.offset.y };
 
 		if (m_isInBuffState)
 		{
@@ -317,32 +322,41 @@ void BossCharacter::Draw()
 			for (float yOffset : yOffsets)
 			{
 				AEMtx33 laserTransform;
-				AEMtx33Trans(&translate, basePosition.x, basePosition.y + yOffset);
+				AEMtx33Trans(&translate, visualPos.x, visualPos.y + yOffset);
 				AEMtx33Rot(&rotate, 0);
-				AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
+				AEMtx33Scale(&scale, m_laserVisualSize.x * offsetDir, m_laserVisualSize.y);
 				AEMtx33Concat(&laserTransform, &rotate, &scale);
 				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 				m_laserAnimation.Draw(laserTransform);
 				if (m_laserAnimation.GetCurrentFrame() >= 8)
-					DrawHollowRect(basePosition.x, basePosition.y + yOffset, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
+					DrawHollowRect(hitboxPos.x, hitboxPos.y + yOffset, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 			}
 		}
 		else
 		{
-			AEVec2 finalPos = basePosition;
+			AEVec2 finalVisualPos = visualPos;
+			AEVec2 finalHitboxPos = hitboxPos;
 			float yDiff = m_pPlayer->GetPosition().y - m_position.y;
-			if (yDiff > 150.f) finalPos.y += 100.f;
-			else if (yDiff < -150.f) finalPos.y -= 100.f;
+			if (yDiff > 150.f)
+			{
+				finalVisualPos.y += 100.f;
+				finalHitboxPos.y += 100.f;
+			}
+			else if (yDiff < -150.f)
+			{
+				finalVisualPos.y -= 100.f;
+				finalHitboxPos.y -= 100.f;
+			}
 
 			AEMtx33 laserTransform;
-			AEMtx33Trans(&translate, finalPos.x, finalPos.y);
+			AEMtx33Trans(&translate, finalVisualPos.x, finalVisualPos.y);
 			AEMtx33Rot(&rotate, 0);
-			AEMtx33Scale(&scale, laserData.size.x * offsetDir, laserData.size.y);
+			AEMtx33Scale(&scale, m_laserVisualSize.x * offsetDir, m_laserVisualSize.y);
 			AEMtx33Concat(&laserTransform, &rotate, &scale);
 			AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 			m_laserAnimation.Draw(laserTransform);
 			if (m_laserAnimation.GetCurrentFrame() >= 8)
-				DrawHollowRect(finalPos.x, finalPos.y, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
+				DrawHollowRect(finalHitboxPos.x, finalHitboxPos.y, laserHitbox.size.x, laserHitbox.size.y, 1.f, 0.f, 1.f, 0.5f);
 		}
 	}
 

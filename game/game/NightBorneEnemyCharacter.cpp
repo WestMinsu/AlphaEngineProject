@@ -10,7 +10,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_size = { 250.f, 250.f };
 	m_healthPoint = 50;
 	m_hitboxSize = { m_size.x * 0.45f, m_size.y * 0.4f };
-	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.25f };
+	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.3f };
 	m_characterSpeed = 100.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_element = ElementType::DARK;
@@ -22,19 +22,25 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_attackRange = 100.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
-	m_isHurt = false;
 
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_isGrounded = false;
+	killScore = 2500;
+
+	m_strafeTimer = 0.0f;
+	m_strafeDuration = 0.0f;
+	m_strafeDirection = 1.0f;
 }
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
 	m_healthPoint = prototype.m_healthPoint;
-	m_characterSpeed = prototype.m_characterSpeed;
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
+	m_characterSpeed = prototype.m_characterSpeed * (0.8f + static_cast<float>(rand() % 41) / 100.0f);
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
 	m_element = prototype.m_element;
@@ -56,6 +62,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_velocityY = prototype.m_velocityY;
 	m_gravity = prototype.m_gravity;
 	m_isGrounded = prototype.m_isGrounded;
+	killScore = prototype.killScore;
 }
 
 NightBorneEnemyCharacter::~NightBorneEnemyCharacter()
@@ -88,8 +95,12 @@ void NightBorneEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 
 	m_healthPoint -= damage;
+
+
 	std::cout << "NightBorne takes damage! HP: " << m_healthPoint << std::endl;
 
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

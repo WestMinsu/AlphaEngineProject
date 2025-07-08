@@ -48,6 +48,10 @@ public:
 	{ 
 		return m_healthPoint <= 0;
 	}
+	int GetKillScore() const
+	{
+		return killScore;
+	}
 protected:
 	AEVec2 m_position;
 	AEVec2 m_size;
@@ -60,4 +64,13 @@ protected:
 
 	CharacterDirection m_currentDirection;
 	ElementType m_element;
+	int killScore;
+	bool m_isHurt;
+	bool m_isDamageEffectActive;
+	f32 m_damageEffectTimer;
+	f32 m_damageEffectDuration;
+
+	f32 m_strafeTimer;
+	f32 m_strafeDuration;
+	f32 m_strafeDirection;
 };

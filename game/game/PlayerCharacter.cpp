@@ -38,9 +38,10 @@ PlayerCharacter::PlayerCharacter()
 	m_currentWeapon = DamageType::FIRE;
 	m_currentWeaponIndex = 0;
 
-	m_isInvincible = false;
-	m_invincibilityTimer = 0.0f;
 	m_isHurt = false;
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.7f;
 	m_score = 0;
 }
 
@@ -65,7 +66,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
 	fireData.damage = 10;
-	fireData.size = { 200.f, 200.f };
+	fireData.size = { 150.f, 50.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	fireData.type = { DamageType::FIRE };
 	m_projectileDataMap[fireData.type] = fireData;
@@ -73,7 +74,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 100;
-	iceData.size = { 200.f, 200.f };
+	iceData.size = { 150.f, 50.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };
 	m_projectileDataMap[iceData.type] = iceData;
@@ -113,13 +114,13 @@ void PlayerCharacter::Update(f32 dt)
 		return; 
 	}
 
-	if (m_isInvincible)
+	if (m_isDamageEffectActive)
 	{
-		m_invincibilityTimer += dt;
-		if (m_invincibilityTimer >= m_invincibilityDuration)
+		m_damageEffectTimer += dt;
+		if (m_damageEffectTimer >= m_damageEffectDuration)
 		{
-			m_isInvincible = false;
-			m_invincibilityTimer = 0.0f;
+			m_isDamageEffectActive = false;
+			m_damageEffectTimer = 0.0f;
 		}
 	}
 
@@ -165,8 +166,8 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		m_isDashing = true;
 
-		m_isInvincible = true;
-		m_invincibilityTimer = 0.0f;
+		m_isDamageEffectActive = true;
+		m_damageEffectTimer = 0.0f;
 	}
 	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isAttacking && !m_isDashing)
 	{
@@ -337,7 +338,15 @@ void PlayerCharacter::Draw()
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
 
-	m_animation.Draw(transform);
+	if (m_isDamageEffectActive && m_isHurt && m_animation.GetCurrentState() != CharacterAnimationState::DEATH)
+	{
+		if (static_cast<int>(m_damageEffectTimer / 0.1f) % 2 == 0)
+		{
+			m_animation.Draw(transform, 1.0f, 1.0f, 1.0f, 0.7f);
+		}
+	}
+	else
+		m_animation.Draw(transform);
 
 	if (m_isMeleeAttackHitboxActive)
 	{
@@ -391,7 +400,7 @@ void PlayerCharacter::Attack()
 
 void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
-	if (m_isInvincible || m_currentAnimState == CharacterAnimationState::DEATH)
+	if (m_isDamageEffectActive || m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		return;
 	}
@@ -399,8 +408,8 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_healthPoint -= damage;
 	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
 
-	m_isInvincible = true;
-	m_invincibilityTimer = 0.0f;
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
@@ -423,7 +432,7 @@ const ProjectileData& PlayerCharacter::GetCurrentProjectileData() const
 
 bool PlayerCharacter::IsInvincible() const
 {
-	return m_isInvincible;
+	return m_isDamageEffectActive;
 }
 
 PlayerCharacter* PlayerCharacter::Clone()

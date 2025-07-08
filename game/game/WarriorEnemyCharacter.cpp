@@ -4,6 +4,9 @@
 #include <iostream>
 #include "PlayerCharacter.h"
 #include "AssetManager.h"
+#include <cmath>
+#include <cstdlib>
+#include <ctime> 
 
 WarriorEnemyCharacter::WarriorEnemyCharacter()
 {
@@ -23,19 +26,22 @@ WarriorEnemyCharacter::WarriorEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
-	m_isHurt = false;
-
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_isGrounded = false;
+	killScore = 1000;
+
+	m_strafeTimer = 0.0f;
+	m_strafeDuration = 0.0f;
+	m_strafeDirection = 1.0f;
 }
 
 WarriorEnemyCharacter::WarriorEnemyCharacter(const WarriorEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
 	m_healthPoint = prototype.m_healthPoint;
-	m_characterSpeed = prototype.m_characterSpeed;
+	m_characterSpeed = prototype.m_characterSpeed * (0.8f + static_cast<float>(rand() % 41) / 100.0f);
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
 	m_element = prototype.m_element;
@@ -90,7 +96,8 @@ void WarriorEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		
 	m_healthPoint -= damage;
 	std::cout << "Warrior Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

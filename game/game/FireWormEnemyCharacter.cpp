@@ -19,18 +19,29 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
-	m_attackRange = 600.0f;
+	m_attackRange = 300.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
 	m_isHurt = false;
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.2f;
+	m_projectileSpawnOffset = { 0.f, -25.f };
+	killScore = 2000;
+
+	m_strafeTimer = 0.0f;
+	m_strafeDuration = 0.0f;
+	m_strafeDirection = 1.0f;
 }
 
 FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& prototype)
 {
 	m_size = prototype.m_size;
+	m_hitboxSize = prototype.m_hitboxSize;
+	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_healthPoint = prototype.m_healthPoint;
-	m_characterSpeed = prototype.m_characterSpeed;
+	m_characterSpeed = prototype.m_characterSpeed * (0.8f + static_cast<float>(rand() % 41) / 100.0f);
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
 	m_element = prototype.m_element;
@@ -46,12 +57,11 @@ FireWormEnemyCharacter::FireWormEnemyCharacter(const FireWormEnemyCharacter& pro
 
 	m_animation = prototype.m_animation;
 	m_animDataMap = prototype.m_animDataMap;
-	m_hitboxSize = prototype.m_hitboxSize;
-	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_isHurt = false;
 
 	m_projectileData = prototype.m_projectileData;
-
+	m_projectileSpawnOffset = prototype.m_projectileSpawnOffset;
+	killScore = prototype.killScore;
 }
 
 FireWormEnemyCharacter::~FireWormEnemyCharacter()
@@ -74,7 +84,7 @@ void FireWormEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 
 	m_projectileData.speed = 800.0f;
 	m_projectileData.damage = 5;
-	m_projectileData.size = { 150.f, 150.f };
+	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/Fire Worm/Sprites/Fire Ball/Move.png", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
 
@@ -90,7 +100,8 @@ void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 	m_healthPoint -= damage;
 	std::cout << "Fire Worm Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
@@ -109,5 +120,5 @@ FireWormEnemyCharacter* FireWormEnemyCharacter::Clone()
 bool FireWormEnemyCharacter::isReadytoFireRange()
 {
 	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK
-		&& (m_animation.GetCurrentFrame() == 13 && !m_hasFiredProjectile);;
+		&& (m_animation.GetCurrentFrame() == 13 && !m_hasFiredProjectile);
 }

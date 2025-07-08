@@ -208,8 +208,7 @@ void MainGameState::Update(f32 dt)
 				enemy->TakeDamage(25, currentWeapon);
 				if (wasAlive && enemy->IsDead())
 				{
-					m_Player.AddScore(1000);
-					//todo: m_Player.AddScore(enemy->score);
+					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_visualEffects.emplace_back();
 				VisualEffect& newEffect = m_visualEffects.back();
@@ -227,18 +226,21 @@ void MainGameState::Update(f32 dt)
 		{
 			if (rangeEnemy->isReadytoFireRange())
 			{
-
 				m_enemyProjectiles.emplace_back();
 				Projectile& newProjectile = m_enemyProjectiles.back();
 				const ProjectileData& projData = rangeEnemy->GetProjectileData();
 				AEVec2 directionVec = { (rangeEnemy->GetDirection() == CharacterDirection::RIGHT ? 1.0f : -1.0f), 0.0f };
-
-				newProjectile.Init(rangeEnemy->GetPosition(), directionVec, projData);
+				AEVec2 spawnPos = rangeEnemy->GetPosition();
+				spawnPos.x += rangeEnemy->GetProjectileSpawnOffset().x;
+				spawnPos.y += rangeEnemy->GetProjectileSpawnOffset().y;
+				std::cout << rangeEnemy->GetProjectileSpawnOffset().y << " " << spawnPos.y << std::endl;
+				newProjectile.Init(spawnPos, directionVec, projData);
 
 				rangeEnemy->SetFiredProjectile(true);
 			}
 		}
 	}
+
 	
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
@@ -256,7 +258,10 @@ void MainGameState::Update(f32 dt)
 		{
 			if (proj->IsActive() && enemy->GetHealth() > 0)
 			{
-				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemy->GetPosition(), enemy->GetHitboxSize()))
+				AEVec2 enemyHitboxPos = enemy->GetPosition();
+				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, enemy->GetHitboxSize()))
 				{
 					switch (enemy->GetElement())
 					{
@@ -270,6 +275,15 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 0.0f;
 						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
+						}
 						break;
 					case ElementType::ICE:
 						if (proj->GetType() == DamageType::ICE)
@@ -280,6 +294,15 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextR = 0.0f;
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 1.0f;
+						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
 						}
 						break;
 					case ElementType::DARK:
@@ -301,14 +324,22 @@ void MainGameState::Update(f32 dt)
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 1.0f;
 						}
+						else
+						{
+							bool wasAlive = !enemy->IsDead();
+							enemy->TakeDamage(proj->GetDamage(), proj->GetType());
+							if (wasAlive && enemy->IsDead())
+							{
+								m_Player.AddScore(enemy->GetKillScore());
+							}
+						}
 						break;
 					default:
 						bool wasAlive = !enemy->IsDead();
 						enemy->TakeDamage(proj->GetDamage(), proj->GetType());
 						if (wasAlive && enemy->IsDead())
 						{
-							m_Player.AddScore(1000);
-							//todo: m_Player.AddScore(enemy->score);
+							m_Player.AddScore(enemy->GetKillScore());
 						}
 						break;
 					}
@@ -353,14 +384,16 @@ void MainGameState::Update(f32 dt)
 
 		for (auto enemy : m_Enemies)
 		{
-			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
+			AEVec2 enemyHitboxPos = enemy->GetPosition();
+			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+			enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
 			{
 				bool wasAlive = !enemy->IsDead();
 				enemy->TakeDamage(10, DamageType::NONE);
 				if (wasAlive && enemy->IsDead())
 				{
-					m_Player.AddScore(1000);
-					//todo: m_Player.AddScore(enemy->score);
+					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_Player.RegisterHit();
 				break;

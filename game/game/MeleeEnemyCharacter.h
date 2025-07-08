@@ -35,7 +35,6 @@ protected:
 
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
-	bool m_isHurt;
 
 	f32 m_velocityX;
 	f32 m_velocityY;

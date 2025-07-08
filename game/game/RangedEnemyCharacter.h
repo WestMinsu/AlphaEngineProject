@@ -27,6 +27,7 @@ public:
 	bool HasFiredProjectile() const { return m_hasFiredProjectile; }
 	void SetFiredProjectile(bool fired) { m_hasFiredProjectile = fired; }
 	const ProjectileData& GetProjectileData() const { return m_projectileData; }
+	const AEVec2& GetProjectileSpawnOffset() const { return m_projectileSpawnOffset; }
 protected:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
@@ -42,10 +43,10 @@ protected:
 	f32 m_attackCooldownTimer;
 	f32 m_attackCooldownDuration;
 	bool m_hasFiredProjectile;
-	bool m_isHurt;
 
 	f32 m_velocityX;
 	f32 m_velocityY;
 	f32 m_gravity;
 	bool m_isGrounded;
+	AEVec2 m_projectileSpawnOffset;
 };
