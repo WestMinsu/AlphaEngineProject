@@ -40,6 +40,7 @@ MeleeEnemyCharacter::~MeleeEnemyCharacter()
 void MeleeEnemyCharacter::Init(AEVec2 position)
 {
 	ACharacter::Init(position);
+	
 }
 
 void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
@@ -79,6 +80,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
+	float xDistanceToPlayer = std::abs(m_position.x - playerPos.x);
 
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
@@ -133,13 +135,25 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		break;
 	}
 	case EnemyAIState::CHASE:
-	{
 		if (distanceToPlayer < m_attackRange)
 			m_currentAIState = EnemyAIState::ATTACK;
+		else if (xDistanceToPlayer < m_attackRange + 100.f) 
+		{
+			m_currentAIState = EnemyAIState::STRAFING;
+			m_strafeDuration = 0.5f + static_cast<float>(rand() % 10) / 10.0f;
+			m_strafeTimer = 0.0f;
+			m_strafeDirection = (rand() % 2 == 0) ? 1.0f : -1.0f;
+		}
 		else if (distanceToPlayer > m_detectionRange)
 			m_currentAIState = EnemyAIState::IDLE;
 		break;
-	}
+	case EnemyAIState::STRAFING:
+		m_strafeTimer += dt;
+		if (m_strafeTimer >= m_strafeDuration)
+		{
+			m_currentAIState = EnemyAIState::CHASE;
+		}
+		break;
 	case EnemyAIState::ATTACK:
 	{
 		if (m_animation.IsFinished())
@@ -163,19 +177,24 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
-		float xDistance = playerPos.x - m_position.x;
+		float xOffset = playerPos.x - m_position.x;
 		float directionChangeThreshold = 5.0f;
 
-		if (xDistance < -directionChangeThreshold)
+		if (xOffset < -directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::LEFT;
 			m_velocityX = -m_characterSpeed;
 		}
-		else if (xDistance > directionChangeThreshold)
+		else if (xOffset > directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::RIGHT;
 			m_velocityX = m_characterSpeed;
 		}
+		desiredAnimState = CharacterAnimationState::WALK;
+	}
+	else if (m_currentAIState == EnemyAIState::STRAFING)
+	{
+		m_velocityX = m_characterSpeed * m_strafeDirection;
 		desiredAnimState = CharacterAnimationState::WALK;
 	}
 	else if (m_currentAIState == EnemyAIState::ATTACK)
@@ -199,12 +218,12 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 void MeleeEnemyCharacter::Move(f32 dt)
 {
-	// TODO
+
 }
 
 void MeleeEnemyCharacter::Attack()
 {
-	// TODO
+	
 }
 
 

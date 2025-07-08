@@ -17,7 +17,7 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
-	m_attackRange = 600.0f;
+	m_attackRange = 300.0f;
 
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
@@ -78,6 +78,7 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
+	float xDistanceToPlayer = std::abs(m_position.x - playerPos.x);
 
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
@@ -132,18 +133,28 @@ void RangedEnemyCharacter::Update(f32 dt)
 		break;
 	}
 	case EnemyAIState::CHASE:
-	{
 		if (distanceToPlayer < m_attackRange)
 		{
 			m_currentAIState = EnemyAIState::ATTACK;
 			m_hasFiredProjectile = false;
 		}
-		else if (distanceToPlayer > m_detectionRange)
+		else if (xDistanceToPlayer < m_attackRange + 100.f)
 		{
+			m_currentAIState = EnemyAIState::STRAFING;
+			m_strafeDuration = 0.5f + static_cast<float>(rand() % 10) / 10.0f;
+			m_strafeTimer = 0.0f;
+			m_strafeDirection = (rand() % 2 == 0) ? 1.0f : -1.0f;
+		}
+		else if (distanceToPlayer > m_detectionRange)
 			m_currentAIState = EnemyAIState::IDLE;
+		break;
+	case EnemyAIState::STRAFING:
+		m_strafeTimer += dt;
+		if (m_strafeTimer >= m_strafeDuration)
+		{
+			m_currentAIState = EnemyAIState::CHASE;
 		}
 		break;
-	}
 	case EnemyAIState::ATTACK:
 	{
 		if (m_animation.IsFinished())
@@ -167,19 +178,24 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	if (m_currentAIState == EnemyAIState::CHASE)
 	{
-		float xDistance = playerPos.x - m_position.x;
+		float xOffset = playerPos.x - m_position.x;
 		float directionChangeThreshold = 5.0f;
 
-		if (m_pPlayer->GetPosition().x < m_position.x)
+		if (xOffset < -directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::LEFT;
 			m_velocityX = -m_characterSpeed;
 		}
-		else
+		else if (xOffset > directionChangeThreshold)
 		{
 			m_currentDirection = CharacterDirection::RIGHT;
 			m_velocityX = m_characterSpeed;
 		}
+		desiredAnimState = CharacterAnimationState::WALK;
+	}
+	else if (m_currentAIState == EnemyAIState::STRAFING)
+	{
+		m_velocityX = m_characterSpeed * m_strafeDirection;
 		desiredAnimState = CharacterAnimationState::WALK;
 	}
 	else if (m_currentAIState == EnemyAIState::ATTACK)

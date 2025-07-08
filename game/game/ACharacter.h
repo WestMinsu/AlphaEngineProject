@@ -69,4 +69,8 @@ protected:
 	bool m_isDamageEffectActive;
 	f32 m_damageEffectTimer;
 	f32 m_damageEffectDuration;
+
+	f32 m_strafeTimer;
+	f32 m_strafeDuration;
+	f32 m_strafeDirection;
 };

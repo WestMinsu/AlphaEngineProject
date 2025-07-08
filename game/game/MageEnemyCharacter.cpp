@@ -19,7 +19,7 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 800.0f;
-	m_attackRange = 600.0f;
+	m_attackRange = 300.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
@@ -27,6 +27,10 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_isDamageEffectActive = false;
 	m_damageEffectTimer = 0.0f;
 	m_damageEffectDuration = 0.2f;
+
+	m_strafeTimer = 0.0f;
+	m_strafeDuration = 0.0f;
+	m_strafeDirection = 1.0f;
 }
 
 MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
@@ -35,7 +39,7 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 	m_hitboxSize = prototype.m_hitboxSize;
 	m_hitboxOffset = prototype.m_hitboxOffset;
 	m_healthPoint = prototype.m_healthPoint;
-	m_characterSpeed = prototype.m_characterSpeed;
+	m_characterSpeed = prototype.m_characterSpeed * (0.8f + static_cast<float>(rand() % 41) / 100.0f);
 	m_currentDirection = prototype.m_currentDirection;
 	m_currentAnimState = prototype.m_currentAnimState;
 	m_animation = prototype.m_animation;
