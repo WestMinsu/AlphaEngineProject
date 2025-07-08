@@ -25,6 +25,10 @@ RangedEnemyCharacter::RangedEnemyCharacter()
 
 	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
 	m_hitboxOffset = { 0.f, 0.f };
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.3f;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = false;
 
 	m_velocityX = 0.0f;
@@ -56,6 +60,16 @@ void RangedEnemyCharacter::Update(f32 dt)
 	}
 	if (!m_pPlayer)
 		return;
+
+	if (m_isDamageEffectActive)
+	{
+		m_damageEffectTimer += dt;
+		if (m_damageEffectTimer >= m_damageEffectDuration)
+		{
+			m_isDamageEffectActive = false;
+			m_damageEffectTimer = 0.0f;
+		}
+	}
 
 	if (m_isHurt && m_animation.IsFinished())
 	{
@@ -204,8 +218,10 @@ void RangedEnemyCharacter::Draw()
 
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
-
-	m_animation.Draw(transform);
+	if (m_isDamageEffectActive && m_isHurt && m_animation.GetCurrentState() != CharacterAnimationState::DEATH)
+		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
+	else
+		m_animation.Draw(transform);
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
@@ -223,7 +239,8 @@ void RangedEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 	m_healthPoint -= damage;
 	std::cout << "Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

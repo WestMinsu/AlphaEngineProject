@@ -13,7 +13,7 @@ public:
 
 	void Init();
 	void Update(f32 dt);
-	void Draw(AEMtx33 transform);
+	void Draw(AEMtx33 transform, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
 	void Destroy();
 
 	void Play(CharacterAnimationState state, const AnimData& clipData);

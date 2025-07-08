@@ -24,6 +24,9 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
 	m_isHurt = false;
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.2f;
 }
 
 MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
@@ -87,7 +90,8 @@ void MageEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 	m_healthPoint -= damage;
 	std::cout << "Mage Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

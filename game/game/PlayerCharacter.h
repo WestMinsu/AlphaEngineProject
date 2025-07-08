@@ -105,10 +105,5 @@ private:
 	int m_currentWeaponIndex;
 	std::map<DamageType, int> m_weaponUseCounts;
 
-	bool m_isInvincible;
-	f32 m_invincibilityTimer;
-	const f32 m_invincibilityDuration = 0.7f;
-	bool m_isHurt;
-
 	s32 m_score;
 };

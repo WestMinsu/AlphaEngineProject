@@ -21,36 +21,16 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
-	m_isHurt = false;
-
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
 	m_isGrounded = false;
 	killScore = 1000;
-}
-
-MeleeEnemyCharacter::MeleeEnemyCharacter(const MeleeEnemyCharacter& prototype)
-{
-	m_size = prototype.m_size;
-	m_healthPoint = prototype.m_healthPoint;
-	m_characterSpeed = prototype.m_characterSpeed;
-	m_currentDirection = prototype.m_currentDirection;
-	m_currentAnimState = prototype.m_currentAnimState;
-
-	m_currentAIState = prototype.m_currentAIState;
-	m_pPlayer = prototype.m_pPlayer;
-	m_detectionRange = prototype.m_detectionRange;
-	m_attackRange = prototype.m_attackRange;
-	m_attackCooldownTimer = 0.0f;
-	m_attackCooldownDuration = prototype.m_attackCooldownDuration;
-
-	m_animation = prototype.m_animation;
-	m_animDataMap = prototype.m_animDataMap;
-	m_hitboxSize = { m_size.x * 0.7f, m_size.y * 0.9f };
-	m_hitboxOffset = { 0.f, 0.f };
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.3f;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = false;
-	killScore = prototype.killScore;
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -82,6 +62,16 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	if (!m_pPlayer) 
 		return;
 
+	if (m_isDamageEffectActive)
+	{
+		m_damageEffectTimer += dt;
+		if (m_damageEffectTimer >= m_damageEffectDuration)
+		{
+			m_isDamageEffectActive = false;
+			m_damageEffectTimer = 0.0f;
+		}
+	}
+
 	if (m_isHurt && m_animation.IsFinished())
 	{
 		m_isHurt = false;
@@ -89,7 +79,6 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
-
 
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
@@ -236,8 +225,10 @@ void MeleeEnemyCharacter::Draw()
 	AEMtx33 transform = { 0 };
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
-
-	m_animation.Draw(transform);
+	if (m_isDamageEffectActive && m_isHurt && m_animation.GetCurrentState() != CharacterAnimationState::DEATH)
+		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
+	else
+		m_animation.Draw(transform);
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
@@ -255,7 +246,8 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 	m_healthPoint -= damage;
 	std::cout << "Melee Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

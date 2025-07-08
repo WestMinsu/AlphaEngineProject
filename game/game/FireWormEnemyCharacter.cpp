@@ -24,6 +24,9 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 	m_attackCooldownDuration = 3.0f;
 	m_hasFiredProjectile = false;
 	m_isHurt = false;
+	m_isDamageEffectActive = false;
+	m_damageEffectTimer = 0.0f;
+	m_damageEffectDuration = 0.2f;
 	m_projectileSpawnOffset = { 0.f, -25.f };
 	killScore = 2000;
 }
@@ -93,7 +96,8 @@ void FireWormEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 
 	m_healthPoint -= damage;
 	std::cout << "Fire Worm Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)

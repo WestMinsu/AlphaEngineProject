@@ -65,4 +65,8 @@ protected:
 	CharacterDirection m_currentDirection;
 	ElementType m_element;
 	int killScore;
+	bool m_isHurt;
+	bool m_isDamageEffectActive;
+	f32 m_damageEffectTimer;
+	f32 m_damageEffectDuration;
 };

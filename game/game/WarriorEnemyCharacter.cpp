@@ -23,8 +23,6 @@ WarriorEnemyCharacter::WarriorEnemyCharacter()
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
-	m_isHurt = false;
-
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
@@ -90,7 +88,8 @@ void WarriorEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		
 	m_healthPoint -= damage;
 	std::cout << "Warrior Enemy takes damage! HP: " << m_healthPoint << std::endl;
-
+	m_isDamageEffectActive = true;
+	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
 
 	if (m_healthPoint <= 0)
