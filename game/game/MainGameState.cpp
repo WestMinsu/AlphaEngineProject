@@ -332,8 +332,8 @@ void MainGameState::Update(f32 dt)
 		{
 			AEVec2 finalLaserPos = laserBasePos;
 			float yDiff = m_Player.GetPosition().y - m_Boss.GetPosition().y;
-			if (yDiff > 150.f) finalLaserPos.y += 100.f;
-			else if (yDiff < -150.f) finalLaserPos.y -= 100.f;
+			if (yDiff > 150.f) finalLaserPos.y += 50.f;
+			else if (yDiff < -150.f) finalLaserPos.y -= 50.f;
 
 			if (CheckAABBCollision(finalLaserPos, laserData.size, playerHitboxPos, m_Player.GetHitboxSize()))
 			{
@@ -352,7 +352,10 @@ void MainGameState::Update(f32 dt)
 		{
 			if (proj->IsActive() && enemy->GetHealth() > 0)
 			{
-				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemy->GetPosition(), enemy->GetHitboxSize()))
+				AEVec2 enemyHitboxPos = enemy->GetPosition();
+				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, enemy->GetHitboxSize()))
 				{
 					switch (enemy->GetElement())
 					{
@@ -475,7 +478,10 @@ void MainGameState::Update(f32 dt)
 
 		for (auto enemy : m_Enemies)
 		{
-			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemy->GetPosition(), enemy->GetHitboxSize()))
+			AEVec2 enemyHitboxPos = enemy->GetPosition();
+			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+			enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
 			{
 				bool wasAlive = !enemy->IsDead();
 				enemy->TakeDamage(10, DamageType::NONE);

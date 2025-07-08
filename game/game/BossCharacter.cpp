@@ -71,7 +71,7 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_meleeHitboxes[4] = { { m_size.x * 0.4f, m_size.y * 0.0f}, { m_size.x * 0.6f, m_size.y * 0.3f } };
 
 	m_laserVisualSize = { m_size.x * 3.0f, m_size.y * 0.5f };
-	m_laserVisualOffset = { m_size.x, m_size.y * 0.1f };
+	m_laserVisualOffset = { m_size.x, -m_size.y * 0.15f };
 
 	float laserSizeX = m_size.x * 3.0f;
 	float laserSizeY = m_size.y * 0.1f;

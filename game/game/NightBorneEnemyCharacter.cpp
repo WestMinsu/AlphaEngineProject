@@ -10,7 +10,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_size = { 250.f, 250.f };
 	m_healthPoint = 50;
 	m_hitboxSize = { m_size.x * 0.45f, m_size.y * 0.4f };
-	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.25f };
+	m_hitboxOffset = { m_size.x * 0.05f, -m_size.y * 0.3f };
 	m_characterSpeed = 100.f;
 	m_currentDirection = CharacterDirection::LEFT;
 	m_element = ElementType::DARK;
