@@ -22,11 +22,9 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
-
-	m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
-
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
+	TileMaps.push_back(TileMap("Assets/Maps/test2_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()*6));
 
 	m_Background.Init();
 	WarriorEnemyCharacter* warrior = new WarriorEnemyCharacter();
@@ -50,6 +48,9 @@ void MainGameState::Init()
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire"));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night"));
+
+	//m_Boss.Init({ kHalfWindowWidth - 300.f, 100.f }, &m_Player);
+	m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
 
 	m_Enemies.push_back(&m_Boss);
 
@@ -175,7 +176,7 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	if (m_Player.GetPosition().x > 0.f)
+	if (m_Player.GetPosition().x > 0.f )
 	{
 		AEGfxSetCamPosition(m_Player.GetPosition().x, 0.f);
 	}
@@ -344,6 +345,12 @@ void MainGameState::Update(f32 dt)
 	
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
+
+	// Camera Clamp
+	xCam = std::clamp(xCam, 0.f, TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth);
+
+	AEGfxSetCamPosition(xCam, yCam);
+
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
