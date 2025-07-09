@@ -45,11 +45,11 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Boss", boss);
 
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
+	//m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
+	//m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
+	//m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
+	//m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
+	//m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
 
 	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
 	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, & m_factory, "Boss", 1);
@@ -265,7 +265,7 @@ void MainGameState::Update(f32 dt)
 
 		if (m_isNextStage)
 		{
-			if (m_moveTileMapCount < 3 )
+			if (m_moveTileMapCount < 2 )
 			{
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth() * 2.f;
 			}
@@ -281,6 +281,24 @@ void MainGameState::Update(f32 dt)
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
 		proj->Update(dt);
+
+		for (auto boss : m_Bosses)
+		{
+			AEVec2 enemyHitboxPos = boss->GetPosition();
+			enemyHitboxPos.x += boss->GetHitboxOffset().x;
+			enemyHitboxPos.y += boss->GetHitboxOffset().y;
+			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, boss->GetHitboxSize()))
+			{
+				bool wasAlive = !boss->IsDead();
+				boss->TakeDamage(proj->GetDamage(), proj->GetType());
+				if (wasAlive && boss->IsDead())
+				{
+					m_Player.AddScore(boss->GetKillScore());
+				}
+				proj->Deactivate();
+				break;
+			}
+		}
 
 		for (auto enemy : m_Enemies)
 		{
@@ -411,6 +429,24 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
 		for (auto enemy : m_Enemies)
+		{
+			AEVec2 enemyHitboxPos = enemy->GetPosition();
+			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+			enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
+			{
+				bool wasAlive = !enemy->IsDead();
+				enemy->TakeDamage(10, DamageType::NONE);
+				if (wasAlive && enemy->IsDead())
+				{
+					m_Player.AddScore(enemy->GetKillScore());
+				}
+				m_Player.RegisterHit();
+				break;
+			}
+		}
+
+		for (auto enemy : m_Bosses)
 		{
 			AEVec2 enemyHitboxPos = enemy->GetPosition();
 			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
@@ -622,6 +658,31 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 			}
 		}
 	}
+
+	for (ACharacter* enemy : m_Bosses)
+	{
+		if (enemy->GetHealth() <= 0)
+			continue;
+
+		const AEVec2& enemyPos = enemy->GetPosition();
+
+		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
+			(playerDir == CharacterDirection::LEFT && enemyPos.x < playerPos.x);
+
+		const float yTolerance = m_Player.GetHitboxSize().y;
+		float yDistance = std::abs(playerPos.y - enemyPos.y);
+
+		if (isInFront && yDistance <= yTolerance)
+		{
+			AEVec2 distVec = { enemyPos.x - playerPos.x, enemyPos.y - playerPos.y };
+			float distance = AEVec2Length(&distVec);
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				closestEnemy = enemy;
+			}
+		}
+	}
 	return closestEnemy;
 }
 
@@ -645,8 +706,6 @@ bool MainGameState::isAllEnemiesDead()
 		result = false;
 	}
 	
-	
-
 	if (result)
 	{
 		m_isNextStage = true;
