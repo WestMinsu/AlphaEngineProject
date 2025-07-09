@@ -14,8 +14,8 @@ public:
 
 	void Init(AEVec2 pos, EnemyFactory* factory, std::string name, s32 spawnTimes);
 	
-	void Update(f32 dt, AEVec2 positionPlayer, std::vector<ACharacter*>& enemies);
-	void Update(f32 dt, AEVec2 positionPlayer, std::vector<BossCharacter*>& bosses);
+	void Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std::vector<ACharacter*>& enemies);
+	void Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std::vector<BossCharacter*>& bosses);
 	void Destroy();
 
 	void Reset();
