@@ -305,12 +305,12 @@ void PlayerCharacter::Update(f32 dt)
 	m_animation.Play(desiredState, m_animDataMap.at(desiredState));
 	m_currentAnimState = desiredState;
 
-	const f32 halfCharWidth = m_size.x / 2.0f;
-	const f32 halfCharHeight = m_size.y / 2.0f;
+	const f32 halfCharWidth = m_hitboxSize.x / 2.0f;
+	const f32 halfCharHeight = m_hitboxSize.y / 2.0f;
 
 	f32 camX, camY;
 	AEGfxGetCamPosition(&camX, &camY);
-	m_position.x = std::clamp(m_position.x, -kHalfWindowWidth + camX,camX + kHalfWindowWidth - halfCharWidth);
+	m_position.x = std::clamp(m_position.x, -kHalfWindowWidth + camX + halfCharWidth,camX + kHalfWindowWidth - halfCharWidth);
 	//if (m_position.x < camX + halfCharWidth)
 	//	m_position.x = -kHalfWindowWidth + halfCharWidth;
 
