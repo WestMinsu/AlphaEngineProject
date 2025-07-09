@@ -48,7 +48,7 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 		)
 	{
 		ACharacter* newEnemy = m_EnemyFactory->Create(m_enemyName);
-		newEnemy->Init(m_position);
+		newEnemy->Init({ m_position.x, m_position.y });
 		enemies.push_back(newEnemy);
 		m_spawnTimes--;
 		m_spawnCurrentTime = 0.f;
@@ -56,7 +56,7 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 
 	if (m_resetCount < moveTileMapCount
 		&& m_resetCount < 2
-		&& m_position.x < positionPlayer.x) {
+		&& m_position.x + 1900 < positionPlayer.x) {
 		Reset();
 	}
 }
@@ -92,9 +92,10 @@ void SpawnEnemy::Reset()
 	if (camX > 2 * 1856 * (1 + m_resetCount) - kHalfWindowWidth && camX > m_position.x)
 	{
 		m_position.x += 2 * 1856;
-		m_spawnTimes = 1;
-		m_spawnCurrentTime = 0.f;
 		m_resetCount++;
+		m_spawnTimes = 2*m_resetCount;
+		m_spawnCurrentTime = 0.f;
+		
 	}
 }
 
