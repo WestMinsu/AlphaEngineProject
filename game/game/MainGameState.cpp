@@ -44,12 +44,12 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Night", night);
 	m_factory.RegisterPrototype("Boss", boss);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 6));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 4));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 8));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 5));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 4));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
 
 	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
 	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, & m_factory, "Boss", 1);
@@ -75,6 +75,10 @@ void MainGameState::Init()
 	m_feedbackTextR = 0.0f;
 	m_feedbackTextG = 0.0f;
 	m_feedbackTextB = 0.0f;
+
+	m_isNextStage = false;
+	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
+	m_moveTileMapCount = 0;
 }
 
 void MainGameState::Update(f32 dt)
@@ -122,10 +126,10 @@ void MainGameState::Update(f32 dt)
 
 	for (auto& spawn : m_Spawns)
 	{
-		spawn->Update(dt, m_Player.GetPosition(),  m_Enemies);
+		spawn->Update(dt, m_Player.GetPosition(), m_moveTileMapCount, m_Enemies);
 	}
 
-	m_SpawnBoss.Update(dt, m_Player.GetPosition(), m_Bosses);
+	m_SpawnBoss.Update(dt, m_Player.GetPosition(), m_moveTileMapCount, m_Bosses);
 
 	for (auto enemy : m_Enemies)
 	{
@@ -167,11 +171,6 @@ void MainGameState::Update(f32 dt)
 				break;
 			}
 		}
-	}
-
-	if (m_Player.GetPosition().x > 0.f )
-	{
-		AEGfxSetCamPosition(m_Player.GetPosition().x, 0.f);
 	}
 
 	bool isPlayerCasting = m_Player.GetCurrentAnimState() == CharacterAnimationState::RANGED_ATTACK;
@@ -242,13 +241,42 @@ void MainGameState::Update(f32 dt)
 	}
 
 	
+
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-	// Camera Clamp
-	xCam = std::clamp(xCam, 0.f, TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth);
+	if (m_Player.GetPosition().x > xCam)
+	{
+		xCam = m_Player.GetPosition().x;
+		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
+		AEGfxSetCamPosition(xCam, 0.f);
+	}
 
-	AEGfxSetCamPosition(xCam, yCam);
+	std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
+
+	if (isAllEnemiesDead() 
+		&& m_isNextStage)
+	{
+		for (auto enemy : m_Enemies )
+		{
+			delete enemy;
+		}
+		m_Enemies.clear();
+
+		if (m_isNextStage)
+		{
+			if (m_moveTileMapCount < 3 )
+			{
+				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth() * 2.f;
+			}
+			else
+			{
+				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth();
+			}
+			m_moveTileMapCount++;
+			m_isNextStage = false;
+		}
+	}
 
 	for (auto proj = m_playerProjectiles.begin(); proj != m_playerProjectiles.end(); )
 	{
@@ -482,7 +510,10 @@ void MainGameState::Exit()
 	m_factory.Destroy();
 
 	// To Do
-	m_Bosses[0]->Destroy();
+	if (m_Bosses.size() > 0)
+	{
+		m_Bosses[0]->Destroy();
+	}
 
 	for (auto& projectile : m_playerProjectiles) projectile.Destroy();
 	for (auto& projectile : m_enemyProjectiles) projectile.Destroy();
@@ -592,4 +623,34 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 		}
 	}
 	return closestEnemy;
+}
+
+bool MainGameState::isAllEnemiesDead()
+{
+	bool result = true;
+
+	if (m_Enemies.size() > 0)
+	{
+		for (ACharacter* enemy : m_Enemies)
+		{
+			if (enemy->GetHealth() > 0)
+			{
+				result = false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		result = false;
+	}
+	
+	
+
+	if (result)
+	{
+		m_isNextStage = true;
+	}
+
+	return result;
 }
