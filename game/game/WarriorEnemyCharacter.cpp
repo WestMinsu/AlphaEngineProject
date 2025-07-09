@@ -35,6 +35,11 @@ WarriorEnemyCharacter::WarriorEnemyCharacter()
 	m_strafeTimer = 0.0f;
 	m_strafeDuration = 0.0f;
 	m_strafeDirection = 1.0f;
+
+	m_sfxAttack = LoadSoundAsset("Assets/Sounds/attack_monster.wav");
+	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt3_monster.wav");
+	m_sfxDeath = LoadSoundAsset("Assets/Sounds/die2_monster.wav");
+	m_attackSoundFrame = 5;
 }
 
 WarriorEnemyCharacter::WarriorEnemyCharacter(const WarriorEnemyCharacter& prototype)
@@ -63,6 +68,12 @@ WarriorEnemyCharacter::WarriorEnemyCharacter(const WarriorEnemyCharacter& protot
 	m_velocityY = prototype.m_velocityY;
 	m_gravity = prototype.m_gravity;
 	m_isGrounded = prototype.m_isGrounded;
+	killScore = prototype.killScore;
+
+	m_sfxAttack = prototype.m_sfxAttack;
+	m_sfxHurt = prototype.m_sfxHurt;
+	m_sfxDeath = prototype.m_sfxDeath;
+	m_attackSoundFrame = prototype.m_attackSoundFrame;
 }
 
 WarriorEnemyCharacter::~WarriorEnemyCharacter()
@@ -85,27 +96,6 @@ void WarriorEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
-}
-
-void WarriorEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
-{
-	if (m_currentAnimState == CharacterAnimationState::DEATH)
-	{
-		return;
-	}
-		
-	m_healthPoint -= damage;
-	std::cout << "Warrior Enemy takes damage! HP: " << m_healthPoint << std::endl;
-	m_isDamageEffectActive = true;
-	m_damageEffectTimer = 0.0f;
-	m_isHurt = true;
-
-	if (m_healthPoint <= 0)
-	{
-		m_healthPoint = 0;
-		m_currentAnimState = CharacterAnimationState::DEATH;
-		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-	}
 }
 
 WarriorEnemyCharacter* WarriorEnemyCharacter::Clone()

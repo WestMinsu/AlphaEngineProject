@@ -5,6 +5,7 @@
 #include "PlayerCharacter.h"
 #include "AssetManager.h"
 #include "TileMap.h"
+#include "GameManager.h"
 
 MeleeEnemyCharacter::MeleeEnemyCharacter()
 {
@@ -27,10 +28,17 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_isGrounded = false;
 	killScore = 1000;
 	m_isDamageEffectActive = false;
+	m_isHurt = false;
 	m_damageEffectTimer = 0.0f;
 	m_damageEffectDuration = 0.3f;
 	m_damageEffectTimer = 0.0f;
-	m_isHurt = false;
+
+	m_strafeTimer = 0.0f;
+	m_strafeDuration = 0.0f;
+	m_strafeDirection = 1.0f;
+
+	m_attackSoundFrame = 5;
+	m_hasPlayedAttackSound = false;
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -40,7 +48,6 @@ MeleeEnemyCharacter::~MeleeEnemyCharacter()
 void MeleeEnemyCharacter::Init(AEVec2 position)
 {
 	ACharacter::Init(position);
-	
 }
 
 void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
@@ -136,7 +143,10 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	}
 	case EnemyAIState::CHASE:
 		if (distanceToPlayer < m_attackRange)
+		{
 			m_currentAIState = EnemyAIState::ATTACK;
+			m_hasPlayedAttackSound = false; 
+		}
 		else if (xDistanceToPlayer < m_attackRange + 100.f) 
 		{
 			m_currentAIState = EnemyAIState::STRAFING;
@@ -170,6 +180,12 @@ void MeleeEnemyCharacter::Update(f32 dt)
 			m_currentAIState = EnemyAIState::IDLE;
 		break;
 	}
+	}
+
+	if (m_currentAIState == EnemyAIState::ATTACK && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() >= m_attackSoundFrame)
+	{
+		GameManager::PlaySFX(m_sfxAttack);
+		m_hasPlayedAttackSound = true;
 	}
 
 	f32 m_velocityX = 0.0f;
@@ -268,11 +284,13 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
+	GameManager::PlaySFX(m_sfxHurt, 1.3f, 1.0f, 0);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
+		GameManager::PlaySFX(m_sfxDeath);
 	}
 }

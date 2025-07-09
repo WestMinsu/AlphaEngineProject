@@ -91,7 +91,7 @@ private:
 	bool m_hasHitEnemyThisAttack;
 	std::vector<AttackHitbox> m_attackHitboxes;
 
-	bool m_isProjectileAttacking;
+	bool m_isSkillAttacking;
 	bool m_hasFiredProjectile;
 
 	bool m_isDashing;
@@ -106,4 +106,13 @@ private:
 	std::map<DamageType, int> m_weaponUseCounts;
 
 	s32 m_score;
+
+	AEAudio m_sfxMeleeAttack;
+	AEAudio m_sfxFireAttack;
+	AEAudio m_sfxIceAttack;
+	AEAudio m_sfxLightningAttack;
+	AEAudio m_sfxHurt;
+	AEAudio m_sfxDeath;
+
+	bool m_hasPlayedAttackSound;
 };

@@ -68,7 +68,7 @@ void MainGameState::Init()
 
 	m_pHealthBarFrame = LoadImageAsset("Assets/UI/healthbar_frame.png");
 	m_pHealthBar = LoadImageAsset("Assets/UI/healthbar_fill.png");
-
+	
 	m_feedbackText = "";
 	m_feedbackTextTimer = 0.0f;
 

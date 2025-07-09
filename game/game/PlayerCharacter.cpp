@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include <iostream>
 #include "TileMap.h"
+#include "GameManager.h"
 
 PlayerCharacter::PlayerCharacter()
 {
@@ -29,7 +30,7 @@ PlayerCharacter::PlayerCharacter()
 	m_isMeleeAttackHitboxActive = false;
 	m_hasHitEnemyThisAttack = false;
 
-	m_isProjectileAttacking = false;
+	m_isSkillAttacking = false;
 	m_hasFiredProjectile = false;
 
 	m_isDashing = false;
@@ -43,6 +44,7 @@ PlayerCharacter::PlayerCharacter()
 	m_damageEffectTimer = 0.0f;
 	m_damageEffectDuration = 0.7f;
 	m_score = 0;
+	m_hasPlayedAttackSound = false;
 }
 
 PlayerCharacter::~PlayerCharacter()
@@ -53,6 +55,13 @@ void PlayerCharacter::Init(AEVec2 position)
 {
 	m_position = position;
 	m_animation.Init();
+
+	m_sfxMeleeAttack = LoadSoundAsset("Assets/Sounds/attack_knight.wav");
+	m_sfxFireAttack = LoadSoundAsset("Assets/Sounds/fire.mp3");
+	m_sfxIceAttack = LoadSoundAsset("Assets/Sounds/ice.mp3");
+	m_sfxLightningAttack = LoadSoundAsset("Assets/Sounds/lightning.mp3");
+	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt_player.mp3");
+	m_sfxDeath = LoadSoundAsset("Assets/Sounds/death_player.mp3");
 
 	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
@@ -129,7 +138,7 @@ void PlayerCharacter::Update(f32 dt)
 		m_isHurt = false;
 	}
 
-	bool isAttacking = m_isMeleeAttacking || m_isProjectileAttacking;
+	bool isAttacking = m_isMeleeAttacking || m_isSkillAttacking;
 
 	if (AEInputCheckTriggered(AEVK_1))
 	{
@@ -156,11 +165,14 @@ void PlayerCharacter::Update(f32 dt)
 	{
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
+		m_hasPlayedAttackSound = false;
 	}
+
 	if (AEInputCheckCurr(AEVK_S) && !isAttacking && (m_weaponUseCounts.at(m_currentWeapon) > 0))
 	{
-		m_isProjectileAttacking = true;
+		m_isSkillAttacking = true;
 		m_hasFiredProjectile = false;
+		m_hasPlayedAttackSound = false;
 	}
 	if (AEInputCheckTriggered(AEVK_LSHIFT) && !m_isDashing && !isAttacking)
 	{
@@ -175,10 +187,33 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY = m_jumpStrength;
 	}
 
+	if (m_isMeleeAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 4)
+	{
+		GameManager::PlaySFX(m_sfxMeleeAttack);
+		m_hasPlayedAttackSound = true;
+	}
+
+	if (m_isSkillAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 5) 
+	{
+		switch (m_currentWeapon)
+		{
+		case DamageType::FIRE:
+			GameManager::PlaySFX(m_sfxFireAttack);
+			break;
+		case DamageType::ICE:
+			GameManager::PlaySFX(m_sfxIceAttack);
+			break;
+		case DamageType::LIGHTNING:
+			GameManager::PlaySFX(m_sfxLightningAttack);
+			break;
+		}
+		m_hasPlayedAttackSound = true;
+	}
+
 	if (m_animation.IsFinished())
 	{
 		if (m_isMeleeAttacking) m_isMeleeAttacking = false;
-		if (m_isProjectileAttacking) m_isProjectileAttacking = false;
+		if (m_isSkillAttacking) m_isSkillAttacking = false;
 		if (m_isDashing) m_isDashing = false;
 	}
 
@@ -230,7 +265,7 @@ void PlayerCharacter::Update(f32 dt)
 			m_velocityX = -currentMaxSpeed;
 	}
 
-	if (!m_isMeleeAttacking && !m_isProjectileAttacking)
+	if (!m_isMeleeAttacking && !m_isSkillAttacking)
 	{
 		if (AEInputCheckCurr(AEVK_LEFT))
 			m_currentDirection = CharacterDirection::LEFT;
@@ -286,7 +321,7 @@ void PlayerCharacter::Update(f32 dt)
 	CharacterAnimationState desiredState;
 	if (m_isMeleeAttacking)
 		desiredState = CharacterAnimationState::MELEE_ATTACK;
-	else if (m_isProjectileAttacking)
+	else if (m_isSkillAttacking)
 		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)
 		desiredState = CharacterAnimationState::DASH;
@@ -411,12 +446,15 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
+	GameManager::PlaySFX(m_sfxHurt);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
+		GameManager::PlaySFX(m_sfxDeath);
+
 	}
 }
 

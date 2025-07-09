@@ -32,11 +32,14 @@ public:
 	// static function
 	// Change m_nextState
 	static void ChangeState(GameState newGameState);
+	static void PlaySFX(AEAudio sfx, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
+	static void PlayBGM(AEAudio bgm, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
 
 	static bool m_isGameRunning;
 private:
 	const char* m_kTextTitle;
 
 	std::unique_ptr<AGameState> m_GameState;
-
+	static AEAudioGroup m_sfxGroup;
+	static AEAudioGroup m_bgmGroup;
 };

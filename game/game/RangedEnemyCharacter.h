@@ -33,6 +33,9 @@ protected:
 	CharacterAnimationState m_currentAnimState;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
 	ProjectileData m_projectileData;
+	AEAudio m_sfxAttack;
+	AEAudio m_sfxHurt;
+	AEAudio m_sfxDeath;
 
 	EnemyAIState m_currentAIState;
 	PlayerCharacter* m_pPlayer;
@@ -49,4 +52,7 @@ protected:
 	f32 m_gravity;
 	bool m_isGrounded;
 	AEVec2 m_projectileSpawnOffset;
+
+	s32 m_attackSoundFrame;
+	bool m_hasPlayedAttackSound;
 };

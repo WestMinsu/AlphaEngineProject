@@ -4,6 +4,8 @@
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
 bool GameManager::m_isGameRunning = true;
+AEAudioGroup GameManager::m_sfxGroup;
+AEAudioGroup GameManager::m_bgmGroup;
 
 GameManager::GameManager()
 {
@@ -23,8 +25,10 @@ void GameManager::Init()
 	AESysSetWindowTitle(m_kTextTitle);
 	
 	m_GameState = std::move(std::make_unique<IntroState>());
-	m_GameState->Init();
+	m_GameState->Init();	
 	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	m_sfxGroup = AEAudioCreateGroup();
+	m_bgmGroup = AEAudioCreateGroup();
 	InitUtilityMeshes();
 	AESysReset();
 }
@@ -76,4 +80,14 @@ void GameManager::Update(f32 dt)
 void GameManager::ChangeState(GameState newGameState)
 {
 	GameManager::m_nextState = newGameState;
+}
+
+void GameManager::PlaySFX(AEAudio sfx, float volume, float pitch, s32 loops)
+{
+	AEAudioPlay(sfx, m_sfxGroup, volume, pitch, loops);
+}
+
+void GameManager::PlayBGM(AEAudio bgm, float volume, float pitch, s32 loops)
+{
+	AEAudioPlay(bgm, m_bgmGroup, volume, pitch, loops);
 }

@@ -32,6 +32,11 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_strafeTimer = 0.0f;
 	m_strafeDuration = 0.0f;
 	m_strafeDirection = 1.0f;
+
+	m_sfxAttack = LoadSoundAsset("Assets/Sounds/attack_monster.wav");
+	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt_monster.wav");
+	m_sfxDeath = LoadSoundAsset("Assets/Sounds/hurt_monster.wav");
+	m_attackSoundFrame = 10;
 }
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacter& prototype)
@@ -63,6 +68,11 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_gravity = prototype.m_gravity;
 	m_isGrounded = prototype.m_isGrounded;
 	killScore = prototype.killScore;
+
+	m_sfxAttack = prototype.m_sfxAttack;
+	m_sfxHurt = prototype.m_sfxHurt;
+	m_sfxDeath = prototype.m_sfxDeath;
+	m_attackSoundFrame = prototype.m_attackSoundFrame;
 }
 
 NightBorneEnemyCharacter::~NightBorneEnemyCharacter()
@@ -85,30 +95,6 @@ void NightBorneEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	}
 
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
-}
-
-void NightBorneEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
-{
-	if (m_currentAnimState == CharacterAnimationState::DEATH)
-	{
-		return;
-	}
-
-	m_healthPoint -= damage;
-
-
-	std::cout << "NightBorne takes damage! HP: " << m_healthPoint << std::endl;
-
-	m_isDamageEffectActive = true;
-	m_damageEffectTimer = 0.0f;
-	m_isHurt = true;
-
-	if (m_healthPoint <= 0)
-	{
-		m_healthPoint = 0;
-		m_currentAnimState = CharacterAnimationState::DEATH;
-		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-	}
 }
 
 NightBorneEnemyCharacter* NightBorneEnemyCharacter::Clone()
