@@ -40,6 +40,16 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_attackSoundFrame = 5;
 	m_hasPlayedAttackSound = false;
 	m_visualPivotOffset = 0.0f;
+
+	m_hasPlayedAttackSound = false;
+	m_hasHitPlayerThisAttack = false;
+	m_isMeleeAttackHitboxActive = false;
+
+	m_meleeHitboxes.clear();
+	m_meleeHitboxes.resize(13, { 0, 0 });
+	m_meleeHitboxes[5] = { { m_size.x * 0.4f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
+	m_meleeHitboxes[6] = { { m_size.x * 0.5f, 0.f }, { m_size.x * 0.8f, m_size.y * 0.25f } };
+	m_meleeHitboxes[7] = { { m_size.x * 0.4f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -58,10 +68,8 @@ void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animation.Init();
 }
 
-
 void MeleeEnemyCharacter::Update(f32 dt)
 {
-
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		m_animation.Update(dt);
@@ -147,6 +155,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		{
 			m_currentAIState = EnemyAIState::ATTACK;
 			m_hasPlayedAttackSound = false; 
+			m_hasHitPlayerThisAttack = false;
 		}
 		else if (xDistanceToPlayer < m_attackRange + 100.f) 
 		{
@@ -182,6 +191,8 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		break;
 	}
 	}
+
+	m_isMeleeAttackHitboxActive = (m_currentAIState == EnemyAIState::ATTACK) && (m_animation.GetCurrentFrame() >= 5 && m_animation.GetCurrentFrame() <= 7);
 
 	if (m_currentAIState == EnemyAIState::ATTACK && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() >= m_attackSoundFrame)
 	{
@@ -272,6 +283,15 @@ void MeleeEnemyCharacter::Draw()
 		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
 	else
 		m_animation.Draw(transform);
+
+	if (IsAttackHitboxActive())
+	{
+		const AttackHitbox& currentHitbox = GetCurrentMeleeHitbox();
+		AEVec2 hitboxPos;
+		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
+		hitboxPos.y = m_position.y + currentHitbox.offset.y;
+		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
+	}
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
@@ -301,4 +321,27 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 		GameManager::PlaySFX(m_sfxDeath);
 	}
+}
+
+bool MeleeEnemyCharacter::IsAttackHitboxActive() const
+{
+	if (m_currentAnimState == CharacterAnimationState::MELEE_ATTACK)
+	{
+		int frame = m_animation.GetCurrentFrame();
+		if (frame >= 5 && frame <= 7) 
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+const AttackHitbox& MeleeEnemyCharacter::GetCurrentMeleeHitbox() const
+{
+	s32 currentFrame = m_animation.GetCurrentFrame();
+	if (currentFrame >= 0 && currentFrame < m_meleeHitboxes.size())
+	{
+		return m_meleeHitboxes[currentFrame];
+	}
+	return m_meleeHitboxes[0];
 }

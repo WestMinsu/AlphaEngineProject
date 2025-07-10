@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include "AIState.h" 
 #include <map>
+#include <vector>
 
 class PlayerCharacter;
 
@@ -22,6 +23,10 @@ public:
 	void Destroy() override;
 	virtual void TakeDamage(s32 damage, DamageType damageType) override;
 
+	bool IsAttackHitboxActive() const;
+	const AttackHitbox& GetCurrentMeleeHitbox() const;
+	bool HasHitPlayerThisAttack() const { return m_hasHitPlayerThisAttack; }
+	void RegisterPlayerHit() { m_hasHitPlayerThisAttack = true; }
 protected:
 	Animation m_animation;
 	CharacterAnimationState m_currentAnimState;
@@ -47,4 +52,7 @@ protected:
 	s32 m_attackSoundFrame;
 	bool m_hasPlayedAttackSound;
 
+	std::vector<AttackHitbox> m_meleeHitboxes;
+	bool m_hasHitPlayerThisAttack;
+	bool m_isMeleeAttackHitboxActive;
 };

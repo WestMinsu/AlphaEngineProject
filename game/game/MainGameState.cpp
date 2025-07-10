@@ -227,6 +227,34 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
+	for (auto* enemy : m_Enemies)
+	{
+		// MeleeEnemyCharacter 타입인지 확인
+		MeleeEnemyCharacter* meleeEnemy = dynamic_cast<MeleeEnemyCharacter*>(enemy);
+		if (meleeEnemy && meleeEnemy->GetHealth() > 0 && m_Player.GetHealth() > 0 && !m_Player.IsInvincible())
+		{
+			if (meleeEnemy->IsAttackHitboxActive() && !meleeEnemy->HasHitPlayerThisAttack())
+			{
+				const AttackHitbox& enemyHitbox = meleeEnemy->GetCurrentMeleeHitbox();
+				AEVec2 enemyPos = meleeEnemy->GetPosition();
+				CharacterDirection enemyDir = meleeEnemy->GetDirection();
+				AEVec2 hitboxPos;
+				hitboxPos.x = enemyPos.x + (enemyDir == CharacterDirection::RIGHT ? enemyHitbox.offset.x : -enemyHitbox.offset.x);
+				hitboxPos.y = enemyPos.y + enemyHitbox.offset.y;
+
+				AEVec2 playerHitboxPos = m_Player.GetPosition();
+				playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+				playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+
+				if (CheckAABBCollision(hitboxPos, enemyHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
+				{
+					m_Player.TakeDamage(100, DamageType::NONE);
+					meleeEnemy->RegisterPlayerHit();
+				}
+			}
+		}
+	}
+
 	for (auto enemy : m_Enemies)
 	{
 		RangedEnemyCharacter* rangeEnemy = dynamic_cast<RangedEnemyCharacter*>(enemy);

@@ -38,6 +38,11 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_sfxDeath = LoadSoundAsset("Assets/Sounds/hurt_monster.wav");
 	m_attackSoundFrame = 10;
 	m_visualPivotOffset = 25.0f;
+
+	m_meleeHitboxes.clear();
+	m_meleeHitboxes.resize(12, { 0, 0 });
+	m_meleeHitboxes[6] = { {m_size.x * 0.5f, 0.f}, {m_size.x * 0.7f, m_size.y * 0.3f} };
+	m_meleeHitboxes[7] = { {m_size.x * 0.5f, 0.f}, {m_size.x * 0.7f, m_size.y * 0.3f} };
 }
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacter& prototype)
