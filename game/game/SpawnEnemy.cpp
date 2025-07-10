@@ -56,7 +56,7 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 
 	if (m_resetCount < moveTileMapCount
 		&& m_resetCount < 2
-		&& m_position.x + 1900 < positionPlayer.x) {
+		&& m_position.x + 2400 < positionPlayer.x) {
 		Reset();
 	}
 }
