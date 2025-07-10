@@ -28,11 +28,7 @@ public:
 	void Exit() override;
 
 private:
-	void DrawUI();
-	ACharacter* FindClosestEnemyInFront();
-	 
 	PlayerCharacter m_Player;
-	//BossCharacter m_Boss;
 
 	std::vector<ACharacter*> m_Enemies;
 	std::vector<BossCharacter*> m_Bosses;
@@ -45,6 +41,10 @@ private:
 	EnemyFactory m_factory;
 	std::vector<SpawnEnemy*> m_Spawns;
 	SpawnEnemy m_SpawnBoss;
+
+	bool m_isNextStage;
+	AEVec2 m_clampCameraX;
+	s32 m_moveTileMapCount;
 
 	AEGfxTexture* m_pUiSlot;      
 	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
@@ -65,5 +65,11 @@ private:
 	f32 m_feedbackTextG;
 	f32 m_feedbackTextB;
 
+
 	bool m_isBossMusicPlaying;
+
+	// private Functions
+	void DrawUI();
+	ACharacter* FindClosestEnemyInFront();
+	bool isAllEnemiesDead();
 };
