@@ -239,16 +239,27 @@ void RangedEnemyCharacter::Attack() {}
 void RangedEnemyCharacter::Draw()
 {
 	AEMtx33 scale = { 0 };
+
+	f32 finalDrawPosX = m_position.x;
+
+	if (m_currentDirection == CharacterDirection::LEFT)
+		AEMtx33Scale(&scale, -m_size.x, m_size.y);
+	else
+	{
+		AEMtx33Scale(&scale, m_size.x, m_size.y);
+		finalDrawPosX += m_visualPivotOffset;
+	}
+
 	AEMtx33 rotate = { 0 };
-	AEMtx33 translate = { 0 };
-	AEMtx33 transform = { 0 };
-
-	AEMtx33Trans(&translate, m_position.x, m_position.y);
 	AEMtx33Rot(&rotate, 0);
-	AEMtx33Scale(&scale, m_currentDirection == CharacterDirection::RIGHT ? m_size.x : -m_size.x, m_size.y);
 
+	AEMtx33 translate = { 0 };
+	AEMtx33Trans(&translate, finalDrawPosX, m_position.y);
+
+	AEMtx33 transform = { 0 };
 	AEMtx33Concat(&transform, &rotate, &scale);
 	AEMtx33Concat(&transform, &translate, &transform);
+
 	if (m_isDamageEffectActive && m_isHurt && m_animation.GetCurrentState() != CharacterAnimationState::DEATH)
 		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
 	else

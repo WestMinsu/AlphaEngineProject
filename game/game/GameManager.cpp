@@ -98,6 +98,7 @@ void GameManager::PlaySFX(AEAudio sfx, float volume, float pitch, s32 loops)
 void GameManager::LoadAllMusic()
 {
 	m_bgmTracks[BGMTrack::STAGE] = LoadSoundAsset("Assets/Sounds/Jeremy Blake - Powerup!.mp3");
+	m_bgmTracks[BGMTrack::MENU] = LoadSoundAsset("Assets/Sounds/Krayzius & Brainstorm - Virtual Boy.mp3");
 	m_bgmTracks[BGMTrack::BOSS] = LoadSoundAsset("Assets/Sounds/Kevin MacLeod - 8bit Dungeon Boss.mp3");
 	m_bgmTracks[BGMTrack::CLEAR] = LoadSoundAsset("Assets/Sounds/Kevin MacLeod - Pixelland.mp3");
 	m_bgmTracks[BGMTrack::OVER] = LoadSoundAsset("Assets/Sounds/Kubbi - Digestive biscuit.mp3");
@@ -126,4 +127,3 @@ void GameManager::StopMusic()
 	AEAudioStopGroup(m_bgmGroup);
 	m_currentTrack = BGMTrack::NONE;
 }
-

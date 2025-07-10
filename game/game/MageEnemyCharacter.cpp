@@ -36,6 +36,7 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt3_monster.wav");
 	m_sfxDeath = LoadSoundAsset("Assets/Sounds/die2_monster.wav");
 	m_attackSoundFrame = 11;
+	m_visualPivotOffset = 20.0f;
 }
 
 MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
@@ -68,6 +69,7 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 	m_sfxHurt = prototype.m_sfxHurt;
 	m_sfxDeath = prototype.m_sfxDeath;
 	m_attackSoundFrame = prototype.m_attackSoundFrame;
+	m_visualPivotOffset = prototype.m_visualPivotOffset;
 }
 
 MageEnemyCharacter::~MageEnemyCharacter() {}
@@ -87,7 +89,7 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	}
 
 	m_projectileData.speed = 800.0f;
-	m_projectileData.damage = 5;
+	m_projectileData.damage = 10;
 	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());

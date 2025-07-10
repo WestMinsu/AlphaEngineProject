@@ -25,6 +25,7 @@ MainMenuState::~MainMenuState()
 
 void MainMenuState::Init()
 {
+	GameManager::PlayBGM(BGMTrack::MENU);
 }
 
 void MainMenuState::Update(f32 dt)
