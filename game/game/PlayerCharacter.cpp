@@ -75,7 +75,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
 	fireData.damage = 34;
-	fireData.size = { 150.f, 50.f };
+	fireData.size = { 200.f, 70.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	fireData.type = { DamageType::FIRE };
 	m_projectileDataMap[fireData.type] = fireData;
@@ -83,7 +83,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 25;
-	iceData.size = { 150.f, 50.f };
+	iceData.size = { 200.f, 70.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };
 	m_projectileDataMap[iceData.type] = iceData;

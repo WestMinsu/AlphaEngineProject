@@ -23,10 +23,15 @@ public:
 	const AEVec2& GetSize() const { return m_size; }
 	s32 GetDamage() const { return m_damage; }
 	DamageType GetType() const { return m_type; }
+	const AEVec2& GetVelocity() const { return m_velocity; }
+	const AEVec2& GetHitboxSize() const { return m_hitboxSize; }
+	const AEVec2& GetHitboxOffset() const { return m_hitboxOffset; }
 private:
 	AEVec2 m_position;
 	AEVec2 m_velocity;
 	AEVec2 m_size;
+	AEVec2 m_hitboxSize;   
+	AEVec2 m_hitboxOffset; 
 	s32 m_damage;
 	Animation m_animation;
 	AnimData m_animData;

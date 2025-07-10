@@ -44,12 +44,6 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_hasPlayedAttackSound = false;
 	m_hasHitPlayerThisAttack = false;
 	m_isMeleeAttackHitboxActive = false;
-
-	m_meleeHitboxes.clear();
-	m_meleeHitboxes.resize(13, { 0, 0 });
-	m_meleeHitboxes[5] = { { m_size.x * 0.4f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
-	m_meleeHitboxes[6] = { { m_size.x * 0.5f, 0.f }, { m_size.x * 0.8f, m_size.y * 0.25f } };
-	m_meleeHitboxes[7] = { { m_size.x * 0.4f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -326,13 +320,7 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 bool MeleeEnemyCharacter::IsAttackHitboxActive() const
 {
 	if (m_currentAnimState == CharacterAnimationState::MELEE_ATTACK)
-	{
-		int frame = m_animation.GetCurrentFrame();
-		if (frame >= 5 && frame <= 7) 
-		{
-			return true;
-		}
-	}
+		return true;
 	return false;
 }
 

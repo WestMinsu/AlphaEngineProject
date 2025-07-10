@@ -229,7 +229,6 @@ void MainGameState::Update(f32 dt)
 
 	for (auto* enemy : m_Enemies)
 	{
-		// MeleeEnemyCharacter 타입인지 확인
 		MeleeEnemyCharacter* meleeEnemy = dynamic_cast<MeleeEnemyCharacter*>(enemy);
 		if (meleeEnemy && meleeEnemy->GetHealth() > 0 && m_Player.GetHealth() > 0 && !m_Player.IsInvincible())
 		{
@@ -248,7 +247,7 @@ void MainGameState::Update(f32 dt)
 
 				if (CheckAABBCollision(hitboxPos, enemyHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
 				{
-					m_Player.TakeDamage(100, DamageType::NONE);
+					m_Player.TakeDamage(10, DamageType::NONE);
 					meleeEnemy->RegisterPlayerHit();
 				}
 			}
@@ -317,12 +316,18 @@ void MainGameState::Update(f32 dt)
 	{
 		proj->Update(dt);
 
+		AEVec2 projHitboxPos = proj->GetPosition();
+		float dirMultiplier = (proj->GetVelocity().x >= 0) ? 1.0f : -1.0f;
+		projHitboxPos.x += proj->GetHitboxOffset().x * dirMultiplier;
+		projHitboxPos.y += proj->GetHitboxOffset().y;
+		const AEVec2& projHitboxSize = proj->GetHitboxSize();
+
 		for (auto boss : m_Bosses)
 		{
 			AEVec2 enemyHitboxPos = boss->GetPosition();
 			enemyHitboxPos.x += boss->GetHitboxOffset().x;
 			enemyHitboxPos.y += boss->GetHitboxOffset().y;
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, boss->GetHitboxSize()))
+			if (CheckAABBCollision(projHitboxPos, projHitboxSize, enemyHitboxPos, boss->GetHitboxSize()))
 			{
 				bool wasAlive = !boss->IsDead();
 				boss->TakeDamage(proj->GetDamage(), proj->GetType());
@@ -342,7 +347,7 @@ void MainGameState::Update(f32 dt)
 				AEVec2 enemyHitboxPos = enemy->GetPosition();
 				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
 				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
-				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, enemy->GetHitboxSize()))
+				if (CheckAABBCollision(projHitboxPos, projHitboxSize, enemyHitboxPos, enemy->GetHitboxSize()))
 				{
 					switch (enemy->GetElement())
 					{
