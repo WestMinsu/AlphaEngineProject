@@ -10,7 +10,7 @@ PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0, };
 	m_size = { 200.f, 200.f };
-	m_hitboxSize = { m_size.x * 0.4f, m_size.y * 0.6f };
+	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
@@ -42,7 +42,7 @@ PlayerCharacter::PlayerCharacter()
 	m_isHurt = false;
 	m_isDamageEffectActive = false;
 	m_damageEffectTimer = 0.0f;
-	m_damageEffectDuration = 0.7f;
+	m_damageEffectDuration = 1.5f;
 	m_score = 0;
 	m_hasPlayedAttackSound = false;
 }
@@ -74,7 +74,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
-	fireData.damage = 10;
+	fireData.damage = 34;
 	fireData.size = { 150.f, 50.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	fireData.type = { DamageType::FIRE };
@@ -82,7 +82,7 @@ void PlayerCharacter::Init(AEVec2 position)
 
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
-	iceData.damage = 100;
+	iceData.damage = 25;
 	iceData.size = { 150.f, 50.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };

@@ -73,4 +73,5 @@ protected:
 	f32 m_strafeTimer;
 	f32 m_strafeDuration;
 	f32 m_strafeDirection;
+	f32 m_visualPivotOffset;
 };

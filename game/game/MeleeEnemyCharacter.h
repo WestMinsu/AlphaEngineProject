@@ -46,4 +46,5 @@ protected:
 
 	s32 m_attackSoundFrame;
 	bool m_hasPlayedAttackSound;
+
 };

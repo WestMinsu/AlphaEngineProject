@@ -93,7 +93,7 @@ void FireWormEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	}
 
 	m_projectileData.speed = 800.0f;
-	m_projectileData.damage = 5;
+	m_projectileData.damage = 15;
 	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/Fire Worm/Sprites/Fire Ball/Move.png", nullptr, 6, SpriteSheetOrientation::HORIZONTAL, 0.1f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());

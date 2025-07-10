@@ -19,7 +19,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 500.0f;
-	m_attackRange = 100.0f;
+	m_attackRange = 150.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
@@ -37,6 +37,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt_monster.wav");
 	m_sfxDeath = LoadSoundAsset("Assets/Sounds/hurt_monster.wav");
 	m_attackSoundFrame = 10;
+	m_visualPivotOffset = 25.0f;
 }
 
 NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacter& prototype)
@@ -73,6 +74,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_sfxHurt = prototype.m_sfxHurt;
 	m_sfxDeath = prototype.m_sfxDeath;
 	m_attackSoundFrame = prototype.m_attackSoundFrame;
+	m_visualPivotOffset = prototype.m_visualPivotOffset;
 }
 
 NightBorneEnemyCharacter::~NightBorneEnemyCharacter()

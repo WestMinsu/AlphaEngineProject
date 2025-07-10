@@ -12,6 +12,7 @@
 enum class BGMTrack
 {
 	NONE,
+	MENU,
 	STAGE,
 	BOSS,
 	CLEAR,
