@@ -19,6 +19,9 @@ MainGameState::~MainGameState() {}
 
 void MainGameState::Init()
 {
+	m_isBossMusicPlaying = false;
+	GameManager::PlayBGM(BGMTrack::STAGE);
+
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
@@ -124,6 +127,12 @@ void MainGameState::Update(f32 dt)
 	{
 		spawn->Update(dt, m_Player.GetPosition(),  m_Enemies);
 	}
+
+	//if (!m_isBossMusicPlaying && m_Bosses[0]->IsAttackable())
+	//{
+	//	GameManager::PlayBGM(BGMTrack::BOSS);
+	//	m_isBossMusicPlaying = true;
+	//}
 
 	m_SpawnBoss.Update(dt, m_Player.GetPosition(), m_Bosses);
 

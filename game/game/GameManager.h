@@ -7,6 +7,16 @@
 #include "MainGameState.h"
 #include "GameClearState.h"
 #include "GameOverState.h"
+#include <map>
+
+enum class BGMTrack
+{
+	NONE,
+	STAGE,
+	BOSS,
+	CLEAR,
+	OVER
+};
 
 class GameManager
 {
@@ -33,13 +43,17 @@ public:
 	// Change m_nextState
 	static void ChangeState(GameState newGameState);
 	static void PlaySFX(AEAudio sfx, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
-	static void PlayBGM(AEAudio bgm, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
-
+	static void PlayBGM(BGMTrack track, float volume = 1.0f, float pitch = 1.0f, s32 loops = -1);
+	static void StopMusic();
 	static bool m_isGameRunning;
 private:
+	void LoadAllMusic();
+
 	const char* m_kTextTitle;
 
 	std::unique_ptr<AGameState> m_GameState;
 	static AEAudioGroup m_sfxGroup;
 	static AEAudioGroup m_bgmGroup;
+	static std::map<BGMTrack, AEAudio> m_bgmTracks;
+	static BGMTrack m_currentTrack;
 };

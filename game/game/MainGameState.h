@@ -64,4 +64,6 @@ private:
 	f32 m_feedbackTextR;
 	f32 m_feedbackTextG;
 	f32 m_feedbackTextB;
+
+	bool m_isBossMusicPlaying;
 };
