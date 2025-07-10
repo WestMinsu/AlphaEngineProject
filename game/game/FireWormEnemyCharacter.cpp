@@ -18,7 +18,7 @@ FireWormEnemyCharacter::FireWormEnemyCharacter()
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 800.0f;
+	m_detectionRange = 1600.0f;
 	m_attackRange = 300.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 3.0f;
