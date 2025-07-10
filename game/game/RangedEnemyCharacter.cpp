@@ -101,12 +101,12 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
 	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
+		if (checkCollisionTileMap(m_position, m_hitboxSize)) break;
 		m_position.y += std::copysign(1.0f, m_velocityY);
 		//std::cout << "Call Y" << std::endl;
 	}
 
-	if (checkCollisionTileMap(m_position, m_size))
+	if (checkCollisionTileMap(m_position, m_hitboxSize))
 	{
 		m_position.y -= std::copysign(1.0f, m_velocityY);
 		if (m_velocityY < 0) m_isGrounded = true;
@@ -114,12 +114,12 @@ void RangedEnemyCharacter::Update(f32 dt)
 
 	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
 	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
+		if (checkCollisionTileMap(m_position, m_hitboxSize)) break;
 		m_position.x += std::copysign(1.0f, m_velocityX);
 		//std::cout << "Call X" << std::endl;
 	}
 
-	if (checkCollisionTileMap(m_position, m_size))
+	if (checkCollisionTileMap(m_position, m_hitboxSize))
 	{
 		m_position.x -= std::copysign(1.0f, m_velocityX);
 	}
