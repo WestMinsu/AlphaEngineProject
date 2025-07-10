@@ -247,7 +247,8 @@ void MainGameState::Update(f32 dt)
 
 	if (m_Player.GetPosition().x > xCam)
 	{
-		xCam = m_Player.GetPosition().x;
+		//xCam = m_Player.GetPosition().x;
+		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
 		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
 		AEGfxSetCamPosition(xCam, 0.f);
 	}

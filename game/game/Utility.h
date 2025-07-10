@@ -6,3 +6,4 @@ AEVec2 GetNormalizedCoords(f32 x, f32 y);
 void InitUtilityMeshes();
 void FreeUtilityMeshes();
 bool CheckAABBCollision(const AEVec2& pos1, const AEVec2& size1, const AEVec2& pos2, const AEVec2& size2);
+float MoveInterpolation(f32 start, f32 destin, f32 ratio);
