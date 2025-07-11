@@ -7,6 +7,7 @@ GameClearState::~GameClearState() {}
 
 void GameClearState::Init()
 {
+	GameManager::PlayBGM(BGMTrack::CLEAR);
 }
 
 void GameClearState::Update(f32 dt)

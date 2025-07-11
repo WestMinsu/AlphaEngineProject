@@ -5,7 +5,10 @@
 GameOverState::GameOverState() {}
 GameOverState::~GameOverState() {}
 
-void GameOverState::Init() {}
+void GameOverState::Init() 
+{
+	GameManager::PlayBGM(BGMTrack::OVER);
+}
 
 void GameOverState::Update(f32 dt)
 {

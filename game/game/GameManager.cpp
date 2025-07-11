@@ -1,9 +1,14 @@
 #include "GameManager.h"
 #include "Utility.h"
+#include "AssetManager.h"
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
 bool GameManager::m_isGameRunning = true;
+AEAudioGroup GameManager::m_sfxGroup;
+AEAudioGroup GameManager::m_bgmGroup;
+std::map<BGMTrack, AEAudio> GameManager::m_bgmTracks;
+BGMTrack GameManager::m_currentTrack = BGMTrack::NONE;
 
 GameManager::GameManager()
 {
@@ -21,10 +26,17 @@ GameManager::~GameManager()
 void GameManager::Init()
 {
 	AESysSetWindowTitle(m_kTextTitle);
-	
+
 	m_GameState = std::move(std::make_unique<IntroState>());
 	m_GameState->Init();
 	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+
+	m_sfxGroup = AEAudioCreateGroup();
+	m_bgmGroup = AEAudioCreateGroup();
+	LoadAllMusic();
+	m_GameState = std::move(std::make_unique<IntroState>());
+	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+
 	InitUtilityMeshes();
 	AESysReset();
 }
@@ -76,4 +88,42 @@ void GameManager::Update(f32 dt)
 void GameManager::ChangeState(GameState newGameState)
 {
 	GameManager::m_nextState = newGameState;
+}
+
+void GameManager::PlaySFX(AEAudio sfx, float volume, float pitch, s32 loops)
+{
+	AEAudioPlay(sfx, m_sfxGroup, volume, pitch, loops);
+}
+
+void GameManager::LoadAllMusic()
+{
+	m_bgmTracks[BGMTrack::STAGE] = LoadSoundAsset("Assets/Sounds/Jeremy Blake - Powerup!.mp3");
+	m_bgmTracks[BGMTrack::MENU] = LoadSoundAsset("Assets/Sounds/Krayzius & Brainstorm - Virtual Boy.mp3");
+	m_bgmTracks[BGMTrack::BOSS] = LoadSoundAsset("Assets/Sounds/Kevin MacLeod - 8bit Dungeon Boss.mp3");
+	m_bgmTracks[BGMTrack::CLEAR] = LoadSoundAsset("Assets/Sounds/Kevin MacLeod - Pixelland.mp3");
+	m_bgmTracks[BGMTrack::OVER] = LoadSoundAsset("Assets/Sounds/Kubbi - Digestive biscuit.mp3");
+}
+
+void GameManager::PlayBGM(BGMTrack track, float volume, float pitch, s32 loops)
+{
+	if (m_currentTrack == track)
+		return;
+
+	AEAudioStopGroup(m_bgmGroup);
+
+	if (m_bgmTracks.count(track))
+	{
+		AEAudioPlay(m_bgmTracks[track], m_bgmGroup, 0.7f, 1.0f, -1);
+		m_currentTrack = track;
+	}
+	else
+	{
+		m_currentTrack = BGMTrack::NONE;
+	}
+}
+
+void GameManager::StopMusic()
+{
+	AEAudioStopGroup(m_bgmGroup);
+	m_currentTrack = BGMTrack::NONE;
 }

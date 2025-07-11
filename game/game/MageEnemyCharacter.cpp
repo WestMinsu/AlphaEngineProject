@@ -31,6 +31,12 @@ MageEnemyCharacter::MageEnemyCharacter()
 	m_strafeTimer = 0.0f;
 	m_strafeDuration = 0.0f;
 	m_strafeDirection = 1.0f;
+
+	m_sfxAttack = LoadSoundAsset("Assets/Sounds/attack_monster.wav");
+	m_sfxHurt = LoadSoundAsset("Assets/Sounds/hurt3_monster.wav");
+	m_sfxDeath = LoadSoundAsset("Assets/Sounds/die2_monster.wav");
+	m_attackSoundFrame = 11;
+	m_visualPivotOffset = 20.0f;
 }
 
 MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
@@ -58,6 +64,12 @@ MageEnemyCharacter::MageEnemyCharacter(const MageEnemyCharacter& prototype)
 
 	m_projectileData = prototype.m_projectileData;
 	killScore = 1500;
+
+	m_sfxAttack = prototype.m_sfxAttack;
+	m_sfxHurt = prototype.m_sfxHurt;
+	m_sfxDeath = prototype.m_sfxDeath;
+	m_attackSoundFrame = prototype.m_attackSoundFrame;
+	m_visualPivotOffset = prototype.m_visualPivotOffset;
 }
 
 MageEnemyCharacter::~MageEnemyCharacter() {}
@@ -77,7 +89,7 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	}
 
 	m_projectileData.speed = 800.0f;
-	m_projectileData.damage = 5;
+	m_projectileData.damage = 10;
 	m_projectileData.size = { 150.f, 50.f };
 	m_projectileData.animData = { "Assets/MagicArrow/enemyarrow.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	m_projectileData.animData.pTexture = LoadImageAsset(m_projectileData.animData.texturePath.c_str());
@@ -85,31 +97,10 @@ void MageEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animation.Play(CharacterAnimationState::IDLE, m_animDataMap.at(CharacterAnimationState::IDLE));
 }
 
-void MageEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
-{
-	if (m_currentAnimState == CharacterAnimationState::DEATH)
-	{
-		return;
-	}
-
-	m_healthPoint -= damage;
-	std::cout << "Mage Enemy takes damage! HP: " << m_healthPoint << std::endl;
-	m_isDamageEffectActive = true;
-	m_damageEffectTimer = 0.0f;
-	m_isHurt = true;
-
-	if (m_healthPoint <= 0)
-	{
-		m_healthPoint = 0;
-		m_currentAnimState = CharacterAnimationState::DEATH;
-		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-	}
-}
-
 bool MageEnemyCharacter::isReadytoFireRange()
 {
 	return m_currentAnimState == CharacterAnimationState::RANGED_ATTACK
-	&& (m_animation.GetCurrentFrame() == 11 && !m_hasFiredProjectile);
+	&& (m_animation.GetCurrentFrame() == m_attackSoundFrame && !m_hasFiredProjectile);
 }
 
 MageEnemyCharacter* MageEnemyCharacter::Clone()

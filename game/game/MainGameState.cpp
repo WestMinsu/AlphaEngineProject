@@ -19,6 +19,9 @@ MainGameState::~MainGameState() {}
 
 void MainGameState::Init()
 {
+	m_isBossMusicPlaying = false;
+	GameManager::PlayBGM(BGMTrack::STAGE);
+
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
@@ -68,7 +71,7 @@ void MainGameState::Init()
 
 	m_pHealthBarFrame = LoadImageAsset("Assets/UI/healthbar_frame.png");
 	m_pHealthBar = LoadImageAsset("Assets/UI/healthbar_fill.png");
-
+	
 	m_feedbackText = "";
 	m_feedbackTextTimer = 0.0f;
 
@@ -124,9 +127,15 @@ void MainGameState::Update(f32 dt)
 
 	m_Player.Update(dt);
 
-	for (auto& spawn : m_Spawns)
+	for (auto spawn : m_Spawns)
 	{
 		spawn->Update(dt, m_Player.GetPosition(), m_moveTileMapCount, m_Enemies);
+	}
+
+	if (!m_isBossMusicPlaying && m_Bosses.size() > 0 && m_Bosses[0]->IsAttackable())
+	{
+		GameManager::PlayBGM(BGMTrack::BOSS);
+		m_isBossMusicPlaying = true;
 	}
 
 	m_SpawnBoss.Update(dt, m_Player.GetPosition(), m_moveTileMapCount, m_Bosses);
@@ -167,7 +176,7 @@ void MainGameState::Update(f32 dt)
 				&& CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				//std::cout << "collsion" << std::endl;
-				m_Player.TakeDamage(1, DamageType::NONE);
+				m_Player.TakeDamage(2, DamageType::NONE);
 				break;
 			}
 		}
@@ -189,8 +198,8 @@ void MainGameState::Update(f32 dt)
 			const AEVec2& playerPos = m_Player.GetPosition();
 			const AEVec2& playerSize = m_Player.GetSize();
 			CharacterDirection playerDir = m_Player.GetDirection();
-			const f32 offsetX_Ratio = 0.3f;
-			const f32 offsetY_Ratio = 0.1f;
+			const f32 offsetX_Ratio = -0.2f;
+			const f32 offsetY_Ratio = -0.15f;
 			spawnPos.x = playerPos.x + (playerDir == CharacterDirection::RIGHT ? playerSize.x * offsetX_Ratio : -playerSize.x * offsetX_Ratio);
 			spawnPos.y = playerPos.y + playerSize.y * offsetY_Ratio;
 			const ProjectileData& projData = m_Player.GetCurrentProjectileData();
@@ -240,8 +249,6 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
-	
-
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
@@ -267,7 +274,7 @@ void MainGameState::Update(f32 dt)
 
 		if (m_isNextStage)
 		{
-			if (m_moveTileMapCount < 2 )
+			if (m_moveTileMapCount < 2)
 			{
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth() * 2.f;
 			}
@@ -646,7 +653,7 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
 			(playerDir == CharacterDirection::LEFT && enemyPos.x < playerPos.x);
 
-		const float yTolerance = m_Player.GetHitboxSize().y;
+		const float yTolerance = m_Player.GetHitboxSize().y * 2;
 		float yDistance = std::abs(playerPos.y - enemyPos.y);
 
 		if (isInFront && yDistance <= yTolerance)

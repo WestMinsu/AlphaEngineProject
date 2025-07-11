@@ -28,9 +28,6 @@ public:
 	void Exit() override;
 
 private:
-	void DrawUI();
-	ACharacter* FindClosestEnemyInFront();
-	 
 	PlayerCharacter m_Player;
 
 	std::vector<ACharacter*> m_Enemies;
@@ -68,6 +65,11 @@ private:
 	f32 m_feedbackTextG;
 	f32 m_feedbackTextB;
 
+
+	bool m_isBossMusicPlaying;
+
 	// private Functions
+	void DrawUI();
+	ACharacter* FindClosestEnemyInFront();
 	bool isAllEnemiesDead();
 };
