@@ -12,8 +12,8 @@ PlayerCharacter::PlayerCharacter()
 	m_size = { 200.f, 200.f };
 	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
-	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.3f };
-	m_crouchingHitboxOffset = { 0.0f, -40.0f };
+	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.19f };
+	m_crouchingHitboxOffset = { 0.0f, -80.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
@@ -449,7 +449,7 @@ void PlayerCharacter::Draw()
 		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
 	}	
 
-	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
+	DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
 void PlayerCharacter::Destroy()
@@ -485,7 +485,7 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 
 	m_healthPoint -= damage;
-	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
+	//std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
 
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
@@ -558,11 +558,11 @@ void PlayerCharacter::BuyMagic(DamageType type)
 		else
 			m_weaponUseCounts[type] += 10;
 
-		std::cout << "Ammo purchased!" << std::endl;
+		//std::cout << "Ammo purchased!" << std::endl;
 	}
 	else
 	{
-		std::cout << "Not enough score!" << std::endl;
+		//std::cout << "Not enough score!" << std::endl;
 	}
 }
 
@@ -573,4 +573,13 @@ const AEVec2& PlayerCharacter::GetHitboxSize() const
 		return m_crouchingHitboxSize;
 	}
 	return m_hitboxSize;
+}
+
+const AEVec2& PlayerCharacter::GetHitboxOffset() const
+{
+	if (m_isCrouching)
+	{
+		return m_crouchingHitboxOffset;
+	}
+	return m_hitboxOffset;
 }

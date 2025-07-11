@@ -75,6 +75,7 @@ public:
 	void AddScore(s32 amount);
 	void BuyMagic(DamageType type);
 	const AEVec2& GetHitboxSize() const override;
+	const AEVec2& GetHitboxOffset() const override;
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
