@@ -8,18 +8,25 @@ AssetManager::AssetManager()
 
 AssetManager::~AssetManager()
 {
-	for (auto& [key, ptr] : m_imageAssets) 
+
+}
+
+void AssetManager::Destroy()
+{
+	for (auto& [key, ptr] : m_imageAssets)
 	{
 		AEGfxTextureUnload(ptr);
 	}
+	m_imageAssets.clear();
 
-	for (auto& [key, ptr] : m_soundAssets ) 
+	for (auto& [key, audio] : m_soundAssets)
 	{
-		AEAudioUnloadAudio(ptr);
+		AEAudioUnloadAudio(audio);
 	}
+	m_soundAssets.clear();
 }
 
-AEGfxTexture* LoadImageAsset(std::string file)
+AEGfxTexture* LoadImageAsset(const std::string& file)
 {
 	if (assetManager.m_imageAssets.find(file) == assetManager.m_imageAssets.end())
 	{
@@ -29,12 +36,17 @@ AEGfxTexture* LoadImageAsset(std::string file)
 	return assetManager.m_imageAssets.find(file)->second;
 }
 
-AEAudio LoadSoundAsset(std::string file)
+AEAudio* LoadSoundAsset(const std::string& file)
 {
 	if (assetManager.m_soundAssets.find(file) == assetManager.m_soundAssets.end())
 	{
 		assetManager.m_soundAssets[file] = AEAudioLoadMusic(file.c_str());
 	}
 
-	return assetManager.m_soundAssets.find(file)->second;
+	return &assetManager.m_soundAssets.find(file)->second;
+}
+
+AssetManager& GetAssetManager()
+{
+	return assetManager;
 }

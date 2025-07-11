@@ -55,6 +55,6 @@ private:
 	std::unique_ptr<AGameState> m_GameState;
 	static AEAudioGroup m_sfxGroup;
 	static AEAudioGroup m_bgmGroup;
-	static std::map<BGMTrack, AEAudio> m_bgmTracks;
+	static std::map<BGMTrack, AEAudio*> m_bgmTracks;
 	static BGMTrack m_currentTrack;
 };

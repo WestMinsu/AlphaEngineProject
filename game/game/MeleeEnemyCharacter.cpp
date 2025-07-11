@@ -154,7 +154,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	if (m_currentAIState == EnemyAIState::ATTACK && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() >= m_attackSoundFrame)
 	{
-		GameManager::PlaySFX(m_sfxAttack);
+		GameManager::PlaySFX(*m_sfxAttack);
 		m_hasPlayedAttackSound = true;
 	}
 
@@ -294,13 +294,13 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
-	GameManager::PlaySFX(m_sfxHurt, 1.3f, 1.0f, 0);
+	GameManager::PlaySFX(*m_sfxHurt, 1.3f, 1.0f, 0);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-		GameManager::PlaySFX(m_sfxDeath);
+		GameManager::PlaySFX(*m_sfxDeath);
 	}
 }

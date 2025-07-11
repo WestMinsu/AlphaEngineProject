@@ -7,7 +7,7 @@ s8 GameManager::m_font;
 bool GameManager::m_isGameRunning = true;
 AEAudioGroup GameManager::m_sfxGroup;
 AEAudioGroup GameManager::m_bgmGroup;
-std::map<BGMTrack, AEAudio> GameManager::m_bgmTracks;
+std::map<BGMTrack, AEAudio*> GameManager::m_bgmTracks;
 BGMTrack GameManager::m_currentTrack = BGMTrack::NONE;
 
 GameManager::GameManager()
@@ -82,6 +82,7 @@ void GameManager::Update(f32 dt)
 		AESysFrameEnd();
 	}
 	m_GameState->Exit();
+	GetAssetManager().Destroy();
 	return;
 }
 
@@ -113,7 +114,7 @@ void GameManager::PlayBGM(BGMTrack track, float volume, float pitch, s32 loops)
 
 	if (m_bgmTracks.count(track))
 	{
-		AEAudioPlay(m_bgmTracks[track], m_bgmGroup, 0.7f, 1.0f, -1);
+		AEAudioPlay(*m_bgmTracks[track], m_bgmGroup, 0.7f, 1.0f, -1);
 		m_currentTrack = track;
 	}
 	else

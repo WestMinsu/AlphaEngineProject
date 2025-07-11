@@ -213,7 +213,7 @@ void PlayerCharacter::Update(f32 dt)
 
 	if (m_isMeleeAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 4)
 	{
-		GameManager::PlaySFX(m_sfxMeleeAttack);
+		GameManager::PlaySFX(*m_sfxMeleeAttack);
 		m_hasPlayedAttackSound = true;
 	}
 
@@ -223,13 +223,13 @@ void PlayerCharacter::Update(f32 dt)
 		switch (m_currentWeapon)
 		{
 		case DamageType::FIRE:
-			GameManager::PlaySFX(m_sfxFireAttack);
+			GameManager::PlaySFX(*m_sfxFireAttack);
 			break;
 		case DamageType::ICE:
-			GameManager::PlaySFX(m_sfxIceAttack);
+			GameManager::PlaySFX(*m_sfxIceAttack);
 			break;
 		case DamageType::LIGHTNING:
-			GameManager::PlaySFX(m_sfxLightningAttack);
+			GameManager::PlaySFX(*m_sfxLightningAttack);
 			break;
 		}
 		m_hasPlayedAttackSound = true;
@@ -470,14 +470,14 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
-	GameManager::PlaySFX(m_sfxHurt);
+	GameManager::PlaySFX(*m_sfxHurt);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-		GameManager::PlaySFX(m_sfxDeath);
+		GameManager::PlaySFX(*m_sfxDeath);
 
 	}
 }
