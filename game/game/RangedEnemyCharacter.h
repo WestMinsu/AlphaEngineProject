@@ -55,4 +55,8 @@ protected:
 
 	s32 m_attackSoundFrame;
 	bool m_hasPlayedAttackSound;
+
+	AEVec2 m_prevPosition;
+	f32 m_stuckTimer;
+	const float m_jumpStrength = 500.f;
 };

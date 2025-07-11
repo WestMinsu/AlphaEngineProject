@@ -22,6 +22,7 @@ enum class CharacterAnimationState
 	IDLE,
 	WALK,
 	JUMP,
+	CROUCH,
 	MELEE_ATTACK,
 	RANGED_ATTACK,
 	DASH,

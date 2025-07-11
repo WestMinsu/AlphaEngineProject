@@ -12,6 +12,8 @@ PlayerCharacter::PlayerCharacter()
 	m_size = { 200.f, 200.f };
 	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
+	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.3f };
+	m_crouchingHitboxOffset = { 0.0f, -40.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
@@ -66,6 +68,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
@@ -139,6 +142,17 @@ void PlayerCharacter::Update(f32 dt)
 	}
 
 	bool isAttacking = m_isMeleeAttacking || m_isSkillAttacking;
+
+	if (AEInputCheckCurr(AEVK_DOWN) && m_isGrounded && !isAttacking && !m_isDashing)
+	{
+		m_isCrouching = true;
+	}
+	else
+	{
+		m_isCrouching = false;
+	}
+
+	bool isBusy = isAttacking || m_isCrouching;
 
 	if (AEInputCheckTriggered(AEVK_Q))
 	{
@@ -218,7 +232,6 @@ void PlayerCharacter::Update(f32 dt)
 	}
 
 	if (m_isSkillAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 5) 
-
 	{
 		switch (m_currentWeapon)
 		{
@@ -353,6 +366,8 @@ void PlayerCharacter::Update(f32 dt)
 		desiredState = CharacterAnimationState::HURT;
 	else if (!m_isGrounded)
 		desiredState = CharacterAnimationState::JUMP;
+	else if (m_isCrouching)
+		desiredState = CharacterAnimationState::CROUCH;
 	else
 	{
 		if (m_velocityX == 0.0f)
@@ -544,4 +559,13 @@ void PlayerCharacter::BuyMagic(DamageType type)
 	{
 		std::cout << "Not enough score!" << std::endl;
 	}
+}
+
+const AEVec2& PlayerCharacter::GetHitboxSize() const
+{
+	if (m_isCrouching)
+	{
+		return m_crouchingHitboxSize;
+	}
+	return m_hitboxSize;
 }

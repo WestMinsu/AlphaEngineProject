@@ -55,4 +55,8 @@ protected:
 	std::vector<AttackHitbox> m_meleeHitboxes;
 	bool m_hasHitPlayerThisAttack;
 	bool m_isMeleeAttackHitboxActive;
+
+	AEVec2 m_prevPosition;
+	f32 m_stuckTimer;
+	const float m_jumpStrength = 500.f; 
 };

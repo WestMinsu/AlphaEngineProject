@@ -88,6 +88,8 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		m_isHurt = false;
 	}
 
+	m_prevPosition = m_position;
+
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
 	float xDistanceToPlayer = std::abs(m_position.x - playerPos.x);
@@ -231,6 +233,21 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	m_position = { hitboxPosition.x - m_hitboxOffset.x, hitboxPosition.y - m_hitboxOffset.y };
 
+	float movedDistance = std::abs(m_position.x - m_prevPosition.x);
+	if (m_isGrounded && m_currentAIState == EnemyAIState::CHASE && m_velocityX != 0.f && movedDistance < 0.1f)
+	{
+		m_stuckTimer += dt;
+		if (m_stuckTimer > 0.01f)
+		{
+			m_velocityY = m_jumpStrength;
+			m_isGrounded = false;
+			m_stuckTimer = 0.0f;
+		}
+	}
+	else
+	{
+		m_stuckTimer = 0.0f; 
+	}
 
 	if (m_currentAnimState != desiredAnimState)
 	{
