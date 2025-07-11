@@ -125,8 +125,8 @@ bool checkCollisionTileMap(AEVec2 position, AEVec2 size)
 
 	int playerLeft = (int)(position.x - (size.x / 4.f) + kHalfWindowWidth);
 	int playerRight = (int)(position.x + (size.x / 4.f) + kHalfWindowWidth);
-	int playerTop = position.y + kHalfWindowHeight;
-	int playerBottom = position.y - (size.y * 1 / 2.f) + kHalfWindowHeight;
+	int playerTop = position.y + (size.y / 2.f) + kHalfWindowHeight;
+	int playerBottom = position.y - (size.y / 2.f) + kHalfWindowHeight;
 
 	for (auto& tileMap : TileMaps) {
 		if (tileMap.m_offset.x > playerRight

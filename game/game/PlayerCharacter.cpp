@@ -265,11 +265,7 @@ void PlayerCharacter::Update(f32 dt)
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
 
-	if (checkCollisionTileMap(groundCheckPos, m_size))
-	{
-		m_isGrounded = true;
-	}
-	else
+	if (!checkCollisionTileMap(groundCheckPos, m_size))
 	{
 		m_isGrounded = false;
 	}
@@ -279,16 +275,17 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY += m_gravity * dt;
 	}
 
-	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+	AEVec2 hitboxPosition{ m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y };
+	AEVec2 tempPosition{ hitboxPosition.x + m_velocityX * dt, hitboxPosition.y + m_velocityY * dt };
 
-	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	while (m_velocityY >= 0 ? hitboxPosition.y < tempPosition.y : hitboxPosition.y > tempPosition.y)
 	{
-		if (checkCollisionTileMap(m_position, m_hitboxSize)) break;
-		m_position.y += std::copysign(1.0f, m_velocityY);
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+		hitboxPosition.y += std::copysign(1.0f, m_velocityY);
 	}
-	if (checkCollisionTileMap(m_position, m_hitboxSize))
+	if ( checkCollisionTileMap(hitboxPosition, m_hitboxSize))
 	{
-		m_position.y -= std::copysign(1.0f, m_velocityY);
+		hitboxPosition.y -= std::copysign(1.0f, m_velocityY);
 		if (m_velocityY < 0)
 		{
 			m_isGrounded = true;
@@ -296,16 +293,18 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY = 0;
 	}
 
-	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	while (m_velocityX >= 0 ? hitboxPosition.x < tempPosition.x : hitboxPosition.x > tempPosition.x)
 	{
-		if (checkCollisionTileMap(m_position, m_hitboxSize)) break;
-		m_position.x += std::copysign(1.0f, m_velocityX);
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+		hitboxPosition.x += std::copysign(1.0f, m_velocityX);
 	}
-	if (checkCollisionTileMap(m_position, m_hitboxSize))
+	if (checkCollisionTileMap(hitboxPosition, m_hitboxSize))
 	{
-		m_position.x -= std::copysign(1.0f, m_velocityX);
+		hitboxPosition.x -= std::copysign(1.0f, m_velocityX);
 		m_velocityX = 0;
 	}
+
+	m_position = { hitboxPosition.x - m_hitboxOffset.x, hitboxPosition.y - m_hitboxOffset.y };
 
 	CharacterAnimationState desiredState;
 	if (m_isMeleeAttacking)
