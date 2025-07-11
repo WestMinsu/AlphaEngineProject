@@ -17,7 +17,7 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 1000.0f;
+	m_detectionRange = 800.0f;
 	m_attackRange = 100.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
@@ -95,11 +95,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
 
-	if (checkCollisionTileMap(groundCheckPos, m_size))
-	{
-		m_isGrounded = true;
-	}
-	else
+	if (!checkCollisionTileMap(groundCheckPos, m_size))
 	{
 		m_isGrounded = false;
 	}
@@ -107,33 +103,6 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	if (!m_isGrounded)
 	{
 		m_velocityY += m_gravity * dt;
-	}
-	
-	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
-
-	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.y += std::copysign(1.0f, m_velocityY);
-		//std::cout << "Call Y" << std::endl;
-	}
-
-	if (checkCollisionTileMap(m_position, m_size))
-	{
-		m_position.y -= std::copysign(1.0f, m_velocityY);
-		if (m_velocityY < 0) m_isGrounded = true;
-	}
-
-	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
-	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.x += std::copysign(1.0f, m_velocityX);
-		//std::cout << "Call X" << std::endl;
-	}
-
-	if (checkCollisionTileMap(m_position, m_size))
-	{
-		m_position.x -= std::copysign(1.0f, m_velocityX);
 	}
 
 	switch (m_currentAIState)
@@ -228,7 +197,40 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		desiredAnimState = CharacterAnimationState::HURT;
 	}
 
-	m_position.x += m_velocityX * dt;
+	//m_position.x += m_velocityX * dt;
+
+	AEVec2 hitboxPosition{ m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y };
+	AEVec2 tempPosition{ hitboxPosition.x + m_velocityX * dt, hitboxPosition.y + m_velocityY * dt };
+
+	while (m_velocityY >= 0 ? hitboxPosition.y < tempPosition.y : hitboxPosition.y > tempPosition.y)
+	{
+		//if (checkCollisionTileMap(m_position, m_size)) break;
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+
+		hitboxPosition.y += std::copysign(1.0f, m_velocityY);
+		//std::cout << "Call Y" << std::endl;
+	}
+
+	if (checkCollisionTileMap(hitboxPosition, m_hitboxSize))
+	{
+		hitboxPosition.y -= std::copysign(1.0f, m_velocityY);
+		if (m_velocityY < 0) m_isGrounded = true;
+	}
+
+	while (m_velocityX >= 0 ? hitboxPosition.x < tempPosition.x : hitboxPosition.x > tempPosition.x)
+	{
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+		hitboxPosition.x += std::copysign(1.0f, m_velocityX);
+		//std::cout << "Call X" << std::endl;
+	}
+
+	if (checkCollisionTileMap(hitboxPosition, m_hitboxSize))
+	{
+		hitboxPosition.x -= std::copysign(1.0f, m_velocityX);
+	}
+
+	m_position = { hitboxPosition.x - m_hitboxOffset.x, hitboxPosition.y - m_hitboxOffset.y };
+
 
 	if (m_currentAnimState != desiredAnimState)
 	{

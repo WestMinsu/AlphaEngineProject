@@ -118,12 +118,12 @@ void MainGameState::Update(f32 dt)
 		tm.Update(dt);
 	}
 
-	if (AEInputCheckTriggered(AEVK_Q))
-		m_Player.BuyMagic(DamageType::FIRE);
-	if (AEInputCheckTriggered(AEVK_W))
-		m_Player.BuyMagic(DamageType::ICE);
-	if (AEInputCheckTriggered(AEVK_E))
-		m_Player.BuyMagic(DamageType::LIGHTNING);
+	//if (AEInputCheckTriggered(AEVK_Q))
+	//	m_Player.BuyMagic(DamageType::FIRE);
+	//if (AEInputCheckTriggered(AEVK_W))
+	//	m_Player.BuyMagic(DamageType::ICE);
+	//if (AEInputCheckTriggered(AEVK_E))
+	//	m_Player.BuyMagic(DamageType::LIGHTNING);
 
 	m_Player.Update(dt);
 
@@ -279,9 +279,11 @@ void MainGameState::Update(f32 dt)
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
+	//if (m_Player.GetPosition().x > xCam)
 	if (m_Player.GetPosition().x > xCam)
 	{
-		xCam = m_Player.GetPosition().x;
+		//xCam = m_Player.GetPosition().x;
+		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
 		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
 		AEGfxSetCamPosition(xCam, 0.f);
 	}
