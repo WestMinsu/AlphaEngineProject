@@ -175,14 +175,14 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-	if (AEInputCheckCurr(AEVK_A) && !isAttacking)
+	if (AEInputCheckCurr(AEVK_A) && !isBusy)
 	{
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 		m_hasPlayedAttackSound = false;
 	}
 
-	if (AEInputCheckCurr(AEVK_S) && !isAttacking && (m_weaponUseCounts.at(m_currentWeapon) > 0))
+	if (AEInputCheckCurr(AEVK_S) && !isBusy && (m_weaponUseCounts.at(m_currentWeapon) > 0))
 	{
 		m_isSkillAttacking = true;
 		m_hasFiredProjectile = false;
@@ -280,22 +280,27 @@ void PlayerCharacter::Update(f32 dt)
 	else
 	{
 		float currentMaxSpeed = m_characterSpeed;
-		if (m_isGrounded)
+		if (!m_isCrouching)
 		{
-			if (AEInputCheckCurr(AEVK_LEFT))
-				m_velocityX = -currentMaxSpeed;
-			else if (AEInputCheckCurr(AEVK_RIGHT))
-				m_velocityX = currentMaxSpeed;
+			if (m_isGrounded)
+			{
+				if (AEInputCheckCurr(AEVK_LEFT))
+					m_velocityX = -currentMaxSpeed;
+				else if (AEInputCheckCurr(AEVK_RIGHT))
+					m_velocityX = currentMaxSpeed;
+				else
+					m_velocityX = 0.0f;
+			}
 			else
-				m_velocityX = 0.0f;
+			{
+				if (AEInputCheckCurr(AEVK_LEFT))
+					m_velocityX -= m_airAcceleration * dt;
+				else if (AEInputCheckCurr(AEVK_RIGHT))
+					m_velocityX += m_airAcceleration * dt;
+			}
 		}
 		else
-		{
-			if (AEInputCheckCurr(AEVK_LEFT))
-				m_velocityX -= m_airAcceleration * dt;
-			else if (AEInputCheckCurr(AEVK_RIGHT))
-				m_velocityX += m_airAcceleration * dt;
-		}
+			m_velocityX = 0.0f;
 
 		if (m_velocityX > currentMaxSpeed)
 			m_velocityX = currentMaxSpeed;
@@ -444,7 +449,7 @@ void PlayerCharacter::Draw()
 		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
 	}	
 
-	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
+	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
 void PlayerCharacter::Destroy()
