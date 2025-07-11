@@ -155,3 +155,8 @@ bool CheckAABBCollision(const AEVec2& pos1, const AEVec2& size1, const AEVec2& p
     return false;
 }
 
+float MoveInterpolation(f32 start, f32 destin, f32 ratio)
+{
+    return start + (destin - start)*ratio;
+}
+

@@ -18,7 +18,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
-	m_detectionRange = 500.0f;
+	m_detectionRange = 1000.0f;
 	m_attackRange = 150.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;

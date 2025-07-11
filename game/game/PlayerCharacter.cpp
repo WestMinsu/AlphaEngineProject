@@ -140,12 +140,12 @@ void PlayerCharacter::Update(f32 dt)
 
 	bool isAttacking = m_isMeleeAttacking || m_isSkillAttacking;
 
-	if (AEInputCheckTriggered(AEVK_1))
+	if (AEInputCheckTriggered(AEVK_Q))
 	{
 		m_currentWeaponIndex = 0;
 		m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 	}
-	if (AEInputCheckTriggered(AEVK_2))
+	if (AEInputCheckTriggered(AEVK_W))
 	{
 		if (m_availableWeapons.size() > 1)
 		{
@@ -153,7 +153,7 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-	if (AEInputCheckTriggered(AEVK_3))
+	if (AEInputCheckTriggered(AEVK_E))
 	{
 		if (m_availableWeapons.size() > 2)
 		{
@@ -174,17 +174,41 @@ void PlayerCharacter::Update(f32 dt)
 		m_hasFiredProjectile = false;
 		m_hasPlayedAttackSound = false;
 	}
-	if (AEInputCheckTriggered(AEVK_LSHIFT) && !m_isDashing && !isAttacking)
+	if ((AEInputCheckTriggered(AEVK_LSHIFT) 
+		|| AEInputCheckTriggered(AEVK_Z)
+		|| AEInputCheckTriggered(AEVK_F)
+		)
+		&& !m_isDashing && !isAttacking)
 	{
 		m_isDashing = true;
 
 		m_isDamageEffectActive = true;
 		m_damageEffectTimer = 0.0f;
 	}
-	if (AEInputCheckTriggered(AEVK_SPACE) && m_isGrounded && !isAttacking && !m_isDashing)
+	if ((AEInputCheckTriggered(AEVK_SPACE) 
+		|| AEInputCheckTriggered(AEVK_UP)) 
+		&& m_isGrounded && !isAttacking && !m_isDashing)
 	{
 		m_isGrounded = false;
 		m_velocityY = m_jumpStrength;
+	}
+
+	if (AEInputCheckTriggered(AEVK_D))
+	{
+		switch (m_currentWeapon)
+		{
+		case DamageType::FIRE:
+			BuyMagic(DamageType::FIRE);
+			break;
+		case DamageType::ICE:
+			BuyMagic(DamageType::ICE);
+			break;
+		case DamageType::LIGHTNING:
+			BuyMagic(DamageType::LIGHTNING);
+			break;
+		default:
+			break;
+		}
 	}
 
 	if (m_isMeleeAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 4)
@@ -194,6 +218,7 @@ void PlayerCharacter::Update(f32 dt)
 	}
 
 	if (m_isSkillAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 5) 
+
 	{
 		switch (m_currentWeapon)
 		{
@@ -276,11 +301,7 @@ void PlayerCharacter::Update(f32 dt)
 	AEVec2 groundCheckPos = m_position;
 	groundCheckPos.y -= 1.0f;
 
-	if (checkCollisionTileMap(groundCheckPos, m_size))
-	{
-		m_isGrounded = true;
-	}
-	else
+	if (!checkCollisionTileMap(groundCheckPos, m_size))
 	{
 		m_isGrounded = false;
 	}
@@ -290,16 +311,17 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY += m_gravity * dt;
 	}
 
-	AEVec2 tempPosition{ m_position.x + m_velocityX * dt, m_position.y + m_velocityY * dt };
+	AEVec2 hitboxPosition{ m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y };
+	AEVec2 tempPosition{ hitboxPosition.x + m_velocityX * dt, hitboxPosition.y + m_velocityY * dt };
 
-	while (m_velocityY >= 0 ? m_position.y < tempPosition.y : m_position.y > tempPosition.y)
+	while (m_velocityY >= 0 ? hitboxPosition.y < tempPosition.y : hitboxPosition.y > tempPosition.y)
 	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.y += std::copysign(1.0f, m_velocityY);
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+		hitboxPosition.y += std::copysign(1.0f, m_velocityY);
 	}
-	if (checkCollisionTileMap(m_position, m_size))
+	if ( checkCollisionTileMap(hitboxPosition, m_hitboxSize))
 	{
-		m_position.y -= std::copysign(1.0f, m_velocityY);
+		hitboxPosition.y -= std::copysign(1.0f, m_velocityY);
 		if (m_velocityY < 0)
 		{
 			m_isGrounded = true;
@@ -307,16 +329,18 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY = 0;
 	}
 
-	while (m_velocityX >= 0 ? m_position.x < tempPosition.x : m_position.x > tempPosition.x)
+	while (m_velocityX >= 0 ? hitboxPosition.x < tempPosition.x : hitboxPosition.x > tempPosition.x)
 	{
-		if (checkCollisionTileMap(m_position, m_size)) break;
-		m_position.x += std::copysign(1.0f, m_velocityX);
+		if (checkCollisionTileMap(hitboxPosition, m_hitboxSize)) break;
+		hitboxPosition.x += std::copysign(1.0f, m_velocityX);
 	}
-	if (checkCollisionTileMap(m_position, m_size))
+	if (checkCollisionTileMap(hitboxPosition, m_hitboxSize))
 	{
-		m_position.x -= std::copysign(1.0f, m_velocityX);
+		hitboxPosition.x -= std::copysign(1.0f, m_velocityX);
 		m_velocityX = 0;
 	}
+
+	m_position = { hitboxPosition.x - m_hitboxOffset.x, hitboxPosition.y - m_hitboxOffset.y };
 
 	CharacterAnimationState desiredState;
 	if (m_isMeleeAttacking)
