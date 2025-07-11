@@ -107,12 +107,12 @@ private:
 
 	s32 m_score;
 
-	AEAudio m_sfxMeleeAttack;
-	AEAudio m_sfxFireAttack;
-	AEAudio m_sfxIceAttack;
-	AEAudio m_sfxLightningAttack;
-	AEAudio m_sfxHurt;
-	AEAudio m_sfxDeath;
+	AEAudio* m_sfxMeleeAttack;
+	AEAudio* m_sfxFireAttack;
+	AEAudio* m_sfxIceAttack;
+	AEAudio* m_sfxLightningAttack;
+	AEAudio* m_sfxHurt;
+	AEAudio* m_sfxDeath;
 
 	bool m_isCrouching;
 

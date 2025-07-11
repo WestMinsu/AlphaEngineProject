@@ -10,13 +10,18 @@ public:
 	AssetManager();
 	~AssetManager();
 
-	friend AEGfxTexture* LoadImageAsset(std::string);
-	friend AEAudio LoadSoundAsset(std::string);
+	friend AEGfxTexture* LoadImageAsset(const std::string&);
+	friend AEAudio* LoadSoundAsset(const std::string&);
+
+	void Destroy();
 
 private:
 	std::map<std::string, AEGfxTexture* > m_imageAssets;
+	
 	std::map<std::string, AEAudio > m_soundAssets;
 };
 
-AEGfxTexture* LoadImageAsset(std::string);
-AEAudio LoadSoundAsset(std::string);
+AEGfxTexture* LoadImageAsset(const std::string&);
+AEAudio* LoadSoundAsset(const std::string&);
+
+AssetManager& GetAssetManager();
