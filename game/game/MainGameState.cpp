@@ -81,6 +81,7 @@ void MainGameState::Init()
 
 	m_isNextStage = false;
 	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
+	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
 }
 
@@ -252,16 +253,22 @@ void MainGameState::Update(f32 dt)
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-	//if (m_Player.GetPosition().x > xCam)
-	if (m_Player.GetPosition().x > xCam)
+	//if (m_Player.GetPosition().x > xCam )
+	if (m_Player.GetPosition().x > m_clampCameraX.x)
 	{
-		//xCam = m_Player.GetPosition().x;
 		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
 		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
 		AEGfxSetCamPosition(xCam, 0.f);
 	}
+	else if(m_currentClampCameraXLeft < m_clampCameraX.x)
+	{
+		m_currentClampCameraXLeft = m_Player.GetPosition().x - kHalfWindowWidth;
+		xCam = std::clamp(xCam, m_currentClampCameraXLeft, m_clampCameraX.y);
+		AEGfxSetCamPosition(xCam, 0.f);
+	}
+	
 
-	std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
+	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 
 	if (isAllEnemiesDead() 
 		&& m_isNextStage)
@@ -275,13 +282,14 @@ void MainGameState::Update(f32 dt)
 		if (m_isNextStage)
 		{
 			if (m_moveTileMapCount < 2)
-			{
+			{	
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth() * 2.f;
 			}
 			else
 			{
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth();
 			}
+			m_clampCameraX.x += TileMaps[0].GetMapTotalWidth() * 2.f;
 			m_moveTileMapCount++;
 			m_isNextStage = false;
 		}

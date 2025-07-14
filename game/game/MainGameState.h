@@ -44,6 +44,7 @@ private:
 
 	bool m_isNextStage;
 	AEVec2 m_clampCameraX;
+	f32 m_currentClampCameraXLeft;
 	s32 m_moveTileMapCount;
 
 	AEGfxTexture* m_pUiSlot;      

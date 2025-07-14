@@ -41,11 +41,11 @@ void TileMap::Update(f32 dt)
 	f32 xCAM, yCAM;
 	AEGfxGetCamPosition(&xCAM, &yCAM);
 
-	if (m_offset.x + mapPixelWidth < xCAM && m_offsetCount < 2) {
+	if (m_offset.x + mapPixelWidth*2 - kHalfWindowWidth < xCAM && m_offsetCount < 2) {
 		m_offset.x += mapPixelWidth * 2;
 		m_offsetCount++;
 	}
-	//else if (m_offset.x > xCAM + mapPixelWidth) {
+	//else if (m_offset.x > xCAM + mapPixelWidth* && m_offsetCount > 0) {
 	//	m_offset.x -= mapPixelWidth * 2;
 	//	m_offsetCount--;
 	//}
