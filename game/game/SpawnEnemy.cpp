@@ -43,7 +43,6 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 	m_spawnCurrentTime += dt;
 	if (m_spawnTimes > 0 
 		&& m_spawnCurrentTime >= m_spawnTerm
-		//&& std::abs( m_position.x - positionPlayer.x ) < kWindowWidth
 		&& m_resetCount == moveTileMapCount
 		)
 	{
@@ -56,7 +55,8 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 
 	if (m_resetCount < moveTileMapCount
 		&& m_resetCount < 2
-		&& m_position.x + 2400 < positionPlayer.x) {
+		//&& m_position.x + 2400 < positionPlayer.x
+		&& 2 * 1856 + m_position.x - positionPlayer.x < kHalfWindowWidth + 100) {
 		Reset();
 	}
 }
