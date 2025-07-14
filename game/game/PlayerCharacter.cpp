@@ -47,6 +47,7 @@ PlayerCharacter::PlayerCharacter()
 	m_damageEffectDuration = 1.5f;
 	m_score = 0;
 	m_hasPlayedAttackSound = false;
+	m_dashCooldownTimer = 0.0f;
 }
 
 PlayerCharacter::~PlayerCharacter()
@@ -135,6 +136,11 @@ void PlayerCharacter::Update(f32 dt)
 		}
 	}
 
+	if (m_dashCooldownTimer > 0.f)
+	{
+		m_dashCooldownTimer -= dt;
+	}
+
 	if (m_isHurt && m_animation.IsFinished())
 	{
 		m_isHurt = false;
@@ -191,12 +197,13 @@ void PlayerCharacter::Update(f32 dt)
 		|| AEInputCheckTriggered(AEVK_Z)
 		|| AEInputCheckTriggered(AEVK_F)
 		)
-		&& !m_isDashing && !isAttacking)
+		&& !m_isDashing && !isBusy && m_dashCooldownTimer <= 0.f)
 	{
 		m_isDashing = true;
 
 		m_isDamageEffectActive = true;
 		m_damageEffectTimer = 0.0f;
+		m_dashCooldownTimer = m_dashCooldownDuration;
 	}
 	if ((AEInputCheckTriggered(AEVK_SPACE) 
 		|| AEInputCheckTriggered(AEVK_UP)) 

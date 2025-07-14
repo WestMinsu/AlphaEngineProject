@@ -203,6 +203,7 @@ void BossCharacter::Update(f32 dt)
 		{
 			m_currentAIState = BossAIState::LASER_BEAM;
 			m_laserAnimation.Play(CharacterAnimationState::LASER_SHEET, m_animDataMap.at(CharacterAnimationState::LASER_SHEET));
+			m_laserTargetPos = m_pPlayer->GetPosition();
 		}
 		break;
 	case BossAIState::LASER_BEAM:
@@ -340,7 +341,7 @@ void BossCharacter::Draw()
 		{
 			AEVec2 finalVisualPos = visualPos;
 			AEVec2 finalHitboxPos = hitboxPos;
-			float yDiff = m_pPlayer->GetPosition().y - m_position.y;
+			float yDiff = m_laserTargetPos.y - m_position.y;
 			if (yDiff > 150.f)
 			{
 				finalVisualPos.y += 100.f;

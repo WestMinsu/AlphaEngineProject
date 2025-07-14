@@ -120,4 +120,7 @@ private:
 	bool m_hasPlayedAttackSound;
 	AEVec2 m_crouchingHitboxSize;
 	AEVec2 m_crouchingHitboxOffset;
+
+	float m_dashCooldownTimer;
+	const float m_dashCooldownDuration = 1.5f;
 };
