@@ -32,11 +32,11 @@ public:
 	{ 
 		return m_healthPoint;
 	}	
-	const AEVec2& GetHitboxSize() const
+	virtual const AEVec2& GetHitboxSize() const
 	{
 		return m_hitboxSize;
 	}
-	const AEVec2& GetHitboxOffset() const
+	virtual const AEVec2& GetHitboxOffset() const
 	{
 		return m_hitboxOffset;
 	}

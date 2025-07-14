@@ -74,7 +74,8 @@ public:
 
 	void AddScore(s32 amount);
 	void BuyMagic(DamageType type);
-
+	const AEVec2& GetHitboxSize() const override;
+	const AEVec2& GetHitboxOffset() const override;
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -114,5 +115,9 @@ private:
 	AEAudio* m_sfxHurt;
 	AEAudio* m_sfxDeath;
 
+	bool m_isCrouching;
+
 	bool m_hasPlayedAttackSound;
+	AEVec2 m_crouchingHitboxSize;
+	AEVec2 m_crouchingHitboxOffset;
 };

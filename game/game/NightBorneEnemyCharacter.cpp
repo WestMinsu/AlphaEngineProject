@@ -19,7 +19,7 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter()
 	m_currentAIState = EnemyAIState::IDLE;
 	m_pPlayer = nullptr;
 	m_detectionRange = 1000.0f;
-	m_attackRange = 150.0f;
+	m_attackRange = 200.0f;
 	m_attackCooldownTimer = 0.0f;
 	m_attackCooldownDuration = 2.0f;
 
@@ -75,6 +75,11 @@ NightBorneEnemyCharacter::NightBorneEnemyCharacter(const NightBorneEnemyCharacte
 	m_sfxDeath = prototype.m_sfxDeath;
 	m_attackSoundFrame = prototype.m_attackSoundFrame;
 	m_visualPivotOffset = prototype.m_visualPivotOffset;
+
+	m_meleeHitboxes.clear();
+	m_meleeHitboxes.resize(12, { 0, 0 });
+	m_meleeHitboxes[9] = { {m_size.x * 0.4f, 0.f}, {m_size.x * 0.15f, m_size.y * 1.0f} };
+	m_meleeHitboxes[10] = { {m_size.x * 0.4f, 0.f}, {m_size.x * 0.15f, m_size.y * 0.3f} };
 }
 
 NightBorneEnemyCharacter::~NightBorneEnemyCharacter()

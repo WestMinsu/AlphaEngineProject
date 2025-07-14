@@ -40,6 +40,10 @@ MeleeEnemyCharacter::MeleeEnemyCharacter()
 	m_attackSoundFrame = 5;
 	m_hasPlayedAttackSound = false;
 	m_visualPivotOffset = 0.0f;
+
+	m_hasPlayedAttackSound = false;
+	m_hasHitPlayerThisAttack = false;
+	m_isMeleeAttackHitboxActive = false;
 }
 
 MeleeEnemyCharacter::~MeleeEnemyCharacter() 
@@ -58,10 +62,8 @@ void MeleeEnemyCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animation.Init();
 }
 
-
 void MeleeEnemyCharacter::Update(f32 dt)
 {
-
 	if (m_currentAnimState == CharacterAnimationState::DEATH)
 	{
 		m_animation.Update(dt);
@@ -85,6 +87,8 @@ void MeleeEnemyCharacter::Update(f32 dt)
 	{
 		m_isHurt = false;
 	}
+
+	m_prevPosition = m_position;
 
 	AEVec2 playerPos = m_pPlayer->GetPosition();
 	float distanceToPlayer = AEVec2Distance(&m_position, &playerPos);
@@ -116,6 +120,7 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		{
 			m_currentAIState = EnemyAIState::ATTACK;
 			m_hasPlayedAttackSound = false; 
+			m_hasHitPlayerThisAttack = false;
 		}
 		else if (xDistanceToPlayer < m_attackRange + 100.f) 
 		{
@@ -151,6 +156,8 @@ void MeleeEnemyCharacter::Update(f32 dt)
 		break;
 	}
 	}
+
+	m_isMeleeAttackHitboxActive = (m_currentAIState == EnemyAIState::ATTACK) && (m_animation.GetCurrentFrame() >= 5 && m_animation.GetCurrentFrame() <= 7);
 
 	if (m_currentAIState == EnemyAIState::ATTACK && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() >= m_attackSoundFrame)
 	{
@@ -226,6 +233,21 @@ void MeleeEnemyCharacter::Update(f32 dt)
 
 	m_position = { hitboxPosition.x - m_hitboxOffset.x, hitboxPosition.y - m_hitboxOffset.y };
 
+	float movedDistance = std::abs(m_position.x - m_prevPosition.x);
+	if (m_isGrounded && m_currentAIState == EnemyAIState::CHASE && m_velocityX != 0.f && movedDistance < 0.1f)
+	{
+		m_stuckTimer += dt;
+		if (m_stuckTimer > 0.01f)
+		{
+			m_velocityY = m_jumpStrength;
+			m_isGrounded = false;
+			m_stuckTimer = 0.0f;
+		}
+	}
+	else
+	{
+		m_stuckTimer = 0.0f; 
+	}
 
 	if (m_currentAnimState != desiredAnimState)
 	{
@@ -274,6 +296,15 @@ void MeleeEnemyCharacter::Draw()
 		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
 	else
 		m_animation.Draw(transform);
+
+	if (IsAttackHitboxActive())
+	{
+		const AttackHitbox& currentHitbox = GetCurrentMeleeHitbox();
+		AEVec2 hitboxPos;
+		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
+		hitboxPos.y = m_position.y + currentHitbox.offset.y;
+		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
+	}
 	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
@@ -303,4 +334,21 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
 		GameManager::PlaySFX(*m_sfxDeath);
 	}
+}
+
+bool MeleeEnemyCharacter::IsAttackHitboxActive() const
+{
+	if (m_currentAnimState == CharacterAnimationState::MELEE_ATTACK)
+		return true;
+	return false;
+}
+
+const AttackHitbox& MeleeEnemyCharacter::GetCurrentMeleeHitbox() const
+{
+	s32 currentFrame = m_animation.GetCurrentFrame();
+	if (currentFrame >= 0 && currentFrame < m_meleeHitboxes.size())
+	{
+		return m_meleeHitboxes[currentFrame];
+	}
+	return m_meleeHitboxes[0];
 }

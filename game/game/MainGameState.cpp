@@ -228,6 +228,33 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
+	for (auto* enemy : m_Enemies)
+	{
+		MeleeEnemyCharacter* meleeEnemy = dynamic_cast<MeleeEnemyCharacter*>(enemy);
+		if (meleeEnemy && meleeEnemy->GetHealth() > 0 && m_Player.GetHealth() > 0 && !m_Player.IsInvincible())
+		{
+			if (meleeEnemy->IsAttackHitboxActive() && !meleeEnemy->HasHitPlayerThisAttack())
+			{
+				const AttackHitbox& enemyHitbox = meleeEnemy->GetCurrentMeleeHitbox();
+				AEVec2 enemyPos = meleeEnemy->GetPosition();
+				CharacterDirection enemyDir = meleeEnemy->GetDirection();
+				AEVec2 hitboxPos;
+				hitboxPos.x = enemyPos.x + (enemyDir == CharacterDirection::RIGHT ? enemyHitbox.offset.x : -enemyHitbox.offset.x);
+				hitboxPos.y = enemyPos.y + enemyHitbox.offset.y;
+
+				AEVec2 playerHitboxPos = m_Player.GetPosition();
+				playerHitboxPos.x += m_Player.GetHitboxOffset().x;
+				playerHitboxPos.y += m_Player.GetHitboxOffset().y;
+
+				if (CheckAABBCollision(hitboxPos, enemyHitbox.size, playerHitboxPos, m_Player.GetHitboxSize()))
+				{
+					m_Player.TakeDamage(10, DamageType::NONE);
+					meleeEnemy->RegisterPlayerHit();
+				}
+			}
+		}
+	}
+
 	for (auto enemy : m_Enemies)
 	{
 		RangedEnemyCharacter* rangeEnemy = dynamic_cast<RangedEnemyCharacter*>(enemy);
@@ -299,12 +326,18 @@ void MainGameState::Update(f32 dt)
 	{
 		proj->Update(dt);
 
+		AEVec2 projHitboxPos = proj->GetPosition();
+		float dirMultiplier = (proj->GetVelocity().x >= 0) ? 1.0f : -1.0f;
+		projHitboxPos.x += proj->GetHitboxOffset().x * dirMultiplier;
+		projHitboxPos.y += proj->GetHitboxOffset().y;
+		const AEVec2& projHitboxSize = proj->GetHitboxSize();
+
 		for (auto boss : m_Bosses)
 		{
 			AEVec2 enemyHitboxPos = boss->GetPosition();
 			enemyHitboxPos.x += boss->GetHitboxOffset().x;
 			enemyHitboxPos.y += boss->GetHitboxOffset().y;
-			if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, boss->GetHitboxSize()))
+			if (CheckAABBCollision(projHitboxPos, projHitboxSize, enemyHitboxPos, boss->GetHitboxSize()))
 			{
 				bool wasAlive = !boss->IsDead();
 				boss->TakeDamage(proj->GetDamage(), proj->GetType());
@@ -324,7 +357,7 @@ void MainGameState::Update(f32 dt)
 				AEVec2 enemyHitboxPos = enemy->GetPosition();
 				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
 				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
-				if (CheckAABBCollision(proj->GetPosition(), proj->GetSize(), enemyHitboxPos, enemy->GetHitboxSize()))
+				if (CheckAABBCollision(projHitboxPos, projHitboxSize, enemyHitboxPos, enemy->GetHitboxSize()))
 				{
 					switch (enemy->GetElement())
 					{

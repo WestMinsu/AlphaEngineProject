@@ -32,6 +32,9 @@ void Projectile::Init(AEVec2 startPos, AEVec2 direction, const ProjectileData& d
 	m_velocity.x = direction.x * data.speed;
 	m_velocity.y = direction.y * data.speed;
 
+	m_hitboxSize = { data.size.x * 0.2f, data.size.y * 0.8f }; 
+	m_hitboxOffset = { data.size.x * 0.15f, 0.0f };
+
 	m_animation.Init();
 	m_animation.Play(CharacterAnimationState::IDLE, data.animData);
 }
@@ -68,7 +71,12 @@ void Projectile::Draw()
 	AEMtx33Concat(&transform, &translate, &transform);
 
 	m_animation.Draw(transform);
-	DrawHollowRect(m_position.x, m_position.y, m_size.x, m_size.y, 0.0f, 0.0f, 1.0f, 0.5f);
+	AEVec2 hitboxWorldPos;
+	float dirMultiplier = (m_velocity.x >= 0) ? 1.0f : -1.0f;
+	hitboxWorldPos.x = m_position.x + (m_hitboxOffset.x * dirMultiplier);
+	hitboxWorldPos.y = m_position.y + m_hitboxOffset.y;
+
+	DrawHollowRect(hitboxWorldPos.x, hitboxWorldPos.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 1.0f, 1.0f, 0.5f);
 }
 
 void Projectile::Destroy()

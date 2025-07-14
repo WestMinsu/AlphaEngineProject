@@ -76,6 +76,14 @@ WarriorEnemyCharacter::WarriorEnemyCharacter(const WarriorEnemyCharacter& protot
 	m_sfxDeath = prototype.m_sfxDeath;
 	m_attackSoundFrame = prototype.m_attackSoundFrame;
 	m_visualPivotOffset = prototype.m_visualPivotOffset;
+
+	m_meleeHitboxes.clear();
+	m_meleeHitboxes.resize(13, { 0, 0 });
+	m_meleeHitboxes[6] = { { 0.1f, 0.f }, { m_size.x * 1.0f, m_size.y * 0.45f } };
+	m_meleeHitboxes[7] = { { 0.1f, 0.f }, { m_size.x * 1.0f, m_size.y * 0.2f } };
+	m_meleeHitboxes[8] = { { 0.1f, 0.f }, { m_size.x * 1.0f, m_size.y * 0.25f } };
+	m_meleeHitboxes[9] = { {0.1f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
+	m_meleeHitboxes[10] = { { 0.1f, 0.f }, { m_size.x * 0.6f, m_size.y * 0.2f } };
 }
 
 WarriorEnemyCharacter::~WarriorEnemyCharacter()

@@ -12,6 +12,8 @@ PlayerCharacter::PlayerCharacter()
 	m_size = { 200.f, 200.f };
 	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
+	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.19f };
+	m_crouchingHitboxOffset = { 0.0f, -80.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
@@ -66,6 +68,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
+	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
@@ -75,7 +78,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData fireData;
 	fireData.speed = 1000.0f;
 	fireData.damage = 34;
-	fireData.size = { 150.f, 50.f };
+	fireData.size = { 200.f, 70.f };
 	fireData.animData = { "Assets/MagicArrow/fire.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	fireData.type = { DamageType::FIRE };
 	m_projectileDataMap[fireData.type] = fireData;
@@ -83,7 +86,7 @@ void PlayerCharacter::Init(AEVec2 position)
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
 	iceData.damage = 25;
-	iceData.size = { 150.f, 50.f };
+	iceData.size = { 200.f, 70.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };
 	m_projectileDataMap[iceData.type] = iceData;
@@ -140,6 +143,17 @@ void PlayerCharacter::Update(f32 dt)
 
 	bool isAttacking = m_isMeleeAttacking || m_isSkillAttacking;
 
+	if (AEInputCheckCurr(AEVK_DOWN) && m_isGrounded && !isAttacking && !m_isDashing)
+	{
+		m_isCrouching = true;
+	}
+	else
+	{
+		m_isCrouching = false;
+	}
+
+	bool isBusy = isAttacking || m_isCrouching;
+
 	if (AEInputCheckTriggered(AEVK_Q))
 	{
 		m_currentWeaponIndex = 0;
@@ -161,14 +175,14 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-	if (AEInputCheckCurr(AEVK_A) && !isAttacking)
+	if (AEInputCheckCurr(AEVK_A) && !isBusy)
 	{
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 		m_hasPlayedAttackSound = false;
 	}
 
-	if (AEInputCheckCurr(AEVK_S) && !isAttacking && (m_weaponUseCounts.at(m_currentWeapon) > 0))
+	if (AEInputCheckCurr(AEVK_S) && !isBusy && (m_weaponUseCounts.at(m_currentWeapon) > 0))
 	{
 		m_isSkillAttacking = true;
 		m_hasFiredProjectile = false;
@@ -218,7 +232,6 @@ void PlayerCharacter::Update(f32 dt)
 	}
 
 	if (m_isSkillAttacking && !m_hasPlayedAttackSound && m_animation.GetCurrentFrame() == 5) 
-
 	{
 		switch (m_currentWeapon)
 		{
@@ -267,22 +280,27 @@ void PlayerCharacter::Update(f32 dt)
 	else
 	{
 		float currentMaxSpeed = m_characterSpeed;
-		if (m_isGrounded)
+		if (!m_isCrouching)
 		{
-			if (AEInputCheckCurr(AEVK_LEFT))
-				m_velocityX = -currentMaxSpeed;
-			else if (AEInputCheckCurr(AEVK_RIGHT))
-				m_velocityX = currentMaxSpeed;
+			if (m_isGrounded)
+			{
+				if (AEInputCheckCurr(AEVK_LEFT))
+					m_velocityX = -currentMaxSpeed;
+				else if (AEInputCheckCurr(AEVK_RIGHT))
+					m_velocityX = currentMaxSpeed;
+				else
+					m_velocityX = 0.0f;
+			}
 			else
-				m_velocityX = 0.0f;
+			{
+				if (AEInputCheckCurr(AEVK_LEFT))
+					m_velocityX -= m_airAcceleration * dt;
+				else if (AEInputCheckCurr(AEVK_RIGHT))
+					m_velocityX += m_airAcceleration * dt;
+			}
 		}
 		else
-		{
-			if (AEInputCheckCurr(AEVK_LEFT))
-				m_velocityX -= m_airAcceleration * dt;
-			else if (AEInputCheckCurr(AEVK_RIGHT))
-				m_velocityX += m_airAcceleration * dt;
-		}
+			m_velocityX = 0.0f;
 
 		if (m_velocityX > currentMaxSpeed)
 			m_velocityX = currentMaxSpeed;
@@ -353,6 +371,8 @@ void PlayerCharacter::Update(f32 dt)
 		desiredState = CharacterAnimationState::HURT;
 	else if (!m_isGrounded)
 		desiredState = CharacterAnimationState::JUMP;
+	else if (m_isCrouching)
+		desiredState = CharacterAnimationState::CROUCH;
 	else
 	{
 		if (m_velocityX == 0.0f)
@@ -429,7 +449,7 @@ void PlayerCharacter::Draw()
 		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
 	}	
 
-	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 0.8f, 1.0f, 0.5f);
+	DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
 void PlayerCharacter::Destroy()
@@ -465,7 +485,7 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 
 	m_healthPoint -= damage;
-	std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
+	//std::cout << "Player takes damage! HP: " << m_healthPoint << std::endl;
 
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
@@ -538,10 +558,28 @@ void PlayerCharacter::BuyMagic(DamageType type)
 		else
 			m_weaponUseCounts[type] += 10;
 
-		std::cout << "Ammo purchased!" << std::endl;
+		//std::cout << "Ammo purchased!" << std::endl;
 	}
 	else
 	{
-		std::cout << "Not enough score!" << std::endl;
+		//std::cout << "Not enough score!" << std::endl;
 	}
+}
+
+const AEVec2& PlayerCharacter::GetHitboxSize() const
+{
+	if (m_isCrouching)
+	{
+		return m_crouchingHitboxSize;
+	}
+	return m_hitboxSize;
+}
+
+const AEVec2& PlayerCharacter::GetHitboxOffset() const
+{
+	if (m_isCrouching)
+	{
+		return m_crouchingHitboxOffset;
+	}
+	return m_hitboxOffset;
 }
