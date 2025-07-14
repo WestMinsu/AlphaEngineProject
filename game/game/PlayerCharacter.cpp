@@ -10,9 +10,9 @@ PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0, };
 	m_size = { 200.f, 200.f };
-	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
+	m_hitboxSize = { m_size.x * 0.10f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
-	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.19f };
+	m_crouchingHitboxSize = { m_size.x * 0.15f, m_size.y * 0.19f };
 	m_crouchingHitboxOffset = { 0.0f, -80.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
@@ -25,7 +25,7 @@ PlayerCharacter::PlayerCharacter()
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
-	m_jumpStrength = 800.0f;
+	m_jumpStrength = 730.0f;
 	m_isGrounded = false;
 
 	m_isMeleeAttacking = false;
@@ -68,10 +68,10 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, true };
+	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
+	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.03f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Hurt/hurt.png", nullptr, 2, SpriteSheetOrientation::HORIZONTAL, 0.2f, false };
 	
@@ -90,7 +90,6 @@ void PlayerCharacter::Init(AEVec2 position)
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };
 	m_projectileDataMap[iceData.type] = iceData;
-
 
 	for (auto& pair : m_animDataMap)
 	{
@@ -438,7 +437,7 @@ void PlayerCharacter::Draw()
 
 	if (m_healthPoint > 0)
 	{
-		float barWidth = m_hitboxSize.x;
+		float barWidth = m_hitboxSize.x * 2.0f;
 		float barHeight = 10.f;
 		float barOffsetY = m_hitboxSize.y / 2.0f; 
 

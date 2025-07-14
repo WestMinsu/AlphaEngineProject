@@ -20,6 +20,12 @@ void Animation::Init()
 
 void Animation::Play(CharacterAnimationState state, const AnimData& clipData)
 {
+	if (m_currentState == CharacterAnimationState::CROUCH && m_currentState == state)
+	{
+		return;
+	}
+
+
 	if (m_mesh != nullptr && m_currentState == state && !m_isFinished)
 	{
 		return;
