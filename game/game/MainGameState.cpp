@@ -9,6 +9,7 @@
 #include "WeaponData.h"
 #include "VisualEffect.h"
 #include "BossCharacter.h"
+#include "PlayerCharacter.h"
 
 MainGameState::MainGameState()
 {
@@ -97,17 +98,19 @@ void MainGameState::Update(f32 dt)
 
 	if (m_Bosses.size() > 0 && m_Bosses[0]->IsCompletelyDead())
 	{
+		GameManager::SetFinalScore(m_Player.GetScore());
 		GameManager::ChangeState(GameState::GAME_CLEAR);
 		return;
 	}
 
 	if (m_Player.IsCompletelyDead())
 	{
+		GameManager::SetFinalScore(m_Player.GetScore());
 		GameManager::ChangeState(GameState::GAME_OVER);
 		return;
 	}
 
-	if (AEInputCheckTriggered(AEVK_R))
+	if (AEInputCheckTriggered(AEVK_ESCAPE))
 	{
 		GameManager::ChangeState(GameState::MAIN_MENU);
 		return;
@@ -478,13 +481,13 @@ void MainGameState::Update(f32 dt)
 			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
 			{
 				bool wasAlive = !enemy->IsDead();
-				enemy->TakeDamage(10, DamageType::NONE);
+				enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
 				if (wasAlive && enemy->IsDead())
 				{
 					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_Player.RegisterHit();
-				break;
+				//break;
 			}
 		}
 
@@ -496,7 +499,7 @@ void MainGameState::Update(f32 dt)
 			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
 			{
 				bool wasAlive = !enemy->IsDead();
-				enemy->TakeDamage(10, DamageType::NONE);
+				enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
 				if (wasAlive && enemy->IsDead())
 				{
 					m_Player.AddScore(enemy->GetKillScore());

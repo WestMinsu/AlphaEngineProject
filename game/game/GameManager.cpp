@@ -9,6 +9,7 @@ AEAudioGroup GameManager::m_sfxGroup;
 AEAudioGroup GameManager::m_bgmGroup;
 std::map<BGMTrack, AEAudio*> GameManager::m_bgmTracks;
 BGMTrack GameManager::m_currentTrack = BGMTrack::NONE;
+s32 GameManager::m_finalScore = 0;
 
 GameManager::GameManager()
 {
@@ -76,7 +77,7 @@ void GameManager::Update(f32 dt)
 		m_GameState->Update(dt);
 		m_GameState->Draw();
 
-		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+		if (0 == AESysDoesWindowExist()) {
 			m_isGameRunning = FALSE;
 		}
 		AESysFrameEnd();
@@ -96,6 +97,8 @@ void GameManager::PlaySFX(AEAudio sfx, float volume, float pitch, s32 loops)
 	AEAudioPlay(sfx, m_sfxGroup, volume, pitch, loops);
 }
 
+
+
 void GameManager::LoadAllMusic()
 {
 	m_bgmTracks[BGMTrack::STAGE] = LoadSoundAsset("Assets/Sounds/Jeremy Blake - Powerup!.mp3");
@@ -114,7 +117,7 @@ void GameManager::PlayBGM(BGMTrack track, float volume, float pitch, s32 loops)
 
 	if (m_bgmTracks.count(track))
 	{
-		AEAudioPlay(*m_bgmTracks[track], m_bgmGroup, 0.7f, 1.0f, -1);
+		AEAudioPlay(*m_bgmTracks[track], m_bgmGroup, volume, pitch, loops);
 		m_currentTrack = track;
 	}
 	else
@@ -127,4 +130,14 @@ void GameManager::StopMusic()
 {
 	AEAudioStopGroup(m_bgmGroup);
 	m_currentTrack = BGMTrack::NONE;
+}
+
+void GameManager::SetFinalScore(s32 score)
+{
+	m_finalScore = score;
+}
+
+s32 GameManager::GetFinalScore()
+{
+	return m_finalScore;
 }

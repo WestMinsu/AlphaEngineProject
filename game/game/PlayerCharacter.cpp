@@ -19,6 +19,7 @@ PlayerCharacter::PlayerCharacter()
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_element = ElementType::NONE;
+	m_meleeAttackDamage = 100;
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_maxHealth = 100;
@@ -242,13 +243,13 @@ void PlayerCharacter::Update(f32 dt)
 		switch (m_currentWeapon)
 		{
 		case DamageType::FIRE:
-			GameManager::PlaySFX(*m_sfxFireAttack);
+			GameManager::PlaySFX(*m_sfxFireAttack, 0.8f);
 			break;
 		case DamageType::ICE:
-			GameManager::PlaySFX(*m_sfxIceAttack);
+			GameManager::PlaySFX(*m_sfxIceAttack, 0.6f);
 			break;
 		case DamageType::LIGHTNING:
-			GameManager::PlaySFX(*m_sfxLightningAttack);
+			GameManager::PlaySFX(*m_sfxLightningAttack, 0.8f);
 			break;
 		}
 		m_hasPlayedAttackSound = true;
@@ -444,15 +445,32 @@ void PlayerCharacter::Draw()
 
 	if (m_healthPoint > 0)
 	{
-		float barWidth = m_hitboxSize.x * 2.0f;
-		float barHeight = 10.f;
+		float healthBarWidth = m_hitboxSize.x * 3.0f;
+		float helathBarHeight = 10.f;
 		float barOffsetY = m_hitboxSize.y / 2.0f; 
 
 		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-		float currentHealthWidth = barWidth * healthRatio;
+		float currentHealthWidth = healthBarWidth * healthRatio;
 
-		DrawRect(m_position.x, m_position.y + barOffsetY, barWidth, barHeight, 0.2f, 0.2f, 0.2f, 1.0f);
-		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+		DrawRect(m_position.x, m_position.y + barOffsetY, healthBarWidth, helathBarHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+		DrawRect(m_position.x - (healthBarWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, helathBarHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+
+		float dashBarWidth = m_hitboxSize.x * 3.0f;
+		float dashBarHeight = 10.f;
+		float dashBarOffsetY = m_hitboxSize.y / 2.5f;
+
+		DrawRect(m_position.x, m_position.y + dashBarOffsetY, dashBarWidth, dashBarHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+
+		if (m_dashCooldownTimer <= 0.f)
+		{
+			DrawRect(m_position.x, m_position.y + dashBarOffsetY, dashBarWidth, dashBarHeight, 0.2f, 0.6f, 1.0f, 1.0f);
+		}
+		else
+		{
+			float cooldownProgress = 1.0f - (m_dashCooldownTimer / m_dashCooldownDuration);
+			float currentCooldownWidth = dashBarWidth * cooldownProgress;
+			DrawRect(m_position.x - (dashBarWidth - currentCooldownWidth) / 2.0f, m_position.y + dashBarOffsetY, currentCooldownWidth, dashBarHeight, 1.0f, 0.2f, 0.2f, 1.0f);
+		}
 	}	
 
 	DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
@@ -496,14 +514,14 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
-	GameManager::PlaySFX(*m_sfxHurt);
+	GameManager::PlaySFX(*m_sfxHurt, 0.8f);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-		GameManager::PlaySFX(*m_sfxDeath);
+		GameManager::PlaySFX(*m_sfxDeath, 0.4f);
 
 	}
 }

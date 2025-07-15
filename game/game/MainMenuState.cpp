@@ -8,11 +8,11 @@
 const f32 buttonWidth = 350.f;
 const f32 buttonHeight = 100.f;
 
-const f32 startButtonX = 0.f;
-const f32 startButtonY = 200.f;
+const f32 startButtonX = -kHalfWindowWidth / 2.0f;
+const f32 startButtonY = kHalfWindowHeight / 4.0f;
 
-const f32 exitButtonX = 0.f;
-const f32 exitButtonY = -200.f;
+const f32 exitButtonX = -kHalfWindowWidth / 2.0f;
+const f32 exitButtonY = -kHalfWindowHeight / 1.5f;
 
 
 MainMenuState::MainMenuState()
@@ -46,24 +46,15 @@ void MainMenuState::Update(f32 dt)
 
 void MainMenuState::Draw()
 {
+	AEGfxTexture* mainMenuTex = AEGfxTextureLoad("Assets/title.jpg");
+	DrawRect(0.f, 0.f, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, mainMenuTex);
+
 	AEGfxSetBackgroundColor(0.1f, 0.1f, 0.1f);
-	DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 0.5, 0.5, 0.5, 1);
-	DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.5, 0.5, 0.5, 1);
 
-	std::string pongButtonText = "Start";
-	std::string animationButtonText = "Exit";
-	f32 TextScale = 0.9f;
-
-	f32 pongButtonTextWidth, pongButtonTextHeight;
-	AEGfxGetPrintSize(GameManager::m_font, pongButtonText.c_str(), TextScale, &pongButtonTextWidth, &pongButtonTextHeight);
-	f32 animationButtonTextWidth, animationButtonTextHeight;
-	AEGfxGetPrintSize(GameManager::m_font, animationButtonText.c_str(), TextScale, &animationButtonTextWidth, &animationButtonTextHeight);
-
-	AEVec2 pongTextCoordinate = GetNormalizedCoords(startButtonX, startButtonY);
-	AEVec2 animationTextCoordinate = GetNormalizedCoords(exitButtonX, exitButtonY);
-
-	AEGfxPrint(GameManager::m_font, pongButtonText.c_str(), pongTextCoordinate.x - pongButtonTextWidth / 2, pongTextCoordinate.y - pongButtonTextHeight / 2, TextScale, 1, 1, 1, 1);
-	AEGfxPrint(GameManager::m_font, animationButtonText.c_str(), animationTextCoordinate.x - animationButtonTextWidth / 2, animationTextCoordinate.y - animationButtonTextHeight / 2, TextScale, 1, 1, 1, 1);
+	AEGfxTexture* startButtonTex = AEGfxTextureLoad("Assets/start.png");
+	AEGfxTexture* exitButtonTex = AEGfxTextureLoad("Assets/exit.png");
+	DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 1, 1, 1, 1, startButtonTex);
+	DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 1, 1, 1, 1, exitButtonTex);
 }
 
 void MainMenuState::Exit()

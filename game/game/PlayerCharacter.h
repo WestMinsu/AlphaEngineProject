@@ -71,11 +71,17 @@ public:
 	{ 
 		return m_score; 
 	}
+	
+	int GetMeleeAttackDamage() const
+	{
+		return m_meleeAttackDamage;
+	}
 
 	void AddScore(s32 amount);
 	void BuyMagic(DamageType type);
 	const AEVec2& GetHitboxSize() const override;
 	const AEVec2& GetHitboxOffset() const override;
+
 private:
 	Animation m_animation;
 	std::map<CharacterAnimationState, AnimData> m_animDataMap;
@@ -85,6 +91,7 @@ private:
 	f32 m_velocityY;
 	f32 m_gravity;
 	f32 m_jumpStrength;
+	int m_meleeAttackDamage;
 	bool m_isGrounded;
 
 	bool m_isMeleeAttacking;

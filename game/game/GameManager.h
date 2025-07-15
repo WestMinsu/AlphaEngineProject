@@ -44,9 +44,11 @@ public:
 	// Change m_nextState
 	static void ChangeState(GameState newGameState);
 	static void PlaySFX(AEAudio sfx, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
-	static void PlayBGM(BGMTrack track, float volume = 1.0f, float pitch = 1.0f, s32 loops = -1);
+	static void PlayBGM(BGMTrack track, float volume = 0.3f, float pitch = 1.0f, s32 loops = -1);
 	static void StopMusic();
 	static bool m_isGameRunning;
+	static void SetFinalScore(s32 score);
+	static s32 GetFinalScore();
 private:
 	void LoadAllMusic();
 
@@ -57,4 +59,6 @@ private:
 	static AEAudioGroup m_bgmGroup;
 	static std::map<BGMTrack, AEAudio*> m_bgmTracks;
 	static BGMTrack m_currentTrack;
+
+	static s32 m_finalScore;
 };
