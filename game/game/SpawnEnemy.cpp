@@ -47,7 +47,7 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 		)
 	{
 		ACharacter* newEnemy = m_EnemyFactory->Create(m_enemyName);
-		newEnemy->Init({ m_position.x, m_position.y });
+		newEnemy->Init({ m_position.x, m_position.y + newEnemy->GetSize().y / 2.f});
 		enemies.push_back(newEnemy);
 		m_spawnTimes--;
 		m_spawnCurrentTime = 0.f;

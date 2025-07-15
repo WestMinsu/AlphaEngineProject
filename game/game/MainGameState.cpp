@@ -39,7 +39,7 @@ void MainGameState::Init()
 	NightBorneEnemyCharacter* night = new NightBorneEnemyCharacter();
 	night->Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	BossCharacter* boss = new BossCharacter();
-	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth - boss->GetSize().x, -180.f }, &m_Player);
+	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -180.f }, &m_Player);
 
 	m_factory.RegisterPrototype("Warrior", warrior);
 	m_factory.RegisterPrototype("Mage", mage);
@@ -47,12 +47,13 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Night", night);
 	m_factory.RegisterPrototype("Boss", boss);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 20*32.f, -kHalfWindowHeight + 14*32.f}, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 36*32.f, -kHalfWindowHeight + 9*32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 51*32.f, -kHalfWindowHeight + 16*32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 68*32.f, -kHalfWindowHeight + 17*32.f }, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 80*32.f, -kHalfWindowHeight + 10*32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 96*32.f, -kHalfWindowHeight + 22*32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 110*32.f, -kHalfWindowHeight + 16*32.f }, &m_factory, "Night", 1));
 
 	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
 	m_SpawnBoss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -170.f }, &m_factory, "Boss", 1);
