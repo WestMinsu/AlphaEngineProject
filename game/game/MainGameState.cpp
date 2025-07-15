@@ -80,6 +80,7 @@ void MainGameState::Init()
 	m_feedbackTextB = 0.0f;
 
 	m_isNextStage = false;
+	m_isLeftLocked = false;
 	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
 	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
@@ -280,21 +281,23 @@ void MainGameState::Update(f32 dt)
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-	//if (m_Player.GetPosition().x > xCam )
-	if (m_Player.GetPosition().x > m_clampCameraX.x)
+	if (m_Player.GetPosition().x > m_clampCameraX.x && m_currentClampCameraXLeft >= m_clampCameraX.x)
 	{
-		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
-		AEGfxSetCamPosition(xCam, 0.f);
+		m_isLeftLocked = false;
 	}
-	else if (m_moveTileMapCount > 0) {
-
+	else if (m_moveTileMapCount > 0)
+	{
+		if (!m_isLeftLocked)
+		{
+			m_isLeftLocked = true;
+		}
 		m_currentClampCameraXLeft = xCam;
-		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-		xCam = std::clamp(xCam, m_currentClampCameraXLeft, m_clampCameraX.y);
-		AEGfxSetCamPosition(xCam, 0.f);
 	}
 
+	float leftClamp = m_isLeftLocked ? m_currentClampCameraXLeft : m_clampCameraX.x;
+	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
+	xCam = std::clamp(xCam, leftClamp, m_clampCameraX.y);
+	AEGfxSetCamPosition(xCam, 0.f);
 
 	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 	//std::cout << "CAM Clamp & Player: " << m_currentClampCameraXLeft << ", " << m_Player.GetPosition().x << std::endl;

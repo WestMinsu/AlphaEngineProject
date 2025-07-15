@@ -43,6 +43,7 @@ private:
 	SpawnEnemy m_SpawnBoss;
 
 	bool m_isNextStage;
+	bool m_isLeftLocked;
 	AEVec2 m_clampCameraX;
 	f32 m_currentClampCameraXLeft;
 	s32 m_moveTileMapCount;
