@@ -91,7 +91,7 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Boss/meleeattack.png", nullptr, 7, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Boss/rangedattack.png", nullptr, 9, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::LASER_CAST] = { "Assets/Boss/lasercast.png", nullptr, 7, SpriteSheetOrientation::HORIZONTAL, 0.12f, false };
-	m_animDataMap[CharacterAnimationState::LASER_SHEET] = { "Assets/Boss/laser_sheet.png", nullptr, 14, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::LASER_SHEET] = { "Assets/Boss/laser_sheet.png", nullptr, 34, SpriteSheetOrientation::VERTICAL, 0.12f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Boss/death.png", nullptr, 14, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::BUFF] = { "Assets/Boss/buff.png", nullptr, 10, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 
@@ -333,7 +333,7 @@ void BossCharacter::Draw()
 				AEMtx33Concat(&laserTransform, &rotate, &scale);
 				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 				m_laserAnimation.Draw(laserTransform);
-				if (m_laserAnimation.GetCurrentFrame() >= 8)
+				if (m_laserAnimation.GetCurrentFrame() >= 22)
 					DrawHollowRect(hitboxPos.x, hitboxPos.y + yOffset, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 			}
 		}
@@ -360,7 +360,7 @@ void BossCharacter::Draw()
 			AEMtx33Concat(&laserTransform, &rotate, &scale);
 			AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 			m_laserAnimation.Draw(laserTransform);
-			if (m_laserAnimation.GetCurrentFrame() >= 8)
+			if (m_laserAnimation.GetCurrentFrame() >= 22)
 				DrawHollowRect(finalHitboxPos.x, finalHitboxPos.y, laserHitbox.size.x, laserHitbox.size.y, 1.f, 0.f, 1.f, 0.5f);
 		}
 	}
@@ -524,7 +524,7 @@ void BossCharacter::AttackRange(PlayerCharacter& player, std::vector<Projectile>
 
 void BossCharacter::AttackLaser(PlayerCharacter& player)
 {
-	bool isLaserHitboxActive = m_laserAnimation.GetCurrentFrame() >= 8;
+	bool isLaserHitboxActive = m_laserAnimation.GetCurrentFrame() >= 22;
 
 	if (m_currentAIState == BossAIState::LASER_BEAM
 		&& isLaserHitboxActive 
@@ -555,7 +555,7 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 		else
 		{
 			AEVec2 finalLaserPos = laserBasePos;
-			float yDiff = player.GetPosition().y - m_position.y;
+			float yDiff = m_laserTargetPos.y - m_position.y;
 			if (yDiff > 150.f) finalLaserPos.y += 100.f;
 			else if (yDiff < -150.f) finalLaserPos.y -= 100.f;
 

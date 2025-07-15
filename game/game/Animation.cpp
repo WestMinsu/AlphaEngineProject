@@ -25,7 +25,6 @@ void Animation::Play(CharacterAnimationState state, const AnimData& clipData)
 		return;
 	}
 
-
 	if (m_mesh != nullptr && m_currentState == state && !m_isFinished)
 	{
 		return;
