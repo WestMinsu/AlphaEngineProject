@@ -30,13 +30,13 @@ void GameManager::Init()
 
 	m_GameState = std::move(std::make_unique<IntroState>());
 	m_GameState->Init();
-	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	m_font = AEGfxCreateFont("Assets/Qaz-Regular.ttf", 72);
 
 	m_sfxGroup = AEAudioCreateGroup();
 	m_bgmGroup = AEAudioCreateGroup();
 	LoadAllMusic();
-	m_GameState = std::move(std::make_unique<IntroState>());
-	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	//m_GameState = std::move(std::make_unique<IntroState>());
+	//m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
 	InitUtilityMeshes();
 	AESysReset();

@@ -26,7 +26,15 @@ void GameOverState::Draw()
 	DrawRect(0.f, 0.f, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, gameOverTex);
 	
 	char strBuffer[100];
-	sprintf_s(strBuffer, "SCORE: %d", GameManager::GetFinalScore());
+
+	sprintf_s(strBuffer, "Score: %d", GameManager::GetFinalScore());
+
+	float outlineThickness = 0.005f;
+	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f, -0.3f + outlineThickness, 1.2f, 0.f, 0.f, 0.f, 1.f);
+	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f, -0.3f - outlineThickness, 1.2f, 0.f, 0.f, 0.f, 1.f);
+	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f + outlineThickness, -0.3f, 1.2f, 0.f, 0.f, 0.f, 1.f);
+	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f - outlineThickness, -0.3f, 1.2f, 0.f, 0.f, 0.f, 1.f);
+
 	AEGfxPrint(GameManager::m_font, strBuffer, -0.3f, -0.3f, 1.2f, 1.f, 1.f, 1.f, 1.f);
 }
 

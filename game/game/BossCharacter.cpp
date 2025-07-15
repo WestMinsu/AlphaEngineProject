@@ -30,6 +30,7 @@ BossCharacter::BossCharacter()
 	m_hitboxSize = { m_size.x * 0.5f, m_size.y * 0.5f };
 	m_hitboxOffset = { m_size.x * 0.01f, m_size.y * 0.02f };
 	killScore = 20000;
+	m_pBossHealthBar = LoadImageAsset("Assets/UI/hpBar.png");
 }
 
 BossCharacter::BossCharacter(const BossCharacter& bossCopy)
@@ -69,6 +70,7 @@ BossCharacter::BossCharacter(const BossCharacter& bossCopy)
 	m_projectileData = bossCopy.m_projectileData;
 	m_meleeHitboxes = bossCopy.m_meleeHitboxes;
 	m_laserHitbox = bossCopy.m_laserHitbox;
+	m_pBossHealthBar = bossCopy.m_pBossHealthBar;
 }
 
 BossCharacter::~BossCharacter() {}
@@ -94,6 +96,7 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animDataMap[CharacterAnimationState::LASER_SHEET] = { "Assets/Boss/laser_sheet.png", nullptr, 34, SpriteSheetOrientation::VERTICAL, 0.12f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Boss/death.png", nullptr, 14, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::BUFF] = { "Assets/Boss/buff.png", nullptr, 10, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+
 
 	for (auto& pair : m_animDataMap)
 	{
@@ -426,6 +429,7 @@ bool BossCharacter::IsUnbeatable() const
 const AttackHitbox& BossCharacter::GetCurrentMeleeHitbox() const
 {
 	s32 currentFrame = m_animation.GetCurrentFrame();
+
 	if (currentFrame >= 0 && currentFrame < m_meleeHitboxes.size())
 	{
 		return m_meleeHitboxes[currentFrame];
@@ -569,18 +573,36 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 
 void BossCharacter::DrawBossHPUI()
 {
+	//if (m_isAttackable)
+	//{
+	//	f32 xCam, yCam;
+	//	AEGfxGetCamPosition(&xCam, &yCam);
+	//	const float barWidth = 500.f;
+	//	const float barHeight = 125.f;
+	//	const float barX = 0;
+	//	const float barY = kHalfWindowHeight - 150.f;
+	//	DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+	//	float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
+	//	float currentHealthWidth = barWidth * healthRatio;
+	//	DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
+	//	DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+	//}
+
 	if (m_isAttackable)
 	{
 		f32 xCam, yCam;
 		AEGfxGetCamPosition(&xCam, &yCam);
-		const float barWidth = 500.f;
-		const float barHeight = 125.f;
+		const float barWidth = 600.f;
+		const float barHeight = 120.f;
 		const float barX = 0;
 		const float barY = kHalfWindowHeight - 150.f;
-		DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+		
+		DrawRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 1.f, 1.f, m_pBossHealthBar);
 		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-		float currentHealthWidth = barWidth * healthRatio;
-		DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
-		DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+		float fillWidth = barWidth * 0.70f;
+		float fillHeight = barHeight * 0.42f;
+		float currentHealthWidth = fillWidth * healthRatio;
+
+		DrawRect(barX + xCam - (fillWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, fillHeight, 1.f, 0.2f, 0.2f, 1.f);
 	}
 }
