@@ -39,7 +39,7 @@ void MainGameState::Init()
 	NightBorneEnemyCharacter* night = new NightBorneEnemyCharacter();
 	night->Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	BossCharacter* boss = new BossCharacter();
-	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth - boss->GetSize().x / 2.f, -150.f }, &m_Player);
+	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth - boss->GetSize().x, -180.f }, &m_Player);
 
 	m_factory.RegisterPrototype("Warrior", warrior);
 	m_factory.RegisterPrototype("Mage", mage);
@@ -55,7 +55,7 @@ void MainGameState::Init()
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
 
 	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
-	m_SpawnBoss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, &m_factory, "Boss", 1);
+	m_SpawnBoss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -170.f }, &m_factory, "Boss", 1);
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
