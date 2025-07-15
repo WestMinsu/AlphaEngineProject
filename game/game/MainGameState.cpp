@@ -40,7 +40,7 @@ void MainGameState::Init()
 	NightBorneEnemyCharacter* night = new NightBorneEnemyCharacter();
 	night->Init({ kHalfWindowWidth - 550.f, 100.f }, &m_Player);
 	BossCharacter* boss = new BossCharacter();
-	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth - boss->GetSize().x / 2.f, -150.f }, &m_Player);
+	boss->Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -180.f }, &m_Player);
 
 	m_factory.RegisterPrototype("Warrior", warrior);
 	m_factory.RegisterPrototype("Mage", mage);
@@ -48,15 +48,16 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Night", night);
 	m_factory.RegisterPrototype("Boss", boss);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 20*32.f, -kHalfWindowHeight + 14*32.f}, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 36*32.f, -kHalfWindowHeight + 9*32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 51*32.f, -kHalfWindowHeight + 16*32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 68*32.f, -kHalfWindowHeight + 17*32.f }, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 80*32.f, -kHalfWindowHeight + 10*32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 96*32.f, -kHalfWindowHeight + 22*32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 110*32.f, -kHalfWindowHeight + 16*32.f }, &m_factory, "Night", 1));
 
 	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
-	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, & m_factory, "Boss", 1);
+	m_SpawnBoss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -170.f }, &m_factory, "Boss", 1);
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");
@@ -72,7 +73,7 @@ void MainGameState::Init()
 
 	m_pHealthBarFrame = LoadImageAsset("Assets/UI/healthbar_frame.png");
 	m_pHealthBar = LoadImageAsset("Assets/UI/healthbar_fill.png");
-	
+
 	m_feedbackText = "";
 	m_feedbackTextTimer = 0.0f;
 
@@ -81,7 +82,9 @@ void MainGameState::Init()
 	m_feedbackTextB = 0.0f;
 
 	m_isNextStage = false;
+	m_isLeftLocked = false;
 	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
+	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
 }
 
@@ -175,7 +178,7 @@ void MainGameState::Update(f32 dt)
 
 		for (auto* enemy : m_Enemies)
 		{
-			if (enemy->GetHealth() > 0 
+			if (enemy->GetHealth() > 0
 				&& CheckAABBCollision(playerHitboxPos, playerHitboxSize, enemy->GetPosition(), enemy->GetHitboxSize()))
 			{
 				//std::cout << "collsion" << std::endl;
@@ -282,21 +285,31 @@ void MainGameState::Update(f32 dt)
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-	//if (m_Player.GetPosition().x > xCam)
-	if (m_Player.GetPosition().x > xCam)
+	if (m_Player.GetPosition().x > m_clampCameraX.x && m_currentClampCameraXLeft >= m_clampCameraX.x)
 	{
-		//xCam = m_Player.GetPosition().x;
-		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
-		AEGfxSetCamPosition(xCam, 0.f);
+		m_isLeftLocked = false;
+	}
+	else if (m_moveTileMapCount > 0)
+	{
+		if (!m_isLeftLocked)
+		{
+			m_isLeftLocked = true;
+		}
+		m_currentClampCameraXLeft = xCam;
 	}
 
-	std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
+	float leftClamp = m_isLeftLocked ? m_currentClampCameraXLeft : m_clampCameraX.x;
+	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
+	xCam = std::clamp(xCam, leftClamp, m_clampCameraX.y);
+	AEGfxSetCamPosition(xCam, 0.f);
 
-	if (isAllEnemiesDead() 
+	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
+	//std::cout << "CAM Clamp & Player: " << m_currentClampCameraXLeft << ", " << m_Player.GetPosition().x << std::endl;
+
+	if (isAllEnemiesDead()
 		&& m_isNextStage)
 	{
-		for (auto enemy : m_Enemies )
+		for (auto enemy : m_Enemies)
 		{
 			delete enemy;
 		}
@@ -312,6 +325,7 @@ void MainGameState::Update(f32 dt)
 			{
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth();
 			}
+			m_clampCameraX.x += TileMaps[0].GetMapTotalWidth() * 2.f;
 			m_moveTileMapCount++;
 			m_isNextStage = false;
 		}
@@ -361,7 +375,7 @@ void MainGameState::Update(f32 dt)
 						{
 							m_feedbackText = "Immune to fire";
 							m_feedbackTextTimer = 1.0f;
-							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x-xCam, enemy->GetPosition().y);
+							m_feedbackTextPos = GetNormalizedCoords(enemy->GetPosition().x - xCam, enemy->GetPosition().y);
 							m_feedbackTextR = 1.0f;
 							m_feedbackTextG = 0.0f;
 							m_feedbackTextB = 0.0f;
@@ -530,7 +544,7 @@ void MainGameState::Draw()
 		enemy->Draw();
 	}
 
-	if ( m_Bosses.size() > 0 && !m_Bosses[0]->IsCompletelyDead())
+	if (m_Bosses.size() > 0 && !m_Bosses[0]->IsCompletelyDead())
 	{
 		m_Bosses[0]->Draw();
 	}
@@ -683,7 +697,7 @@ ACharacter* MainGameState::FindClosestEnemyInFront()
 	{
 		if (enemy->GetHealth() <= 0)
 			continue;
-		
+
 		const AEVec2& enemyPos = enemy->GetPosition();
 
 		bool isInFront = (playerDir == CharacterDirection::RIGHT && enemyPos.x > playerPos.x) ||
@@ -750,7 +764,7 @@ bool MainGameState::isAllEnemiesDead()
 	{
 		result = false;
 	}
-	
+
 	if (result)
 	{
 		m_isNextStage = true;
