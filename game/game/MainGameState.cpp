@@ -82,6 +82,11 @@ void MainGameState::Init()
 	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
 	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
+
+	m_pGoMessage = LoadImageAsset("Assets/UI/go.png");
+	m_GoMessageTimer = 0.f;
+	m_GoMessageSize = {200.f, 100.f};
+	m_GoMessageOffset= {kHalfWindowWidth - m_GoMessageSize.x - 30, 0};
 }
 
 void MainGameState::Update(f32 dt)
@@ -275,16 +280,6 @@ void MainGameState::Update(f32 dt)
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
-
-	//if (m_Player.GetPosition().x > xCam)
-	//{
-	//	xCam = m_Player.GetPosition().x;
-	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-	//	xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
-	//	AEGfxSetCamPosition(xCam, 0.f);
-	//}
-
-
 	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 
 	if (isAllEnemiesDead() 
@@ -295,6 +290,7 @@ void MainGameState::Update(f32 dt)
 			delete enemy;
 		}
 		m_Enemies.clear();
+		m_GoMessageTimer = 0.f;
 
 		if (m_isNextStage)
 		{
@@ -509,6 +505,8 @@ void MainGameState::Update(f32 dt)
 	{
 		effect.Update(dt);
 	}
+
+	m_GoMessageTimer += dt;
 }
 
 void MainGameState::Draw()
@@ -682,6 +680,12 @@ void MainGameState::DrawUI()
 	if (m_Bosses.size() > 0)
 	{
 		m_Bosses[0]->DrawBossHPUI();
+	}
+
+	if (m_GoMessageTimer < 5.f && m_GoMessageTimer > 0.f)
+	{
+		f32 sizeRatio = (int)(1 + m_GoMessageTimer) - m_GoMessageTimer;
+		DrawRect(xCam + m_GoMessageOffset.x + m_GoMessageSize.x * (1.f - sizeRatio), yCam + m_GoMessageOffset.y, m_GoMessageSize.x * sizeRatio, m_GoMessageSize.y, 1.f, 1.f, 1.f, 1.f, m_pGoMessage);
 	}
 }
 
