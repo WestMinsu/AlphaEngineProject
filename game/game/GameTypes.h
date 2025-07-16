@@ -24,6 +24,8 @@ enum class CharacterAnimationState
 	JUMP,
 	CROUCH,
 	MELEE_ATTACK,
+	MELEE_ATTACK_2,
+	MELEE_ATTACK_3,
 	RANGED_ATTACK,
 	DASH,
 	DEATH,

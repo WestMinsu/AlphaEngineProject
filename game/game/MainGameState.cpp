@@ -288,7 +288,7 @@ void MainGameState::Update(f32 dt)
 		AEGfxSetCamPosition(xCam, 0.f);
 	}
 
-	std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
+	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 
 	if (isAllEnemiesDead() 
 		&& m_isNextStage)
@@ -484,7 +484,7 @@ void MainGameState::Update(f32 dt)
 					m_Player.AddScore(enemy->GetKillScore());
 				}
 				m_Player.RegisterHit();
-				//break;
+				break;
 			}
 		}
 

@@ -19,7 +19,7 @@ PlayerCharacter::PlayerCharacter()
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_element = ElementType::NONE;
-	m_meleeAttackDamage = 100;
+	m_meleeAttackDamage = 10;
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_maxHealth = 100;
@@ -49,6 +49,9 @@ PlayerCharacter::PlayerCharacter()
 	m_score = 0;
 	m_hasPlayedAttackSound = false;
 	m_dashCooldownTimer = 0.0f;
+
+	m_meleeComboCounter = 0;
+	m_meleeComboResetTimer = 0.0f;
 }
 
 PlayerCharacter::~PlayerCharacter()
@@ -72,6 +75,8 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::MELEE_ATTACK_2] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 2/Battlemage Attack 2.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::MELEE_ATTACK_3] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 3/Battlemage Attack 3.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.08f, false };	
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.03f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
@@ -181,11 +186,34 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-	if (AEInputCheckCurr(AEVK_A) && !isBusy)
+	//if (AEInputCheckCurr(AEVK_A) && !isBusy)
+	//{
+	//	m_isMeleeAttacking = true;
+	//	m_hasHitEnemyThisAttack = false;
+	//	m_hasPlayedAttackSound = false;
+	//}
+
+	if (!m_isMeleeAttacking && m_meleeComboCounter > 0)
 	{
+		m_meleeComboResetTimer += dt;
+		if (m_meleeComboResetTimer > m_comboResetTime)
+		{
+			m_meleeComboCounter = 0; 
+		}
+	}
+
+	if (AEInputCheckTriggered(AEVK_A) && !isBusy)
+	{
+		m_meleeComboCounter++;
+		if (m_meleeComboCounter > 3)
+		{
+			m_meleeComboCounter = 1;
+		}
+
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 		m_hasPlayedAttackSound = false;
+		m_meleeComboResetTimer = 0.0f;
 	}
 
 	if (AEInputCheckCurr(AEVK_S) && !isBusy && (m_weaponUseCounts.at(m_currentWeapon) > 0))
@@ -369,7 +397,24 @@ void PlayerCharacter::Update(f32 dt)
 
 	CharacterAnimationState desiredState;
 	if (m_isMeleeAttacking)
-		desiredState = CharacterAnimationState::MELEE_ATTACK;
+	{
+		switch (m_meleeComboCounter)
+		{
+		case 1:
+			desiredState = CharacterAnimationState::MELEE_ATTACK;
+			break;
+		case 2:
+			desiredState = CharacterAnimationState::MELEE_ATTACK_2;
+			break;
+		case 3:
+			desiredState = CharacterAnimationState::MELEE_ATTACK_3;
+			break;
+		default:
+			desiredState = CharacterAnimationState::IDLE;
+			m_isMeleeAttacking = false;
+			break;
+		}
+	}
 	else if (m_isSkillAttacking)
 		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)

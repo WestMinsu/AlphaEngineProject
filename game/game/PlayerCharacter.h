@@ -130,4 +130,8 @@ private:
 
 	float m_dashCooldownTimer;
 	const float m_dashCooldownDuration = 1.5f;
+
+	int m_meleeComboCounter;      
+	float m_meleeComboResetTimer;   
+	const float m_comboResetTime = 0.3f;
 };

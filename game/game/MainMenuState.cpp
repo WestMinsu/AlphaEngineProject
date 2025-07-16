@@ -36,13 +36,23 @@ void MainMenuState::Update(f32 dt)
 	AEInputGetCursorPosition(&pX, &pY);
 	pX -= static_cast<s32>(kHalfWindowWidth);
 	pY = static_cast<s32>(kHalfWindowHeight) - pY;
+
+	m_isHoveringStart = (pX >= startButtonX - buttonWidth / 2 && pX <= startButtonX + buttonWidth / 2) &&
+		(pY >= startButtonY - buttonHeight / 2 && pY <= startButtonY + buttonHeight / 2);
+
+	m_isHoveringLeaderboard = (pX >= leaderBoardButtonX - buttonWidth / 2 && pX <= leaderBoardButtonX + buttonWidth / 2) &&
+		(pY >= leaderBoardButtonY - buttonHeight / 2 && pY <= leaderBoardButtonY + buttonHeight / 2);
+
+	m_isHoveringExit = (pX >= exitButtonX - buttonWidth / 2 && pX <= exitButtonX + buttonWidth / 2) &&
+		(pY >= exitButtonY - buttonHeight / 2 && pY <= exitButtonY + buttonHeight / 2);
+
 	if (AEInputCheckReleased(AEVK_LBUTTON))
 	{
-		if ((startButtonX - buttonWidth / 2 <= pX && pX <= startButtonX + buttonWidth / 2) && (startButtonY - buttonHeight / 2 <= pY && pY <= startButtonY + buttonHeight / 2))
+		if (m_isHoveringStart)
 			GameManager::ChangeState(GameState::MAIN_GAME);
-		if ((leaderBoardButtonX - buttonWidth / 2 <= pX && pX <= leaderBoardButtonX + buttonWidth / 2) && (leaderBoardButtonY - buttonHeight / 2 <= pY && pY <= leaderBoardButtonY + buttonHeight / 2))
+		else if (m_isHoveringLeaderboard)
 			GameManager::ChangeState(GameState::LEADERBOARD);
-		if ((exitButtonX - buttonWidth / 2 <= pX && pX <= exitButtonX + buttonWidth / 2) && (exitButtonY - buttonHeight / 2 <= pY && pY <= exitButtonY + buttonHeight / 2))
+		else if (m_isHoveringExit)
 			GameManager::m_isGameRunning = false;
 	}
 }
@@ -57,9 +67,21 @@ void MainMenuState::Draw()
 	AEGfxTexture* startButtonTex = AEGfxTextureLoad("Assets/start.png");
 	AEGfxTexture* leaderBoardButtonTex = AEGfxTextureLoad("Assets/leaderboard.png");
 	AEGfxTexture* exitButtonTex = AEGfxTextureLoad("Assets/exit.png");
-	DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 1, 1, 1, 1, startButtonTex);
-	DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 1, 1, 1, 1, leaderBoardButtonTex);
-	DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 1, 1, 1, 1, exitButtonTex);
+
+	if (m_isHoveringStart)
+		DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, startButtonTex);
+	else
+		DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, startButtonTex);
+
+	if (m_isHoveringLeaderboard)
+		DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, leaderBoardButtonTex);
+	else
+		DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, leaderBoardButtonTex);
+
+	if (m_isHoveringExit)
+		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, exitButtonTex);
+	else
+		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, exitButtonTex);
 }
 
 void MainMenuState::Exit()
