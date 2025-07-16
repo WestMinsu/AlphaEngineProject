@@ -60,10 +60,17 @@ private:
 	float m_feedbackTextTimer;
 	AEVec2 m_feedbackTextPos;
 
+	AEGfxTexture* m_pGoMessage;
+	float m_GoMessageTimer;
+	AEVec2 m_GoMessageSize;
+	AEVec2 m_GoMessageOffset;
+
 	f32 m_feedbackTextR;
 	f32 m_feedbackTextG;
 	f32 m_feedbackTextB;
 
+	AEGfxTexture* m_borderTexture;
+	AEGfxTexture* m_scoreBorderTexture;
 
 	bool m_isBossMusicPlaying;
 

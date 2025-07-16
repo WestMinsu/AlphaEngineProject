@@ -6,6 +6,7 @@ std::unique_ptr<GameManager> GameManager::s_pInstance = nullptr;
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
+s8 GameManager::m_scoreFont;
 bool GameManager::m_isGameRunning = true;
 AEAudioGroup GameManager::m_sfxGroup;
 AEAudioGroup GameManager::m_bgmGroup;
@@ -43,6 +44,7 @@ void GameManager::Init()
 	m_GameState = std::move(std::make_unique<IntroState>());
 	m_GameState->Init();
 	m_font = AEGfxCreateFont("Assets/Qaz-Regular.ttf", 72);
+	m_scoreFont = AEGfxCreateFont("Assets/UI/PixelGameFont.ttf", 72);
 
 	m_sfxGroup = AEAudioCreateGroup();
 	m_bgmGroup = AEAudioCreateGroup();

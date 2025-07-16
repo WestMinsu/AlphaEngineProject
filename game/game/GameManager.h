@@ -33,6 +33,7 @@ public:
 	static GameState m_nextState;
 
 	static s8 m_font;
+	static s8 m_scoreFont;
 
 	static void ChangeState(GameState newGameState);
 	static void PlaySFX(AEAudio sfx, float volume = 1.0f, float pitch = 1.0f, s32 loops = 0);
