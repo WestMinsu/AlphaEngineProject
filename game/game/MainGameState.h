@@ -69,6 +69,8 @@ private:
 	f32 m_feedbackTextG;
 	f32 m_feedbackTextB;
 
+	AEGfxTexture* m_borderTexture;
+	AEGfxTexture* m_scoreBorderTexture;
 
 	bool m_isBossMusicPlaying;
 

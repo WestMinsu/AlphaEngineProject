@@ -87,6 +87,9 @@ void MainGameState::Init()
 	m_GoMessageTimer = 0.f;
 	m_GoMessageSize = {200.f, 100.f};
 	m_GoMessageOffset= {kHalfWindowWidth - m_GoMessageSize.x - 30, 0};
+
+	m_borderTexture = LoadImageAsset("Assets/UI/UISlotBorders.png");
+	m_scoreBorderTexture = LoadImageAsset("Assets/UI/ScoreBorders.png");
 }
 
 void MainGameState::Update(f32 dt)
@@ -545,11 +548,10 @@ void MainGameState::Draw()
 		//std::cout << m_feedbackTextPos.x << m_feedbackTextPos.y << std::endl;
 	}
 
+	float xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
 	if (m_pBossMessageTexture)
 	{
-		float xCam, yCam;
-		AEGfxGetCamPosition(&xCam, &yCam);
-
 		float imgWidth = 700.f;
 		float imgHeight = 100.f;
 		float imgY = 200.f;
@@ -671,18 +673,24 @@ void MainGameState::DrawUI()
 		AEGfxPrint(GameManager::m_font, countStr, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
 	}
 
+
+	DrawRect(xCam, posY, slotSize*3.5f, slotSize*1.2f, 1.f, 1.f, 1.f, 1.f, m_borderTexture);
+
+
 	f32 TextScale = 0.5f;
 	char scoreBuffer[100];
 	sprintf_s(scoreBuffer, "SCORE: %d", m_Player.GetScore());
-	AEVec2 fontPos = GetNormalizedCoords(kHalfWindowWidth * 0.5f, kHalfWindowHeight - 40.f);
-	AEGfxPrint(GameManager::m_font, scoreBuffer, fontPos.x, fontPos.y, TextScale, 1, 1, 1, 1);
+	AEVec2 fontPos = GetNormalizedCoords(kHalfWindowWidth * 0.5f, kHalfWindowHeight - 70.f);
+	AEGfxPrint(GameManager::m_scoreFont, scoreBuffer, fontPos.x, fontPos.y, TextScale, 1.f, 0.5f, 0.f, 1);
+
+	DrawRect(xCam + kHalfWindowWidth * 0.7f, kHalfWindowHeight - 55.f, 400, 80, 1.f, 1.f, 1.f, 1.f, m_scoreBorderTexture);
 
 	if (m_Bosses.size() > 0)
 	{
 		m_Bosses[0]->DrawBossHPUI();
 	}
 
-	if (m_GoMessageTimer < 5.f && m_GoMessageTimer > 0.f)
+	if (m_GoMessageTimer < 3.f && m_GoMessageTimer > 0.f)
 	{
 		f32 sizeRatio = (int)(1 + m_GoMessageTimer) - m_GoMessageTimer;
 		DrawRect(xCam + m_GoMessageOffset.x + m_GoMessageSize.x * (1.f - sizeRatio), yCam + m_GoMessageOffset.y, m_GoMessageSize.x * sizeRatio, m_GoMessageSize.y, 1.f, 1.f, 1.f, 1.f, m_pGoMessage);
