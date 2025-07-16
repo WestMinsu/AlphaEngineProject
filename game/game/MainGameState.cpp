@@ -121,13 +121,6 @@ void MainGameState::Update(f32 dt)
 		tm.Update(dt);
 	}
 
-	//if (AEInputCheckTriggered(AEVK_Q))
-	//	m_Player.BuyMagic(DamageType::FIRE);
-	//if (AEInputCheckTriggered(AEVK_W))
-	//	m_Player.BuyMagic(DamageType::ICE);
-	//if (AEInputCheckTriggered(AEVK_E))
-	//	m_Player.BuyMagic(DamageType::LIGHTNING);
-
 	m_Player.Update(dt);
 
 	for (auto spawn : m_Spawns)
@@ -279,26 +272,9 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
+	UpdateCamera();
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
-
-	if (m_Player.GetPosition().x > m_clampCameraX.x && m_currentClampCameraXLeft >= m_clampCameraX.x)
-	{
-		m_isLeftLocked = false;
-	}
-	else if (m_moveTileMapCount > 0)
-	{
-		if (!m_isLeftLocked)
-		{
-			m_isLeftLocked = true;
-		}
-		m_currentClampCameraXLeft = xCam;
-	}
-
-	float leftClamp = m_isLeftLocked ? m_currentClampCameraXLeft : m_clampCameraX.x;
-	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-	xCam = std::clamp(xCam, leftClamp, m_clampCameraX.y);
-	AEGfxSetCamPosition(xCam, 0.f);
 
 	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 	//std::cout << "CAM Clamp & Player: " << m_currentClampCameraXLeft << ", " << m_Player.GetPosition().x << std::endl;
@@ -531,7 +507,7 @@ void MainGameState::Draw()
 {
 	m_Background.Draw();
 
-	for (auto tm : TileMaps)
+	for (auto& tm : TileMaps)
 	{
 		tm.Draw();
 	}
@@ -613,6 +589,37 @@ void MainGameState::Exit()
 	m_enemyProjectiles.clear();
 
 	AEGfxSetCamPosition(0.f, 0.f);
+}
+
+void MainGameState::UpdateCamera()
+{
+	f32 xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
+
+	if (m_Player.GetPosition().x > m_clampCameraX.x && m_currentClampCameraXLeft >= m_clampCameraX.x)
+	{
+		m_isLeftLocked = false;
+	}
+	else if (m_moveTileMapCount > 0)
+	{
+		if (!m_isLeftLocked)
+		{
+			m_isLeftLocked = true;
+		}
+		m_currentClampCameraXLeft = xCam;
+	}
+
+	float leftClamp = m_isLeftLocked ? m_currentClampCameraXLeft : m_clampCameraX.x;
+	//if (m_Player.GetPosition().x > m_clampCameraX.x)
+	//{
+	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
+	//}
+	//else {
+	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.5f);
+	//}
+	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.2f);
+	xCam = std::clamp(xCam, leftClamp, m_clampCameraX.y);
+	AEGfxSetCamPosition(xCam, 0.f);
 }
 
 void MainGameState::DrawUI()
