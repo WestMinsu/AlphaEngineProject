@@ -53,6 +53,9 @@ void TileMap::Update(f32 dt)
 
 void TileMap::Draw()
 {
+	f32 camX, camY = 0;
+	AEGfxGetCamPosition(&camX, &camY);
+
 	for (const auto& layer : m_layers)
 	{
 		for (int row = 0; row < m_mapHeight; row++)
@@ -85,26 +88,30 @@ void TileMap::Draw()
 				int x = col * m_tileSize * m_tileScale - kHalfWindowWidth + m_tileSize * m_tileScale / 2.f + m_offset.x;
 				int y = row * m_tileSize * m_tileScale - kHalfWindowHeight + m_tileSize * m_tileScale / 2.f;
 
-				AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-				AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
+				if ( camX - kHalfWindowWidth - m_tileSize*m_tileScale < x 
+					&& camX + kHalfWindowWidth + m_tileSize * m_tileScale > x)
+				{
+					AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+					AEGfxTextureSet(usedTileset->tilesetTexture, u0, v0);
 
-				AEMtx33 scale = { 0 };
-				AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
+					AEMtx33 scale = { 0 };
+					AEMtx33Scale(&scale, m_tileSize * m_tileScale, m_tileSize * m_tileScale);
 
-				AEMtx33 rotate = { 0 };
-				AEMtx33Rot(&rotate, 0);
+					AEMtx33 rotate = { 0 };
+					AEMtx33Rot(&rotate, 0);
 
-				AEMtx33 translate = { 0 };
-				AEMtx33Trans(&translate, x, y);
+					AEMtx33 translate = { 0 };
+					AEMtx33Trans(&translate, x, y);
 
-				AEMtx33 transform = { 0 };
-				AEMtx33Concat(&transform, &rotate, &scale);
-				AEMtx33Concat(&transform, &translate, &transform);
+					AEMtx33 transform = { 0 };
+					AEMtx33Concat(&transform, &rotate, &scale);
+					AEMtx33Concat(&transform, &translate, &transform);
 
-				AEGfxSetTransform(transform.m);
+					AEGfxSetTransform(transform.m);
 
-				std::pair<f32, f32> keyPiar{ usedTileset->imageWidth, usedTileset->imageHeight };
-				AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
+					std::pair<f32, f32> keyPiar{ usedTileset->imageWidth, usedTileset->imageHeight };
+					AEGfxMeshDraw(m_meshes[keyPiar], AE_GFX_MDM_TRIANGLES);
+				}
 			}
 		}
 	}
@@ -177,7 +184,7 @@ void TileMap::SetOffset(f32 offsetX, f32 offsetY)
 	m_offset = AEVec2{ offsetX, offsetY };
 }
 
-void TileMap::LoadJson(const char* jsonfile)
+void TileMap::LoadJson(const std::string& jsonfile)
 {
 	std::ifstream ifs(jsonfile);
 	if (!ifs) throw std::runtime_error("Fail to read");
@@ -187,7 +194,7 @@ void TileMap::LoadJson(const char* jsonfile)
 	m_mapHeight = m_mapJson["height"];
 }
 
-void TileMap::LoadTilesets(const char* tilesetDir)
+void TileMap::LoadTilesets(const std::string& tilesetDir)
 {
 	for (const auto& ts : m_mapJson["tilesets"])
 	{

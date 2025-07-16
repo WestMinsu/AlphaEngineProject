@@ -10,7 +10,14 @@ struct CollisionBox
     f32 x, y, width, height;
 };
 
+struct TileVertex
+{
+    AEVec2 position;
+    AEVec2 uv;
+};
+
 struct TilesetInfo {
+    //GLuint textureID;
     s32 firstGId;
     s32 tileWidth, tileHeight;
     s32 columns, tileCount;
@@ -61,8 +68,8 @@ private:
     std::vector<CollisionBox> m_collisionBoxes;
     std::map<std::pair<f32, f32>, AEGfxVertexList*> m_meshes;
     
-    void LoadJson(const char*);
-    void LoadTilesets(const char*);
+    void LoadJson(const std::string&);
+    void LoadTilesets(const std::string&);
     void PrepareLayerData();
     void ExtractWorldColliders();
 };

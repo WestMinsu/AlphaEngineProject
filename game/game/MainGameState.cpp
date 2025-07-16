@@ -48,14 +48,14 @@ void MainGameState::Init()
 	m_factory.RegisterPrototype("Night", night);
 	m_factory.RegisterPrototype("Boss", boss);
 
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1350, -kHalfWindowHeight + 270 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 1660, -kHalfWindowHeight + 680 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2250, -kHalfWindowHeight + 330 }, &m_factory, "Warrior", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2820, -kHalfWindowHeight + 750 }, &m_factory, "Mage", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 2950, -kHalfWindowHeight + 425 }, &m_factory, "Fire", 1));
-	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 3425, -kHalfWindowHeight + 585 }, &m_factory, "Night", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 20 * 32.f, -kHalfWindowHeight + 14 * 32.f }, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 36 * 32.f, -kHalfWindowHeight + 9 * 32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 51 * 32.f, -kHalfWindowHeight + 16 * 32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 68 * 32.f, -kHalfWindowHeight + 17 * 32.f }, &m_factory, "Warrior", 2));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 80 * 32.f, -kHalfWindowHeight + 10 * 32.f }, &m_factory, "Mage", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 96 * 32.f, -kHalfWindowHeight + 22 * 32.f }, &m_factory, "Fire", 1));
+	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 110 * 32.f, -kHalfWindowHeight + 16 * 32.f }, &m_factory, "Night", 1));
 
-	//m_Boss.Init({ TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth -m_Boss.GetSize().x/2.f, -100.f}, &m_Player);
 	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, & m_factory, "Boss", 1);
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
@@ -78,7 +78,9 @@ void MainGameState::Init()
 	m_feedbackTextB = 0.0f;
 
 	m_isNextStage = false;
+	m_isLeftLocked = false;
 	m_clampCameraX = { 0, TileMaps[0].GetMapTotalWidth() * 2.f - kWindowWidth };
+	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
 }
 
@@ -117,13 +119,6 @@ void MainGameState::Update(f32 dt)
 	{
 		tm.Update(dt);
 	}
-
-	//if (AEInputCheckTriggered(AEVK_Q))
-	//	m_Player.BuyMagic(DamageType::FIRE);
-	//if (AEInputCheckTriggered(AEVK_W))
-	//	m_Player.BuyMagic(DamageType::ICE);
-	//if (AEInputCheckTriggered(AEVK_E))
-	//	m_Player.BuyMagic(DamageType::LIGHTNING);
 
 	m_Player.Update(dt);
 
@@ -276,17 +271,19 @@ void MainGameState::Update(f32 dt)
 		}
 	}
 
+	UpdateCamera();
 	f32 xCam, yCam;
 	AEGfxGetCamPosition(&xCam, &yCam);
 
+
 	//if (m_Player.GetPosition().x > xCam)
-	if (m_Player.GetPosition().x > xCam)
-	{
-		//xCam = m_Player.GetPosition().x;
-		xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
-		xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
-		AEGfxSetCamPosition(xCam, 0.f);
-	}
+	//{
+	//	xCam = m_Player.GetPosition().x;
+	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
+	//	xCam = std::clamp(xCam, m_clampCameraX.x, m_clampCameraX.y);
+	//	AEGfxSetCamPosition(xCam, 0.f);
+	//}
+
 
 	//std::cout << "CAM Clamp: " << m_clampCameraX.x << ", " << m_clampCameraX.y << std::endl;
 
@@ -309,6 +306,7 @@ void MainGameState::Update(f32 dt)
 			{
 				m_clampCameraX.y += TileMaps[0].GetMapTotalWidth();
 			}
+			m_clampCameraX.x += TileMaps[0].GetMapTotalWidth() * 2.f;
 			m_moveTileMapCount++;
 			m_isNextStage = false;
 		}
@@ -517,7 +515,7 @@ void MainGameState::Draw()
 {
 	m_Background.Draw();
 
-	for (auto tm : TileMaps)
+	for (auto& tm : TileMaps)
 	{
 		tm.Draw();
 	}
@@ -599,6 +597,37 @@ void MainGameState::Exit()
 	m_enemyProjectiles.clear();
 
 	AEGfxSetCamPosition(0.f, 0.f);
+}
+
+void MainGameState::UpdateCamera()
+{
+	f32 xCam, yCam;
+	AEGfxGetCamPosition(&xCam, &yCam);
+
+	if (m_Player.GetPosition().x > m_clampCameraX.x && m_currentClampCameraXLeft >= m_clampCameraX.x)
+	{
+		m_isLeftLocked = false;
+	}
+	else if (m_moveTileMapCount > 0)
+	{
+		if (!m_isLeftLocked)
+		{
+			m_isLeftLocked = true;
+		}
+		m_currentClampCameraXLeft = xCam;
+	}
+
+	float leftClamp = m_isLeftLocked ? m_currentClampCameraXLeft : m_clampCameraX.x;
+	//if (m_Player.GetPosition().x > m_clampCameraX.x)
+	//{
+	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.1f);
+	//}
+	//else {
+	//	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.5f);
+	//}
+	xCam = MoveInterpolation(xCam, m_Player.GetPosition().x, 0.2f);
+	xCam = std::clamp(xCam, leftClamp, m_clampCameraX.y);
+	AEGfxSetCamPosition(xCam, 0.f);
 }
 
 void MainGameState::DrawUI()

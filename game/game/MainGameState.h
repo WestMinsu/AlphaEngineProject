@@ -68,6 +68,7 @@ private:
 	bool m_isBossMusicPlaying;
 
 	// private Functions
+	void UpdateCamera();
 	void DrawUI();
 	ACharacter* FindClosestEnemyInFront();
 	bool isAllEnemiesDead();
