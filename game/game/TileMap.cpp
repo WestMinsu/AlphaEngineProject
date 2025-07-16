@@ -4,8 +4,6 @@
 #include "TileMap.h"
 #include "AssetManager.h"
 #include "Constants.h"
-#include <glew/include/GL/glew.h>
-#include <glm/glm/glm.hpp>
 
 std::vector<TileMap> TileMaps;
 
