@@ -56,7 +56,7 @@ void MainGameState::Init()
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 96 * 32.f, -kHalfWindowHeight + 22 * 32.f }, &m_factory, "Fire", 1));
 	m_Spawns.push_back(new SpawnEnemy({ -kHalfWindowWidth + 110 * 32.f, -kHalfWindowHeight + 16 * 32.f }, &m_factory, "Night", 1));
 
-	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth, -100.f }, & m_factory, "Boss", 1);
+	m_SpawnBoss.Init( { TileMaps[0].GetMapTotalWidth() * 7.f - kWindowWidth - boss->GetSize().x/2.f + 100, -kHalfWindowHeight + 6 * 32.f}, &m_factory, "Boss", 1);
 
 	m_pUiSlot = LoadImageAsset("Assets/UI/slot.png");
 	m_weaponIconMap[DamageType::FIRE] = LoadImageAsset("Assets/MagicArrow/fire_icon.png");

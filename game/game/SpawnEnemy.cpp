@@ -69,7 +69,7 @@ void SpawnEnemy::Update(f32 dt, AEVec2 positionPlayer, s32 moveTileMapCount, std
 		&& m_position.x - positionPlayer.x < kHalfWindowWidth - 200)
 	{
 		BossCharacter* newBoss = dynamic_cast<BossCharacter*>(m_EnemyFactory->Create(m_enemyName));
-		newBoss->Init(m_position);
+		newBoss->Init({ m_position.x, m_position.y + newBoss->GetSize().y / 2.f });
 		bosses.push_back(newBoss);
 		m_spawnTimes--;
 		m_spawnCurrentTime = 0.f;
