@@ -52,9 +52,6 @@ private:
 	std::map<DamageType, AEGfxTexture*> m_weaponIconMap;
 	AnimData m_lightningEffectData;
 
-	AEGfxTexture* m_pHealthBarFrame;
-	AEGfxTexture* m_pHealthBar;
-
 	AEGfxTexture* m_pBossMessageTexture;
 	float m_bossMessageTimer;
 	BossAIState m_previousBossAIState;

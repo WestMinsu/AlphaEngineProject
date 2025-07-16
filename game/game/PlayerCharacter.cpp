@@ -10,22 +10,23 @@ PlayerCharacter::PlayerCharacter()
 {
 	m_position = { 0, };
 	m_size = { 200.f, 200.f };
-	m_hitboxSize = { m_size.x * 0.25f, m_size.y * 0.6f };
+	m_hitboxSize = { m_size.x * 0.10f, m_size.y * 0.6f };
 	m_hitboxOffset = { 0.0f, -40.0f };
-	m_crouchingHitboxSize = { m_size.x * 0.25f, m_size.y * 0.19f };
+	m_crouchingHitboxSize = { m_size.x * 0.15f, m_size.y * 0.19f };
 	m_crouchingHitboxOffset = { 0.0f, -80.0f };
 	m_healthPoint = 100;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_element = ElementType::NONE;
+	m_meleeAttackDamage = 10;
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_maxHealth = 100;
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
-	m_jumpStrength = 800.0f;
+	m_jumpStrength = 730.0f;
 	m_isGrounded = false;
 
 	m_isMeleeAttacking = false;
@@ -47,6 +48,10 @@ PlayerCharacter::PlayerCharacter()
 	m_damageEffectDuration = 1.5f;
 	m_score = 0;
 	m_hasPlayedAttackSound = false;
+	m_dashCooldownTimer = 0.0f;
+
+	m_meleeComboCounter = 0;
+	m_meleeComboResetTimer = 0.0f;
 }
 
 PlayerCharacter::~PlayerCharacter()
@@ -68,10 +73,12 @@ void PlayerCharacter::Init(AEVec2 position)
 	m_animDataMap[CharacterAnimationState::IDLE] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Idle/Battlemage Idle.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.1f, true };
 	m_animDataMap[CharacterAnimationState::WALK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Running/Battlemage Run.png", nullptr, 10, SpriteSheetOrientation::VERTICAL, 0.08f, true };
 	m_animDataMap[CharacterAnimationState::JUMP] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Jump Neutral/Battlemage Jump Neutral.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, true };
+	m_animDataMap[CharacterAnimationState::CROUCH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Crouch/Battlemage Crouch.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 1/Battlemage Attack 1.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::MELEE_ATTACK_2] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 2/Battlemage Attack 2.png", nullptr, 8, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::MELEE_ATTACK_3] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Attack 3/Battlemage Attack 3.png", nullptr, 9, SpriteSheetOrientation::VERTICAL, 0.08f, false };	
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Sustain Magic/Battlemage Sustain Magic.png", nullptr, 11, SpriteSheetOrientation::VERTICAL, 0.1f, false };
-	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.07f, false };
+	m_animDataMap[CharacterAnimationState::DASH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Dash/Battlemage Dash.png", nullptr, 7, SpriteSheetOrientation::VERTICAL, 0.03f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Death/Battlemage Death.png", nullptr, 12, SpriteSheetOrientation::VERTICAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::HURT] = { "Assets/Character/Battlemage Complete (Sprite Sheet)/Hurt/hurt.png", nullptr, 2, SpriteSheetOrientation::HORIZONTAL, 0.2f, false };
 	
@@ -90,7 +97,6 @@ void PlayerCharacter::Init(AEVec2 position)
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };
 	m_projectileDataMap[iceData.type] = iceData;
-
 
 	for (auto& pair : m_animDataMap)
 	{
@@ -136,6 +142,11 @@ void PlayerCharacter::Update(f32 dt)
 		}
 	}
 
+	if (m_dashCooldownTimer > 0.f)
+	{
+		m_dashCooldownTimer -= dt;
+	}
+
 	if (m_isHurt && m_animation.IsFinished())
 	{
 		m_isHurt = false;
@@ -175,11 +186,34 @@ void PlayerCharacter::Update(f32 dt)
 			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 		}
 	}
-	if (AEInputCheckCurr(AEVK_A) && !isBusy)
+	//if (AEInputCheckCurr(AEVK_A) && !isBusy)
+	//{
+	//	m_isMeleeAttacking = true;
+	//	m_hasHitEnemyThisAttack = false;
+	//	m_hasPlayedAttackSound = false;
+	//}
+
+	if (!m_isMeleeAttacking && m_meleeComboCounter > 0)
 	{
+		m_meleeComboResetTimer += dt;
+		if (m_meleeComboResetTimer > m_comboResetTime)
+		{
+			m_meleeComboCounter = 0; 
+		}
+	}
+
+	if (AEInputCheckTriggered(AEVK_A) && !isBusy)
+	{
+		m_meleeComboCounter++;
+		if (m_meleeComboCounter > 3)
+		{
+			m_meleeComboCounter = 1;
+		}
+
 		m_isMeleeAttacking = true;
 		m_hasHitEnemyThisAttack = false;
 		m_hasPlayedAttackSound = false;
+		m_meleeComboResetTimer = 0.0f;
 	}
 
 	if (AEInputCheckCurr(AEVK_S) && !isBusy && (m_weaponUseCounts.at(m_currentWeapon) > 0))
@@ -192,12 +226,13 @@ void PlayerCharacter::Update(f32 dt)
 		|| AEInputCheckTriggered(AEVK_Z)
 		|| AEInputCheckTriggered(AEVK_F)
 		)
-		&& !m_isDashing && !isAttacking)
+		&& !m_isDashing && !isBusy && m_dashCooldownTimer <= 0.f)
 	{
 		m_isDashing = true;
 
 		m_isDamageEffectActive = true;
 		m_damageEffectTimer = 0.0f;
+		m_dashCooldownTimer = m_dashCooldownDuration;
 	}
 	if ((AEInputCheckTriggered(AEVK_SPACE) 
 		|| AEInputCheckTriggered(AEVK_UP)) 
@@ -236,13 +271,13 @@ void PlayerCharacter::Update(f32 dt)
 		switch (m_currentWeapon)
 		{
 		case DamageType::FIRE:
-			GameManager::PlaySFX(*m_sfxFireAttack);
+			GameManager::PlaySFX(*m_sfxFireAttack, 0.8f);
 			break;
 		case DamageType::ICE:
-			GameManager::PlaySFX(*m_sfxIceAttack);
+			GameManager::PlaySFX(*m_sfxIceAttack, 0.6f);
 			break;
 		case DamageType::LIGHTNING:
-			GameManager::PlaySFX(*m_sfxLightningAttack);
+			GameManager::PlaySFX(*m_sfxLightningAttack, 0.8f);
 			break;
 		}
 		m_hasPlayedAttackSound = true;
@@ -362,7 +397,24 @@ void PlayerCharacter::Update(f32 dt)
 
 	CharacterAnimationState desiredState;
 	if (m_isMeleeAttacking)
-		desiredState = CharacterAnimationState::MELEE_ATTACK;
+	{
+		switch (m_meleeComboCounter)
+		{
+		case 1:
+			desiredState = CharacterAnimationState::MELEE_ATTACK;
+			break;
+		case 2:
+			desiredState = CharacterAnimationState::MELEE_ATTACK_2;
+			break;
+		case 3:
+			desiredState = CharacterAnimationState::MELEE_ATTACK_3;
+			break;
+		default:
+			desiredState = CharacterAnimationState::IDLE;
+			m_isMeleeAttacking = false;
+			break;
+		}
+	}
 	else if (m_isSkillAttacking)
 		desiredState = CharacterAnimationState::RANGED_ATTACK;
 	else if (m_isDashing)
@@ -438,15 +490,32 @@ void PlayerCharacter::Draw()
 
 	if (m_healthPoint > 0)
 	{
-		float barWidth = m_hitboxSize.x;
-		float barHeight = 10.f;
+		float healthBarWidth = m_hitboxSize.x * 3.0f;
+		float helathBarHeight = 10.f;
 		float barOffsetY = m_hitboxSize.y / 2.0f; 
 
 		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-		float currentHealthWidth = barWidth * healthRatio;
+		float currentHealthWidth = healthBarWidth * healthRatio;
 
-		DrawRect(m_position.x, m_position.y + barOffsetY, barWidth, barHeight, 0.2f, 0.2f, 0.2f, 1.0f);
-		DrawRect(m_position.x - (barWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, barHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+		DrawRect(m_position.x, m_position.y + barOffsetY, healthBarWidth, helathBarHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+		DrawRect(m_position.x - (healthBarWidth - currentHealthWidth) / 2.0f, m_position.y + barOffsetY, currentHealthWidth, helathBarHeight, 0.0f, 0.8f, 0.2f, 1.0f);
+
+		float dashBarWidth = m_hitboxSize.x * 3.0f;
+		float dashBarHeight = 10.f;
+		float dashBarOffsetY = m_hitboxSize.y / 2.5f;
+
+		DrawRect(m_position.x, m_position.y + dashBarOffsetY, dashBarWidth, dashBarHeight, 0.2f, 0.2f, 0.2f, 1.0f);
+
+		if (m_dashCooldownTimer <= 0.f)
+		{
+			DrawRect(m_position.x, m_position.y + dashBarOffsetY, dashBarWidth, dashBarHeight, 0.2f, 0.6f, 1.0f, 1.0f);
+		}
+		else
+		{
+			float cooldownProgress = 1.0f - (m_dashCooldownTimer / m_dashCooldownDuration);
+			float currentCooldownWidth = dashBarWidth * cooldownProgress;
+			DrawRect(m_position.x - (dashBarWidth - currentCooldownWidth) / 2.0f, m_position.y + dashBarOffsetY, currentCooldownWidth, dashBarHeight, 1.0f, 0.2f, 0.2f, 1.0f);
+		}
 	}	
 
 	DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
@@ -490,14 +559,14 @@ void PlayerCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
-	GameManager::PlaySFX(*m_sfxHurt);
+	GameManager::PlaySFX(*m_sfxHurt, 0.8f);
 
 	if (m_healthPoint <= 0)
 	{
 		m_healthPoint = 0;
 		m_currentAnimState = CharacterAnimationState::DEATH;
 		m_animation.Play(m_currentAnimState, m_animDataMap.at(m_currentAnimState));
-		GameManager::PlaySFX(*m_sfxDeath);
+		GameManager::PlaySFX(*m_sfxDeath, 0.4f);
 
 	}
 }

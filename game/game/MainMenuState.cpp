@@ -8,12 +8,14 @@
 const f32 buttonWidth = 350.f;
 const f32 buttonHeight = 100.f;
 
-const f32 startButtonX = 0.f;
-const f32 startButtonY = 200.f;
+const f32 startButtonX = -kHalfWindowWidth / 2.0f;
+const f32 startButtonY = kHalfWindowHeight / 4.0f;
 
-const f32 exitButtonX = 0.f;
-const f32 exitButtonY = -200.f;
+const f32 leaderBoardButtonX = -kHalfWindowWidth / 2.0f;
+const f32 leaderBoardButtonY = -kHalfWindowHeight / 5.0f;
 
+const f32 exitButtonX = -kHalfWindowWidth / 2.0f;
+const f32 exitButtonY = -kHalfWindowHeight / 1.5f;
 
 MainMenuState::MainMenuState()
 {
@@ -34,36 +36,52 @@ void MainMenuState::Update(f32 dt)
 	AEInputGetCursorPosition(&pX, &pY);
 	pX -= static_cast<s32>(kHalfWindowWidth);
 	pY = static_cast<s32>(kHalfWindowHeight) - pY;
+
+	m_isHoveringStart = (pX >= startButtonX - buttonWidth / 2 && pX <= startButtonX + buttonWidth / 2) &&
+		(pY >= startButtonY - buttonHeight / 2 && pY <= startButtonY + buttonHeight / 2);
+
+	m_isHoveringLeaderboard = (pX >= leaderBoardButtonX - buttonWidth / 2 && pX <= leaderBoardButtonX + buttonWidth / 2) &&
+		(pY >= leaderBoardButtonY - buttonHeight / 2 && pY <= leaderBoardButtonY + buttonHeight / 2);
+
+	m_isHoveringExit = (pX >= exitButtonX - buttonWidth / 2 && pX <= exitButtonX + buttonWidth / 2) &&
+		(pY >= exitButtonY - buttonHeight / 2 && pY <= exitButtonY + buttonHeight / 2);
+
 	if (AEInputCheckReleased(AEVK_LBUTTON))
 	{
-		if ((startButtonX - buttonWidth / 2 <= pX && pX <= startButtonX + buttonWidth / 2) && (startButtonY - buttonHeight / 2 <= pY && pY <= startButtonY + buttonHeight / 2))
+		if (m_isHoveringStart)
 			GameManager::ChangeState(GameState::MAIN_GAME);
-		if ((exitButtonX - buttonWidth / 2 <= pX && pX <= exitButtonX + buttonWidth / 2) && (exitButtonY - buttonHeight / 2 <= pY && pY <= exitButtonY + buttonHeight / 2))
+		else if (m_isHoveringLeaderboard)
+			GameManager::ChangeState(GameState::LEADERBOARD);
+		else if (m_isHoveringExit)
 			GameManager::m_isGameRunning = false;
 	}
-
 }
 
 void MainMenuState::Draw()
 {
+	AEGfxTexture* mainMenuTex = AEGfxTextureLoad("Assets/title.jpg");
+	DrawRect(0.f, 0.f, kWindowWidth, kWindowHeight, 1.f, 1.f, 1.f, 1.f, mainMenuTex);
+
 	AEGfxSetBackgroundColor(0.1f, 0.1f, 0.1f);
-	DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 0.5, 0.5, 0.5, 1);
-	DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.5, 0.5, 0.5, 1);
 
-	std::string pongButtonText = "Start";
-	std::string animationButtonText = "Exit";
-	f32 TextScale = 0.9f;
+	AEGfxTexture* startButtonTex = AEGfxTextureLoad("Assets/start.png");
+	AEGfxTexture* leaderBoardButtonTex = AEGfxTextureLoad("Assets/leaderboard.png");
+	AEGfxTexture* exitButtonTex = AEGfxTextureLoad("Assets/exit.png");
 
-	f32 pongButtonTextWidth, pongButtonTextHeight;
-	AEGfxGetPrintSize(GameManager::m_font, pongButtonText.c_str(), TextScale, &pongButtonTextWidth, &pongButtonTextHeight);
-	f32 animationButtonTextWidth, animationButtonTextHeight;
-	AEGfxGetPrintSize(GameManager::m_font, animationButtonText.c_str(), TextScale, &animationButtonTextWidth, &animationButtonTextHeight);
+	if (m_isHoveringStart)
+		DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, startButtonTex);
+	else
+		DrawRect(startButtonX, startButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, startButtonTex);
 
-	AEVec2 pongTextCoordinate = GetNormalizedCoords(startButtonX, startButtonY);
-	AEVec2 animationTextCoordinate = GetNormalizedCoords(exitButtonX, exitButtonY);
+	if (m_isHoveringLeaderboard)
+		DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, leaderBoardButtonTex);
+	else
+		DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, leaderBoardButtonTex);
 
-	AEGfxPrint(GameManager::m_font, pongButtonText.c_str(), pongTextCoordinate.x - pongButtonTextWidth / 2, pongTextCoordinate.y - pongButtonTextHeight / 2, TextScale, 1, 1, 1, 1);
-	AEGfxPrint(GameManager::m_font, animationButtonText.c_str(), animationTextCoordinate.x - animationButtonTextWidth / 2, animationTextCoordinate.y - animationButtonTextHeight / 2, TextScale, 1, 1, 1, 1);
+	if (m_isHoveringExit)
+		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, exitButtonTex);
+	else
+		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, exitButtonTex);
 }
 
 void MainMenuState::Exit()

@@ -30,6 +30,8 @@ BossCharacter::BossCharacter()
 	m_hitboxSize = { m_size.x * 0.5f, m_size.y * 0.5f };
 	m_hitboxOffset = { m_size.x * 0.01f, m_size.y * 0.02f };
 	killScore = 20000;
+	m_pBossHealthBarFrame = LoadImageAsset("Assets/UI/hpBar.png");
+	m_pHealthBar = LoadImageAsset("Assets/UI/hp.png");
 }
 
 BossCharacter::BossCharacter(const BossCharacter& bossCopy)
@@ -69,6 +71,8 @@ BossCharacter::BossCharacter(const BossCharacter& bossCopy)
 	m_projectileData = bossCopy.m_projectileData;
 	m_meleeHitboxes = bossCopy.m_meleeHitboxes;
 	m_laserHitbox = bossCopy.m_laserHitbox;
+	m_pBossHealthBarFrame = bossCopy.m_pBossHealthBarFrame;
+	m_pHealthBar = bossCopy.m_pHealthBar;
 }
 
 BossCharacter::~BossCharacter() {}
@@ -91,9 +95,10 @@ void BossCharacter::Init(AEVec2 position, PlayerCharacter* player)
 	m_animDataMap[CharacterAnimationState::MELEE_ATTACK] = { "Assets/Boss/meleeattack.png", nullptr, 7, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::RANGED_ATTACK] = { "Assets/Boss/rangedattack.png", nullptr, 9, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::LASER_CAST] = { "Assets/Boss/lasercast.png", nullptr, 7, SpriteSheetOrientation::HORIZONTAL, 0.12f, false };
-	m_animDataMap[CharacterAnimationState::LASER_SHEET] = { "Assets/Boss/laser_sheet.png", nullptr, 14, SpriteSheetOrientation::VERTICAL, 0.08f, false };
+	m_animDataMap[CharacterAnimationState::LASER_SHEET] = { "Assets/Boss/laser_sheet.png", nullptr, 34, SpriteSheetOrientation::VERTICAL, 0.12f, false };
 	m_animDataMap[CharacterAnimationState::DEATH] = { "Assets/Boss/death.png", nullptr, 14, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
 	m_animDataMap[CharacterAnimationState::BUFF] = { "Assets/Boss/buff.png", nullptr, 10, SpriteSheetOrientation::HORIZONTAL, 0.1f, false };
+
 
 	for (auto& pair : m_animDataMap)
 	{
@@ -203,6 +208,7 @@ void BossCharacter::Update(f32 dt)
 		{
 			m_currentAIState = BossAIState::LASER_BEAM;
 			m_laserAnimation.Play(CharacterAnimationState::LASER_SHEET, m_animDataMap.at(CharacterAnimationState::LASER_SHEET));
+			m_laserTargetPos = m_pPlayer->GetPosition();
 		}
 		break;
 	case BossAIState::LASER_BEAM:
@@ -332,7 +338,7 @@ void BossCharacter::Draw()
 				AEMtx33Concat(&laserTransform, &rotate, &scale);
 				AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 				m_laserAnimation.Draw(laserTransform);
-				if (m_laserAnimation.GetCurrentFrame() >= 8)
+				if (m_laserAnimation.GetCurrentFrame() >= 22)
 					DrawHollowRect(hitboxPos.x, hitboxPos.y + yOffset, laserData.size.x, laserData.size.y, 1.f, 0.f, 1.f, 0.5f);
 			}
 		}
@@ -340,7 +346,7 @@ void BossCharacter::Draw()
 		{
 			AEVec2 finalVisualPos = visualPos;
 			AEVec2 finalHitboxPos = hitboxPos;
-			float yDiff = m_pPlayer->GetPosition().y - m_position.y;
+			float yDiff = m_laserTargetPos.y - m_position.y;
 			if (yDiff > 150.f)
 			{
 				finalVisualPos.y += 100.f;
@@ -359,7 +365,7 @@ void BossCharacter::Draw()
 			AEMtx33Concat(&laserTransform, &rotate, &scale);
 			AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 			m_laserAnimation.Draw(laserTransform);
-			if (m_laserAnimation.GetCurrentFrame() >= 8)
+			if (m_laserAnimation.GetCurrentFrame() >= 22)
 				DrawHollowRect(finalHitboxPos.x, finalHitboxPos.y, laserHitbox.size.x, laserHitbox.size.y, 1.f, 0.f, 1.f, 0.5f);
 		}
 	}
@@ -425,6 +431,7 @@ bool BossCharacter::IsUnbeatable() const
 const AttackHitbox& BossCharacter::GetCurrentMeleeHitbox() const
 {
 	s32 currentFrame = m_animation.GetCurrentFrame();
+
 	if (currentFrame >= 0 && currentFrame < m_meleeHitboxes.size())
 	{
 		return m_meleeHitboxes[currentFrame];
@@ -523,7 +530,7 @@ void BossCharacter::AttackRange(PlayerCharacter& player, std::vector<Projectile>
 
 void BossCharacter::AttackLaser(PlayerCharacter& player)
 {
-	bool isLaserHitboxActive = m_laserAnimation.GetCurrentFrame() >= 8;
+	bool isLaserHitboxActive = m_laserAnimation.GetCurrentFrame() >= 22;
 
 	if (m_currentAIState == BossAIState::LASER_BEAM
 		&& isLaserHitboxActive 
@@ -554,7 +561,7 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 		else
 		{
 			AEVec2 finalLaserPos = laserBasePos;
-			float yDiff = player.GetPosition().y - m_position.y;
+			float yDiff = m_laserTargetPos.y - m_position.y;
 			if (yDiff > 150.f) finalLaserPos.y += 100.f;
 			else if (yDiff < -150.f) finalLaserPos.y -= 100.f;
 
@@ -568,18 +575,36 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 
 void BossCharacter::DrawBossHPUI()
 {
+	//if (m_isAttackable)
+	//{
+	//	f32 xCam, yCam;
+	//	AEGfxGetCamPosition(&xCam, &yCam);
+	//	const float barWidth = 500.f;
+	//	const float barHeight = 125.f;
+	//	const float barX = 0;
+	//	const float barY = kHalfWindowHeight - 150.f;
+	//	DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+	//	float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
+	//	float currentHealthWidth = barWidth * healthRatio;
+	//	DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
+	//	DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+	//}
+
 	if (m_isAttackable)
 	{
 		f32 xCam, yCam;
 		AEGfxGetCamPosition(&xCam, &yCam);
-		const float barWidth = 500.f;
-		const float barHeight = 125.f;
+		const float barWidth = 620.f;
+		const float barHeight = 120.f;
 		const float barX = 0;
 		const float barY = kHalfWindowHeight - 150.f;
-		DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
+		
+		DrawRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 1.f, 1.f, m_pBossHealthBarFrame);
 		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-		float currentHealthWidth = barWidth * healthRatio;
-		DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
-		DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
+		float fillWidth = barWidth * 0.72f;
+		float fillHeight = barHeight * 0.43f;
+		float currentHealthWidth = fillWidth * healthRatio;
+
+		DrawRect(barX + xCam - (fillWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, fillHeight, 1.f, 0.2f, 0.2f, 1.f, m_pHealthBar);
 	}
 }

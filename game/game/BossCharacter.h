@@ -56,7 +56,7 @@ public:
 	AEVec2 GetLaserTargetPos() const { return m_laserTargetPos; }
 	Animation& GetLaserAnimation() { return m_laserAnimation; }
 	const AttackHitbox& GetLaserHitbox() const { return m_laserHitbox; }
-	const f32 getMaxHealth() const { return m_maxHealth; }
+	const f32 GetMaxHealth() const { return m_maxHealth; }
 	bool IsCompletelyDead() const;
 	bool HasHitPlayerThisAttack() const { return m_hasHitPlayerThisAttack; }
 	void RegisterPlayerHit() { m_hasHitPlayerThisAttack = true; }
@@ -102,4 +102,6 @@ private:
 	bool m_hasHitPlayerThisAttack;
 
 	const float m_bossMessageDuration = 2.5;
+	AEGfxTexture* m_pBossHealthBarFrame;
+	AEGfxTexture* m_pHealthBar;
 };

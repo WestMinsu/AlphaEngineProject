@@ -9,6 +9,7 @@ enum class GameState
 	MAIN_GAME,
 	GAME_CLEAR,
 	GAME_OVER,
+	LEADERBOARD
 };
 
 class AGameState

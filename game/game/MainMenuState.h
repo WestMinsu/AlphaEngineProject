@@ -16,4 +16,7 @@ public:
 	void Exit() override;
 
 private:
+	bool m_isHoveringStart;
+	bool m_isHoveringLeaderboard;
+	bool m_isHoveringExit;
 };

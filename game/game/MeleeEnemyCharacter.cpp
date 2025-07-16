@@ -325,7 +325,7 @@ void MeleeEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;
-	GameManager::PlaySFX(*m_sfxHurt, 1.3f, 1.0f, 0);
+	GameManager::PlaySFX(*m_sfxHurt);
 
 	if (m_healthPoint <= 0)
 	{

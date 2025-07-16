@@ -1,6 +1,8 @@
 #include "GameManager.h"
 #include "Utility.h"
 #include "AssetManager.h"
+#include "LeaderBoardState.h"
+std::unique_ptr<GameManager> GameManager::s_pInstance = nullptr;
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
@@ -9,12 +11,23 @@ AEAudioGroup GameManager::m_sfxGroup;
 AEAudioGroup GameManager::m_bgmGroup;
 std::map<BGMTrack, AEAudio*> GameManager::m_bgmTracks;
 BGMTrack GameManager::m_currentTrack = BGMTrack::NONE;
+s32 GameManager::m_finalScore = 0;
+
+GameManager* GameManager::GetInstance()
+{
+	if (s_pInstance == nullptr)
+	{
+		s_pInstance = std::unique_ptr<GameManager>(new GameManager());
+	}
+	return s_pInstance.get();
+}
 
 GameManager::GameManager()
 {
-	m_kTextTitle = "Title";
+	m_kTextTitle = "Arcane Edge";
 
 	m_GameState = nullptr;
+	m_pScoreManager = std::make_unique<ScoreManager>("leaderboard.txt");
 }
 
 GameManager::~GameManager()
@@ -29,20 +42,20 @@ void GameManager::Init()
 
 	m_GameState = std::move(std::make_unique<IntroState>());
 	m_GameState->Init();
-	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	m_font = AEGfxCreateFont("Assets/Qaz-Regular.ttf", 72);
 
 	m_sfxGroup = AEAudioCreateGroup();
 	m_bgmGroup = AEAudioCreateGroup();
 	LoadAllMusic();
-	m_GameState = std::move(std::make_unique<IntroState>());
-	m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
 	InitUtilityMeshes();
 	AESysReset();
 }
 
-void GameManager::Update(f32 dt)
+void GameManager::Update()
 {
+	f32 dt = static_cast<f32>(AEFrameRateControllerGetFrameTime());
+
 	while (m_isGameRunning)
 	{
 		if (GameManager::m_nextState != GameState::NONE)
@@ -66,8 +79,10 @@ void GameManager::Update(f32 dt)
 			case GameState::GAME_OVER:
 				m_GameState = std::move(std::make_unique<GameOverState>());
 				break;
+			case GameState::LEADERBOARD:
+				m_GameState = std::move(std::make_unique<LeaderBoardState>());
+				break;
 			}
-
 			m_GameState->Init();
 			GameManager::m_nextState = GameState::NONE;
 		}
@@ -76,7 +91,7 @@ void GameManager::Update(f32 dt)
 		m_GameState->Update(dt);
 		m_GameState->Draw();
 
-		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+		if (0 == AESysDoesWindowExist()) {
 			m_isGameRunning = FALSE;
 		}
 		AESysFrameEnd();
@@ -96,6 +111,8 @@ void GameManager::PlaySFX(AEAudio sfx, float volume, float pitch, s32 loops)
 	AEAudioPlay(sfx, m_sfxGroup, volume, pitch, loops);
 }
 
+
+
 void GameManager::LoadAllMusic()
 {
 	m_bgmTracks[BGMTrack::STAGE] = LoadSoundAsset("Assets/Sounds/Jeremy Blake - Powerup!.mp3");
@@ -114,7 +131,7 @@ void GameManager::PlayBGM(BGMTrack track, float volume, float pitch, s32 loops)
 
 	if (m_bgmTracks.count(track))
 	{
-		AEAudioPlay(*m_bgmTracks[track], m_bgmGroup, 0.7f, 1.0f, -1);
+		AEAudioPlay(*m_bgmTracks[track], m_bgmGroup, volume, pitch, loops);
 		m_currentTrack = track;
 	}
 	else
@@ -127,4 +144,19 @@ void GameManager::StopMusic()
 {
 	AEAudioStopGroup(m_bgmGroup);
 	m_currentTrack = BGMTrack::NONE;
+}
+
+void GameManager::SetFinalScore(s32 score)
+{
+	m_finalScore = score;
+}
+
+s32 GameManager::GetFinalScore()
+{
+	return m_finalScore;
+}
+
+ScoreManager& GameManager::GetScoreManager()
+{
+	return *m_pScoreManager;
 }
