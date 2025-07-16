@@ -58,7 +58,6 @@ void GameClearState::Draw()
 
 	AEGfxPrint(GameManager::m_font, strBuffer, -0.7f, -0.1f, 1.2f, 1.f, 1.f, 1.f, 1.f);
 
-
 	sprintf_s(strBuffer, "Enter Your Name: %s_", m_playerName.c_str());
 	AEGfxPrint(GameManager::m_font, strBuffer, -0.7f, -0.3f + outlineThickness, 1.2f, 0.f, 0.f, 0.f, 1.f);
 	AEGfxPrint(GameManager::m_font, strBuffer, -0.7f, -0.3f - outlineThickness, 1.2f, 0.f, 0.f, 0.f, 1.f);

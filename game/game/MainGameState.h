@@ -15,6 +15,7 @@
 #include "SpawnEnemy.h"
 #include "WarriorEnemyCharacter.h"
 #include "NightBorneEnemyCharacter.h"
+#include "DestructibleObject.h"
 
 class MainGameState : public AGameState
 {
@@ -36,6 +37,7 @@ private:
 	std::vector<Projectile> m_playerProjectiles; 
 	std::vector<Projectile> m_enemyProjectiles;
 	std::vector<VisualEffect> m_visualEffects;
+	std::vector<DestructibleObject> m_stones;
 
 	Background m_Background;
 	EnemyFactory m_factory;
@@ -79,4 +81,8 @@ private:
 	void DrawUI();
 	ACharacter* FindClosestEnemyInFront();
 	bool isAllEnemiesDead();
+
+	float m_stoneRespawnTimer;
+	const float m_stoneRespawnTime = 15.0f;
+	bool m_allStonesWereDestroyed;
 };

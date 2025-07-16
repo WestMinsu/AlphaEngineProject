@@ -19,7 +19,7 @@ PlayerCharacter::PlayerCharacter()
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_element = ElementType::NONE;
-	m_meleeAttackDamage = 1000;
+	m_meleeAttackDamage = 100;
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
 	m_maxHealth = 100;
