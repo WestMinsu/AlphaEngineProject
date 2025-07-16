@@ -375,7 +375,7 @@ void BossCharacter::Draw()
 
 void BossCharacter::TakeDamage(s32 damage, DamageType damageType)
 {
-	if (!m_isAttackable) 
+	if (IsUnbeatable())
 		return;
 
 	float damageMultiplier = 1.0f;
@@ -425,7 +425,12 @@ BossCharacter* BossCharacter::Clone()
 
 bool BossCharacter::IsUnbeatable() const
 {
-	return m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF || !m_isAttackable;
+	return m_currentAIState == BossAIState::GLOWING || m_currentAIState == BossAIState::BUFF || !m_isAttackable || m_isShieldedByStones;
+}
+
+void BossCharacter::SetStoneShield(bool shieldOn)
+{
+	m_isShieldedByStones = shieldOn;
 }
 
 const AttackHitbox& BossCharacter::GetCurrentMeleeHitbox() const
@@ -575,22 +580,7 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 
 void BossCharacter::DrawBossHPUI()
 {
-	//if (m_isAttackable)
-	//{
-	//	f32 xCam, yCam;
-	//	AEGfxGetCamPosition(&xCam, &yCam);
-	//	const float barWidth = 500.f;
-	//	const float barHeight = 125.f;
-	//	const float barX = 0;
-	//	const float barY = kHalfWindowHeight - 150.f;
-	//	DrawRect(barX + xCam, barY, barWidth, barHeight, 0.1f, 0.1f, 0.1f, 1.f);
-	//	float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-	//	float currentHealthWidth = barWidth * healthRatio;
-	//	DrawRect(barX + xCam - (barWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, barHeight, 1.0f, 0.0f, 0.0f, 1.f);
-	//	DrawHollowRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 0.f, 1.f);
-	//}
-
-	if (m_isAttackable)
+	if (!IsUnbeatable())
 	{
 		f32 xCam, yCam;
 		AEGfxGetCamPosition(&xCam, &yCam);

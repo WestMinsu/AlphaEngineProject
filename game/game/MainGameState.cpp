@@ -26,6 +26,8 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
+	m_stones.emplace_back().Init({ 12000.f, -150.f }, "Assets/Boss/stone.PNG");
+
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 	TileMaps.push_back(TileMap("Assets/Maps/test2_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth() * 6));
@@ -147,7 +149,13 @@ void MainGameState::Update(f32 dt)
 		m_Bosses[0]->AttackMelee(m_Player);
 		m_Bosses[0]->AttackRange(m_Player, m_enemyProjectiles);
 		m_Bosses[0]->AttackLaser(m_Player);
+
 	}
+	for (auto& stone : m_stones)
+	{
+		stone.Update(dt);
+	}
+
 
 	if (m_bossMessageTimer > 0.0f)
 	{
@@ -174,6 +182,42 @@ void MainGameState::Update(f32 dt)
 				m_Player.TakeDamage(2, DamageType::NONE);
 				break;
 			}
+		}
+	}
+
+	bool allStonesCurrentlyDestroyed = true;
+	for (const auto& stone : m_stones)
+	{
+		if (stone.IsActive())
+		{
+			allStonesCurrentlyDestroyed = false;
+			break;
+		}
+	}
+
+	for (auto boss : m_Bosses)
+	{
+		m_Bosses[0]->SetStoneShield(!allStonesCurrentlyDestroyed);
+	}
+
+	if (allStonesCurrentlyDestroyed && !m_allStonesWereDestroyed)
+	{
+		m_stoneRespawnTimer = m_stoneRespawnTime;
+		std::cout << "All stones destroyed! Respawn timer started." << std::endl;
+	}
+
+	m_allStonesWereDestroyed = allStonesCurrentlyDestroyed;
+
+	if (m_stoneRespawnTimer > 0.0f)
+	{
+		m_stoneRespawnTimer -= dt;
+		if (m_stoneRespawnTimer <= 0.0f)
+		{
+			for (auto& stone : m_stones)
+			{
+				stone.Respawn(); 
+			}
+			m_stoneRespawnTimer = 0.0f; 
 		}
 	}
 
@@ -322,10 +366,24 @@ void MainGameState::Update(f32 dt)
 		projHitboxPos.y += proj->GetHitboxOffset().y;
 		const AEVec2& projHitboxSize = proj->GetHitboxSize();
 
+		bool hit = false;
+		for (auto& stone : m_stones)
+		{
+			if (stone.IsActive() && CheckAABBCollision(proj->GetPosition(), proj->GetSize(), stone.GetPosition(), stone.GetSize()))
+			{
+				stone.TakeDamage(proj->GetDamage());
+				proj->Deactivate();
+				hit = true;
+				break;
+			}
+		}
+		if (hit) 
+			continue;
+
 		for (auto boss : m_Bosses)
 		{
 			AEVec2 enemyHitboxPos = boss->GetPosition();
-			enemyHitboxPos.x += boss->GetHitboxOffset().x;
+			enemyHitboxPos.x += boss->GetHitboxOffset().x;	
 			enemyHitboxPos.y += boss->GetHitboxOffset().y;
 			if (CheckAABBCollision(projHitboxPos, projHitboxSize, enemyHitboxPos, boss->GetHitboxSize()))
 			{
@@ -468,39 +526,54 @@ void MainGameState::Update(f32 dt)
 		hitboxPos.x = playerPos.x + (m_Player.GetDirection() == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = playerPos.y + currentHitbox.offset.y;
 
-		for (auto enemy : m_Enemies)
+		bool hit = false;
+		for (auto& stone : m_stones)
 		{
-			AEVec2 enemyHitboxPos = enemy->GetPosition();
-			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
-			enemyHitboxPos.y += enemy->GetHitboxOffset().y;
-			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
+			if (stone.IsActive() && CheckAABBCollision(hitboxPos, currentHitbox.size, stone.GetPosition(), stone.GetSize()))
 			{
-				bool wasAlive = !enemy->IsDead();
-				enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
-				if (wasAlive && enemy->IsDead())
-				{
-					m_Player.AddScore(enemy->GetKillScore());
-				}
+				stone.TakeDamage(m_Player.GetMeleeAttackDamage());
 				m_Player.RegisterHit();
+				hit = true;
 				break;
 			}
 		}
 
-		for (auto enemy : m_Bosses)
+		if (!hit)
 		{
-			AEVec2 enemyHitboxPos = enemy->GetPosition();
-			enemyHitboxPos.x += enemy->GetHitboxOffset().x;
-			enemyHitboxPos.y += enemy->GetHitboxOffset().y;
-			if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
+			for (auto enemy : m_Enemies)
 			{
-				bool wasAlive = !enemy->IsDead();
-				enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
-				if (wasAlive && enemy->IsDead())
+				AEVec2 enemyHitboxPos = enemy->GetPosition();
+				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+				if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
 				{
-					m_Player.AddScore(enemy->GetKillScore());
+					bool wasAlive = !enemy->IsDead();
+					enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
+					if (wasAlive && enemy->IsDead())
+					{
+						m_Player.AddScore(enemy->GetKillScore());
+					}
+					m_Player.RegisterHit();
+					break;
 				}
-				m_Player.RegisterHit();
-				break;
+			}
+
+			for (auto enemy : m_Bosses)
+			{
+				AEVec2 enemyHitboxPos = enemy->GetPosition();
+				enemyHitboxPos.x += enemy->GetHitboxOffset().x;
+				enemyHitboxPos.y += enemy->GetHitboxOffset().y;
+				if (enemy->GetHealth() > 0 && CheckAABBCollision(hitboxPos, currentHitbox.size, enemyHitboxPos, enemy->GetHitboxSize()))
+				{
+					bool wasAlive = !enemy->IsDead();
+					enemy->TakeDamage(m_Player.GetMeleeAttackDamage(), DamageType::NONE);
+					if (wasAlive && enemy->IsDead())
+					{
+						m_Player.AddScore(enemy->GetKillScore());
+					}
+					m_Player.RegisterHit();
+					break;
+				}
 			}
 		}
 	}
@@ -523,6 +596,11 @@ void MainGameState::Draw()
 	for (auto enemy : m_Enemies)
 	{
 		enemy->Draw();
+	}
+
+	for (auto& stone : m_stones)
+	{
+		stone.Draw();
 	}
 
 	if ( m_Bosses.size() > 0 && !m_Bosses[0]->IsCompletelyDead())

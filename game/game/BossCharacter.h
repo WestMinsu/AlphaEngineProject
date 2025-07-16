@@ -48,6 +48,7 @@ public:
 	const AnimData& GetAnimData(CharacterAnimationState state) const { return m_animDataMap.at(state); }
 	bool IsAttackable() const { return m_isAttackable; }
 	bool IsUnbeatable() const; 
+	void SetStoneShield(bool shieldOn);
 	bool IsBuffed() const { return m_isInBuffState; }
 	const ProjectileData& GetProjectileData() const { return m_projectileData; }
 	const AttackHitbox& GetCurrentMeleeHitbox() const;
@@ -100,6 +101,7 @@ private:
 	bool m_hasFired;
 	AEVec2 m_laserTargetPos;
 	bool m_hasHitPlayerThisAttack;
+	bool m_isShieldedByStones;
 
 	const float m_bossMessageDuration = 2.5;
 	AEGfxTexture* m_pBossHealthBarFrame;
