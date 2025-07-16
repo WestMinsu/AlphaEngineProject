@@ -1,6 +1,8 @@
 #include "GameManager.h"
 #include "Utility.h"
 #include "AssetManager.h"
+#include "LeaderBoardState.h"
+std::unique_ptr<GameManager> GameManager::s_pInstance = nullptr;
 
 GameState GameManager::m_nextState = GameState::NONE;
 s8 GameManager::m_font;
@@ -11,11 +13,21 @@ std::map<BGMTrack, AEAudio*> GameManager::m_bgmTracks;
 BGMTrack GameManager::m_currentTrack = BGMTrack::NONE;
 s32 GameManager::m_finalScore = 0;
 
+GameManager* GameManager::GetInstance()
+{
+	if (s_pInstance == nullptr)
+	{
+		s_pInstance = std::unique_ptr<GameManager>(new GameManager());
+	}
+	return s_pInstance.get();
+}
+
 GameManager::GameManager()
 {
-	m_kTextTitle = "Title";
+	m_kTextTitle = "Arcane Edge";
 
 	m_GameState = nullptr;
+	m_pScoreManager = std::make_unique<ScoreManager>("leaderboard.txt");
 }
 
 GameManager::~GameManager()
@@ -35,15 +47,15 @@ void GameManager::Init()
 	m_sfxGroup = AEAudioCreateGroup();
 	m_bgmGroup = AEAudioCreateGroup();
 	LoadAllMusic();
-	//m_GameState = std::move(std::make_unique<IntroState>());
-	//m_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
 	InitUtilityMeshes();
 	AESysReset();
 }
 
-void GameManager::Update(f32 dt)
+void GameManager::Update()
 {
+	f32 dt = static_cast<f32>(AEFrameRateControllerGetFrameTime());
+
 	while (m_isGameRunning)
 	{
 		if (GameManager::m_nextState != GameState::NONE)
@@ -67,8 +79,10 @@ void GameManager::Update(f32 dt)
 			case GameState::GAME_OVER:
 				m_GameState = std::move(std::make_unique<GameOverState>());
 				break;
+			case GameState::LEADERBOARD:
+				m_GameState = std::move(std::make_unique<LeaderBoardState>());
+				break;
 			}
-
 			m_GameState->Init();
 			GameManager::m_nextState = GameState::NONE;
 		}
@@ -140,4 +154,9 @@ void GameManager::SetFinalScore(s32 score)
 s32 GameManager::GetFinalScore()
 {
 	return m_finalScore;
+}
+
+ScoreManager& GameManager::GetScoreManager()
+{
+	return *m_pScoreManager;
 }

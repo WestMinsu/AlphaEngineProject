@@ -30,7 +30,8 @@ BossCharacter::BossCharacter()
 	m_hitboxSize = { m_size.x * 0.5f, m_size.y * 0.5f };
 	m_hitboxOffset = { m_size.x * 0.01f, m_size.y * 0.02f };
 	killScore = 20000;
-	m_pBossHealthBar = LoadImageAsset("Assets/UI/hpBar.png");
+	m_pBossHealthBarFrame = LoadImageAsset("Assets/UI/hpBar.png");
+	m_pHealthBar = LoadImageAsset("Assets/UI/hp.png");
 }
 
 BossCharacter::BossCharacter(const BossCharacter& bossCopy)
@@ -70,7 +71,8 @@ BossCharacter::BossCharacter(const BossCharacter& bossCopy)
 	m_projectileData = bossCopy.m_projectileData;
 	m_meleeHitboxes = bossCopy.m_meleeHitboxes;
 	m_laserHitbox = bossCopy.m_laserHitbox;
-	m_pBossHealthBar = bossCopy.m_pBossHealthBar;
+	m_pBossHealthBarFrame = bossCopy.m_pBossHealthBarFrame;
+	m_pHealthBar = bossCopy.m_pHealthBar;
 }
 
 BossCharacter::~BossCharacter() {}
@@ -592,17 +594,17 @@ void BossCharacter::DrawBossHPUI()
 	{
 		f32 xCam, yCam;
 		AEGfxGetCamPosition(&xCam, &yCam);
-		const float barWidth = 600.f;
+		const float barWidth = 620.f;
 		const float barHeight = 120.f;
 		const float barX = 0;
 		const float barY = kHalfWindowHeight - 150.f;
 		
-		DrawRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 1.f, 1.f, m_pBossHealthBar);
+		DrawRect(barX + xCam, barY, barWidth, barHeight, 1.f, 1.f, 1.f, 1.f, m_pBossHealthBarFrame);
 		float healthRatio = static_cast<float>(m_healthPoint) / m_maxHealth;
-		float fillWidth = barWidth * 0.70f;
-		float fillHeight = barHeight * 0.42f;
+		float fillWidth = barWidth * 0.72f;
+		float fillHeight = barHeight * 0.43f;
 		float currentHealthWidth = fillWidth * healthRatio;
 
-		DrawRect(barX + xCam - (fillWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, fillHeight, 1.f, 0.2f, 0.2f, 1.f);
+		DrawRect(barX + xCam - (fillWidth - currentHealthWidth) / 2.0f, barY, currentHealthWidth, fillHeight, 1.f, 0.2f, 0.2f, 1.f, m_pHealthBar);
 	}
 }

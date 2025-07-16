@@ -104,6 +104,15 @@
     <ClInclude Include="NightBorneEnemyCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LeaderBoardData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LeaderBoardState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ACharacter.cpp">
@@ -182,6 +191,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NightBorneEnemyCharacter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LeaderBoardState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

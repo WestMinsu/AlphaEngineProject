@@ -114,6 +114,8 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="GameClearState.h" />
     <ClInclude Include="GameOverState.h" />
     <ClInclude Include="GameTypes.h" />
+    <ClInclude Include="LeaderBoardData.h" />
+    <ClInclude Include="LeaderBoardState.h" />
     <ClInclude Include="MeleeEnemyCharacter.h" />
     <ClInclude Include="MageEnemyCharacter.h" />
     <ClInclude Include="NightBorneEnemyCharacter.h" />
@@ -125,6 +127,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClInclude Include="MainGameState.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Projectile.h" />
+    <ClInclude Include="ScoreManager.h" />
     <ClInclude Include="SpawnEnemy.h" />
     <ClInclude Include="RangedEnemyCharacter.h" />
     <ClInclude Include="TileMap.h" />
@@ -144,6 +147,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="FireWormEnemyCharacter.cpp" />
     <ClCompile Include="GameClearState.cpp" />
     <ClCompile Include="GameOverState.cpp" />
+    <ClCompile Include="LeaderBoardState.cpp" />
     <ClCompile Include="MeleeEnemyCharacter.cpp" />
     <ClCompile Include="MageEnemyCharacter.cpp" />
     <ClCompile Include="NightBorneEnemyCharacter.cpp" />
@@ -154,6 +158,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q
     <ClCompile Include="MainGameState.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="ScoreManager.cpp" />
     <ClCompile Include="SpawnEnemy.cpp" />
     <ClCompile Include="RangedEnemyCharacter.cpp" />
     <ClCompile Include="TileMap.cpp" />

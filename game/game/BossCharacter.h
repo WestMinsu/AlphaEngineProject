@@ -102,5 +102,6 @@ private:
 	bool m_hasHitPlayerThisAttack;
 
 	const float m_bossMessageDuration = 2.5;
-	AEGfxTexture* m_pBossHealthBar;
+	AEGfxTexture* m_pBossHealthBarFrame;
+	AEGfxTexture* m_pHealthBar;
 };
