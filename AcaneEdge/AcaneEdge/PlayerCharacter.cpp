@@ -219,7 +219,7 @@ void PlayerCharacter::Update(f32 dt)
 		m_velocityY = m_jumpStrength;
 	}
 
-	if (AEInputCheckTriggered(AEVK_D))
+	if (AEInputCheckTriggered(AEVK_R))
 	{
 		switch (m_currentWeapon)
 		{
