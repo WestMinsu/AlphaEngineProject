@@ -85,4 +85,7 @@ private:
 	float m_stoneRespawnTimer;
 	const float m_stoneRespawnTime = 15.0f;
 	bool m_allStonesWereDestroyed;
+
+	AEGfxTexture* m_pBossTutorialTexture;
+	bool m_isShowingBossTutorial;
 };

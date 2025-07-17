@@ -14,6 +14,9 @@
 MainGameState::MainGameState()
 {
 	m_pUiSlot = nullptr;
+
+	m_pBossTutorialTexture = nullptr;
+	m_isShowingBossTutorial = false;
 }
 
 MainGameState::~MainGameState() {}
@@ -27,6 +30,10 @@ void MainGameState::Init()
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
 	m_stones.emplace_back().Init({ 12000.f, -150.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ 11900.f, -150.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ 11800.f, -150.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ 11700.f, -150.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ 11600.f, -150.f }, "Assets/Boss/stone.PNG");
 
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
@@ -92,6 +99,7 @@ void MainGameState::Init()
 
 	m_borderTexture = LoadImageAsset("Assets/UI/UISlotBorders.png");
 	m_scoreBorderTexture = LoadImageAsset("Assets/UI/ScoreBorders.png");
+	m_pBossTutorialTexture = LoadImageAsset("Assets/boss/bosstutorial.png"); 
 }
 
 void MainGameState::Update(f32 dt)
@@ -201,6 +209,11 @@ void MainGameState::Update(f32 dt)
 			allStonesCurrentlyDestroyed = false;
 			break;
 		}
+	}
+
+	if (m_isShowingBossTutorial && allStonesCurrentlyDestroyed)
+	{
+		m_isShowingBossTutorial = false;
 	}
 
 	for (auto boss : m_Bosses)
@@ -607,6 +620,7 @@ void MainGameState::Draw()
 	if ( m_Bosses.size() > 0 && !m_Bosses[0]->IsCompletelyDead())
 	{
 		m_Bosses[0]->Draw();
+		m_isShowingBossTutorial = true;
 	}
 
 	m_Player.Draw();
@@ -635,6 +649,18 @@ void MainGameState::Draw()
 		float imgY = 200.f;
 
 		DrawRect(xCam, imgY, imgWidth, imgHeight, 1.f, 1.f, 1.f, 1.f, m_pBossMessageTexture);
+	}
+
+	if (m_isShowingBossTutorial)
+	{
+		float xCam, yCam;
+		AEGfxGetCamPosition(&xCam, &yCam);
+
+		float imgWidth = 400.f;
+		float imgHeight = 150.f;
+		float imgY = 300.f;
+
+		DrawRect(xCam, imgY, imgWidth, imgHeight, 1.f, 1.f, 1.f, 1.f, m_pBossTutorialTexture);
 	}
 }
 

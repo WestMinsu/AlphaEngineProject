@@ -79,7 +79,7 @@ void MainMenuState::Draw()
 		DrawRect(leaderBoardButtonX, leaderBoardButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, leaderBoardButtonTex);
 
 	if (m_isHoveringExit)
-		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.6, 0.6f, 0.6f, 1.f, exitButtonTex);
+		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 0.6f, 0.6f, 0.6f, 1.f, exitButtonTex);
 	else
 		DrawRect(exitButtonX, exitButtonY, buttonWidth, buttonHeight, 1.f, 1.f, 1.f, 1.f, exitButtonTex);
 }
