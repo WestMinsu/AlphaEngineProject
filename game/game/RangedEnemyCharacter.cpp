@@ -281,7 +281,7 @@ void RangedEnemyCharacter::Draw()
 		m_animation.Draw(transform, 1.0f, 0.0f, 0.0f, 0.7f);
 	else
 		m_animation.Draw(transform);
-	DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
+	//DrawHollowRect(m_position.x + m_hitboxOffset.x, m_position.y + m_hitboxOffset.y, m_hitboxSize.x, m_hitboxSize.y, 1.0f, 0.0f, 0.0f, 1.f);
 }
 
 void RangedEnemyCharacter::Destroy()

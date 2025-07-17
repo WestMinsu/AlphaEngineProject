@@ -76,7 +76,7 @@ void Projectile::Draw()
 	hitboxWorldPos.x = m_position.x + (m_hitboxOffset.x * dirMultiplier);
 	hitboxWorldPos.y = m_position.y + m_hitboxOffset.y;
 
-	DrawHollowRect(hitboxWorldPos.x, hitboxWorldPos.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 1.0f, 1.0f, 0.5f);
+	//DrawHollowRect(hitboxWorldPos.x, hitboxWorldPos.y, m_hitboxSize.x, m_hitboxSize.y, 0.0f, 1.0f, 1.0f, 0.5f);
 }
 
 void Projectile::Destroy()

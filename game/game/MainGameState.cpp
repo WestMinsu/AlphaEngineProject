@@ -167,11 +167,6 @@ void MainGameState::Update(f32 dt)
 		m_Bosses[0]->AttackLaser(m_Player);
 		m_isShowingBossTutorial = true;
 	}
-	for (auto& stone : m_stones)
-	{
-		stone.Update(dt);
-	}
-
 
 	if (m_bossMessageTimer > 0.0f)
 	{
@@ -202,12 +197,16 @@ void MainGameState::Update(f32 dt)
 	}
 
 	bool allStonesCurrentlyDestroyed = true;
-	for (const auto& stone : m_stones)
+
+	if (m_isShowingBossTutorial)
 	{
-		if (stone.IsActive())
+		for (const auto& stone : m_stones)
 		{
-			allStonesCurrentlyDestroyed = false;
-			break;
+			if (stone.IsActive())
+			{
+				allStonesCurrentlyDestroyed = false;
+				break;
+			}
 		}
 	}
 

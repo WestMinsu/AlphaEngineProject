@@ -167,32 +167,9 @@ void PlayerCharacter::Update(f32 dt)
 
 	if (AEInputCheckTriggered(AEVK_Q))
 	{
-		m_currentWeaponIndex = 0;
+		m_currentWeaponIndex = (m_currentWeaponIndex + 1) % m_availableWeapons.size();
 		m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
 	}
-	if (AEInputCheckTriggered(AEVK_W))
-	{
-		if (m_availableWeapons.size() > 1)
-		{
-			m_currentWeaponIndex = 1;
-			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
-		}
-	}
-	if (AEInputCheckTriggered(AEVK_E))
-	{
-		if (m_availableWeapons.size() > 2)
-		{
-			m_currentWeaponIndex = 2;
-			m_currentWeapon = m_availableWeapons[m_currentWeaponIndex];
-		}
-	}
-	//if (AEInputCheckCurr(AEVK_A) && !isBusy)
-	//{
-	//	m_isMeleeAttacking = true;
-	//	m_hasHitEnemyThisAttack = false;
-	//	m_hasPlayedAttackSound = false;
-	//}
-
 	if (!m_isMeleeAttacking && m_meleeComboCounter > 0)
 	{
 		m_meleeComboResetTimer += dt;
@@ -485,7 +462,7 @@ void PlayerCharacter::Draw()
 		AEVec2 hitboxPos;
 		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::RIGHT ? currentHitbox.offset.x : -currentHitbox.offset.x);
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
-		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
+		//DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
 
 	if (m_healthPoint > 0)
@@ -518,7 +495,7 @@ void PlayerCharacter::Draw()
 		}
 	}	
 
-	DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
+	//DrawHollowRect(m_position.x + GetHitboxOffset().x, m_position.y + GetHitboxOffset().y, GetHitboxSize().x, GetHitboxSize().y, 0.0f, 0.8f, 1.0f, 0.5f);
 }
 
 void PlayerCharacter::Destroy()
