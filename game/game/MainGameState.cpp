@@ -29,15 +29,15 @@ void MainGameState::Init()
 	AEGfxSetCamPosition(0.f, 0.f);
 	m_Player.Init({ -kHalfWindowWidth + 200.f, 0.f });
 
-	m_stones.emplace_back().Init({ 12000.f, -150.f }, "Assets/Boss/stone.PNG");
-	m_stones.emplace_back().Init({ 11900.f, -150.f }, "Assets/Boss/stone.PNG");
-	m_stones.emplace_back().Init({ 11800.f, -150.f }, "Assets/Boss/stone.PNG");
-	m_stones.emplace_back().Init({ 11700.f, -150.f }, "Assets/Boss/stone.PNG");
-	m_stones.emplace_back().Init({ 11600.f, -150.f }, "Assets/Boss/stone.PNG");
-
 	TileMaps.push_back(TileMap("Assets/Maps/test0_32.tmj", 2.f));
 	TileMaps.push_back(TileMap("Assets/Maps/test1_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth()));
 	TileMaps.push_back(TileMap("Assets/Maps/test2_32.tmj", 2.f, TileMaps[0].GetMapTotalWidth() * 6));
+
+	m_stones.emplace_back().Init({ TileMaps[0].GetMapTotalWidth() * 6.f - kHalfWindowWidth + 50 * 32.f, -kHalfWindowHeight + 8.5f * 32.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ TileMaps[0].GetMapTotalWidth() * 6.f - kHalfWindowWidth + 5 * 32.f, -kHalfWindowHeight + 14.5f * 32.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ TileMaps[0].GetMapTotalWidth() * 6.f - kHalfWindowWidth + 17 * 32.f, -kHalfWindowHeight + 19.5f * 32.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ TileMaps[0].GetMapTotalWidth() * 6.f - kHalfWindowWidth + 29 * 32.f, -kHalfWindowHeight + 21.5f * 32.f }, "Assets/Boss/stone.PNG");
+	m_stones.emplace_back().Init({ TileMaps[0].GetMapTotalWidth() * 6.f - kHalfWindowWidth + 43 * 32.f, -kHalfWindowHeight + 18.5f * 32.f }, "Assets/Boss/stone.PNG");
 
 	m_Background.Init();
 	WarriorEnemyCharacter* warrior = new WarriorEnemyCharacter();
