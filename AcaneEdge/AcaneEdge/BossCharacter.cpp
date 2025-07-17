@@ -313,7 +313,7 @@ void BossCharacter::Draw()
 		AEVec2 hitboxPos;
 		hitboxPos.x = m_position.x + (m_currentDirection == CharacterDirection::LEFT ? -currentHitbox.offset.x : currentHitbox.offset.x);
 		hitboxPos.y = m_position.y + currentHitbox.offset.y;
-		DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
+		//DrawHollowRect(hitboxPos.x, hitboxPos.y, currentHitbox.size.x, currentHitbox.size.y, 1.0f, 0.0f, 0.0f, 0.5f);
 	}
 
 
@@ -366,7 +366,7 @@ void BossCharacter::Draw()
 			AEMtx33Concat(&laserTransform, &translate, &laserTransform);
 			m_laserAnimation.Draw(laserTransform);
 	/*		if (m_laserAnimation.GetCurrentFrame() >= 22)
-				DrawHollowRect(finalHitboxPos.x, finalHitboxPos.y, laserHitbox.size.x, laserHitbox.size.y, 1.f, 0.f, 1.f, 0.5f);*/
+				//DrawHollowRect(finalHitboxPos.x, finalHitboxPos.y, laserHitbox.size.x, laserHitbox.size.y, 1.f, 0.f, 1.f, 0.5f);*/
 		}
 	}
 
