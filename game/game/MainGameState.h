@@ -62,7 +62,7 @@ private:
 	float m_feedbackTextTimer;
 	AEVec2 m_feedbackTextPos;
 
-	AEGfxTexture* m_pGoMessage;
+	AEGfxTexture* m_GoMessage;
 	float m_GoMessageTimer;
 	AEVec2 m_GoMessageSize;
 	AEVec2 m_GoMessageOffset;
@@ -86,6 +86,11 @@ private:
 	const float m_stoneRespawnTime = 15.0f;
 	bool m_allStonesWereDestroyed;
 
-	AEGfxTexture* m_pBossTutorialTexture;
+	AEGfxTexture* m_BossTutorialTexture;
 	bool m_isShowingBossTutorial;
+
+	AEGfxTexture* m_controlTexture;
+	bool m_isHelpScreenVisible;
+
+	AEGfxTexture* m_helpTexture;
 };

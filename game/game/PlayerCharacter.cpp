@@ -14,15 +14,15 @@ PlayerCharacter::PlayerCharacter()
 	m_hitboxOffset = { 0.0f, -40.0f };
 	m_crouchingHitboxSize = { m_size.x * 0.15f, m_size.y * 0.19f };
 	m_crouchingHitboxOffset = { 0.0f, -80.0f };
-	m_healthPoint = 100;
+	m_healthPoint = 150;
 	m_characterSpeed = 300.f;
 	m_airAcceleration = 1200.f;
 	m_currentDirection = CharacterDirection::RIGHT;
 	m_element = ElementType::NONE;
-	m_meleeAttackDamage = 100;
+	m_meleeAttackDamage = 10;
 
 	m_currentAnimState = CharacterAnimationState::IDLE;
-	m_maxHealth = 100;
+	m_maxHealth = 150;
 	m_velocityX = 0.0f;
 	m_velocityY = 0.0f;
 	m_gravity = -1200.0f;
@@ -596,6 +596,8 @@ void PlayerCharacter::AddScore(s32 amount)
 void PlayerCharacter::BuyMagic(DamageType type)
 {
 	int cost = 1000;
+	if (type == DamageType::LIGHTNING)
+		cost = 2000;
 	if (m_score >= cost)
 	{
 		m_score -= cost;

@@ -15,7 +15,7 @@ MainGameState::MainGameState()
 {
 	m_pUiSlot = nullptr;
 
-	m_pBossTutorialTexture = nullptr;
+	m_BossTutorialTexture = nullptr;
 	m_isShowingBossTutorial = false;
 }
 
@@ -92,18 +92,35 @@ void MainGameState::Init()
 	m_currentClampCameraXLeft = m_clampCameraX.x;
 	m_moveTileMapCount = 0;
 
-	m_pGoMessage = LoadImageAsset("Assets/UI/go.png");
+	m_GoMessage = LoadImageAsset("Assets/UI/go.png");
 	m_GoMessageTimer = 0.f;
 	m_GoMessageSize = {200.f, 100.f};
 	m_GoMessageOffset= {kHalfWindowWidth - m_GoMessageSize.x - 30, 0};
 
 	m_borderTexture = LoadImageAsset("Assets/UI/UISlotBorders.png");
 	m_scoreBorderTexture = LoadImageAsset("Assets/UI/ScoreBorders.png");
-	m_pBossTutorialTexture = LoadImageAsset("Assets/boss/bosstutorial.png"); 
+	m_BossTutorialTexture = LoadImageAsset("Assets/boss/bosstutorial.png"); 
+	m_controlTexture = LoadImageAsset("Assets/UI/controlguide.png");
+	m_helpTexture = LoadImageAsset("Assets/UI/help.png");
 }
 
 void MainGameState::Update(f32 dt)
 {
+	if (m_isHelpScreenVisible)
+	{
+		if (AEInputCheckTriggered(AEVK_F1))
+		{
+			m_isHelpScreenVisible = false;
+		}
+		return;
+	}
+
+	if (AEInputCheckTriggered(AEVK_F1))
+	{
+		m_isHelpScreenVisible = true;
+		return; 
+	}
+
 	if (m_feedbackTextTimer > 0.0f)
 	{
 		m_feedbackTextTimer -= dt;
@@ -658,7 +675,18 @@ void MainGameState::Draw()
 		float imgHeight = 150.f;
 		float imgY = 300.f;
 
-		DrawRect(xCam, imgY, imgWidth, imgHeight, 1.f, 1.f, 1.f, 1.f, m_pBossTutorialTexture);
+		DrawRect(xCam, imgY, imgWidth, imgHeight, 1.f, 1.f, 1.f, 1.f, m_BossTutorialTexture);
+	}
+
+	DrawRect(0, 300, 700, 100, 1.f, 1.f, 1.f, 1.f, m_helpTexture);
+
+	if (m_isHelpScreenVisible)
+	{
+		float xCam, yCam;
+		AEGfxGetCamPosition(&xCam, &yCam);
+
+		DrawRect(xCam, yCam, kWindowWidth, kWindowHeight, 0.f, 0.f, 0.f, 0.7f);
+		DrawRect(xCam, yCam, 800, 800, 1.f, 1.f, 1.f, 1.f, m_controlTexture);
 	}
 }
 
@@ -668,11 +696,6 @@ void MainGameState::Exit()
 	{
 		tm.Destroy();
 	}
-
-	//for (auto enemy : m_Enemies)
-	//{
-	//	enemy->Destroy();
-	//}
 
 	TileMaps.clear();
 	m_Background.Destroy();
@@ -795,7 +818,7 @@ void MainGameState::DrawUI()
 	if (m_GoMessageTimer < 3.f && m_GoMessageTimer > 0.f)
 	{
 		f32 sizeRatio = (int)(1 + m_GoMessageTimer) - m_GoMessageTimer;
-		DrawRect(xCam + m_GoMessageOffset.x + m_GoMessageSize.x * (1.f - sizeRatio), yCam + m_GoMessageOffset.y, m_GoMessageSize.x * sizeRatio, m_GoMessageSize.y, 1.f, 1.f, 1.f, 1.f, m_pGoMessage);
+		DrawRect(xCam + m_GoMessageOffset.x + m_GoMessageSize.x * (1.f - sizeRatio), yCam + m_GoMessageOffset.y, m_GoMessageSize.x * sizeRatio, m_GoMessageSize.y, 1.f, 1.f, 1.f, 1.f, m_GoMessage);
 	}
 }
 
