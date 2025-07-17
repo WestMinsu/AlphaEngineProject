@@ -92,7 +92,7 @@ void PlayerCharacter::Init(AEVec2 position)
 
 	ProjectileData iceData;
 	iceData.speed = 1000.0f;
-	iceData.damage = 25;
+	iceData.damage = 20;
 	iceData.size = { 200.f, 70.f };
 	iceData.animData = { "Assets/MagicArrow/ice.png", nullptr, 15, SpriteSheetOrientation::HORIZONTAL, 0.05f, true };
 	iceData.type = { DamageType::ICE };

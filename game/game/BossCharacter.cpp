@@ -558,7 +558,7 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 				AEVec2 currentLaserPos = { laserBasePos.x, laserBasePos.y + yOffset };
 				if (CheckAABBCollision(currentLaserPos, m_laserHitbox.size, playerHitboxPos, player.GetHitboxSize()))
 				{
-					player.TakeDamage(1, DamageType::NONE);
+					player.TakeDamage(50, DamageType::NONE);
 					break;
 				}
 			}
@@ -572,7 +572,7 @@ void BossCharacter::AttackLaser(PlayerCharacter& player)
 
 			if (CheckAABBCollision(finalLaserPos, m_laserHitbox.size, playerHitboxPos, player.GetHitboxSize()))
 			{
-				player.TakeDamage(1, DamageType::NONE);
+				player.TakeDamage(50, DamageType::NONE);
 			}
 		}
 	}
