@@ -385,7 +385,7 @@ void BossCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 	m_healthPoint -= static_cast<s32>(damage * damageMultiplier);
 
-	std::cout << "Boss takes damage! HP: " << m_healthPoint << std::endl;
+	//std::cout << "Boss takes damage! HP: " << m_healthPoint << std::endl;
 
 	if (m_healthPoint <= 0)
 	{

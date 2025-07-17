@@ -297,7 +297,7 @@ void RangedEnemyCharacter::TakeDamage(s32 damage, DamageType damageType)
 	}
 
 	m_healthPoint -= damage;
-	std::cout << "Ranged Enemy takes damage! HP: " << m_healthPoint << std::endl;
+	//std::cout << "Ranged Enemy takes damage! HP: " << m_healthPoint << std::endl;
 	m_isDamageEffectActive = true;
 	m_damageEffectTimer = 0.0f;
 	m_isHurt = true;

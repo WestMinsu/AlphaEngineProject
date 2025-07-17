@@ -18,7 +18,7 @@ void ScoreManager::LoadScores()
 	std::ifstream file(m_filename);
 	if (!file.is_open())
 	{
-		std::cout << "Could not open leaderboard file for reading. A new one will be created." << std::endl;
+		//std::cout << "Could not open leaderboard file for reading. A new one will be created." << std::endl;
 		return;
 	}
 

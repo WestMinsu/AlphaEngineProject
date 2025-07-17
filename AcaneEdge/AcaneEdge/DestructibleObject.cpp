@@ -42,7 +42,7 @@ void DestructibleObject::TakeDamage(s32 damage)
 	if (m_health <= 0)
 	{
 		m_isActive = false;
-		std::cout << "A stone has been destroyed!" << std::endl;
+		//std::cout << "A stone has been destroyed!" << std::endl;
 	}
 }
 
@@ -50,5 +50,5 @@ void DestructibleObject::Respawn()
 {
 	m_isActive = true;
 	m_health = 10;
-	std::cout << "A stone has respawned!" << std::endl;
+	//std::cout << "A stone has respawned!" << std::endl;
 }

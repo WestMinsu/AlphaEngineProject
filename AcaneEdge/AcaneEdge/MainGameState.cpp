@@ -240,7 +240,7 @@ void MainGameState::Update(f32 dt)
 	if (allStonesCurrentlyDestroyed && !m_allStonesWereDestroyed)
 	{
 		m_stoneRespawnTimer = m_stoneRespawnTime;
-		std::cout << "All stones destroyed! Respawn timer started." << std::endl;
+		//std::cout << "All stones destroyed! Respawn timer started." << std::endl;
 	}
 
 	m_allStonesWereDestroyed = allStonesCurrentlyDestroyed;
@@ -344,7 +344,7 @@ void MainGameState::Update(f32 dt)
 				AEVec2 spawnPos = rangeEnemy->GetPosition();
 				spawnPos.x += rangeEnemy->GetProjectileSpawnOffset().x;
 				spawnPos.y += rangeEnemy->GetProjectileSpawnOffset().y;
-				std::cout << rangeEnemy->GetProjectileSpawnOffset().y << " " << spawnPos.y << std::endl;
+				//std::cout << rangeEnemy->GetProjectileSpawnOffset().y << " " << spawnPos.y << std::endl;
 				newProjectile.Init(spawnPos, directionVec, projData);
 
 				rangeEnemy->SetFiredProjectile(true);

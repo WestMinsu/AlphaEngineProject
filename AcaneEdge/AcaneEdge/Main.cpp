@@ -21,7 +21,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	srand(static_cast<unsigned int>(time(NULL)));
-	AESysInit(hInstance, nCmdShow, kWindowWidth, kWindowHeight, 1, 60, false, NULL);
+	AESysInit(hInstance, nCmdShow, kWindowWidth, kWindowHeight, 0, 60, false, NULL);
 
 	GameManager::GetInstance()->Init();
 	GameManager::GetInstance()->Update();
