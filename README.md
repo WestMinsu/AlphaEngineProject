@@ -53,3 +53,6 @@ https://drive.google.com/file/d/1Y_ibDJ4eBOJX6XSiUzVGOKXVZEj0WfQb/view?usp=shari
 
 5주차 영상
 https://drive.google.com/file/d/1wP_wEHz47Mzx2igJ3g5OTAVAfuXxCsEK/view?usp=sharing
+
+Trailer
+https://drive.google.com/file/d/18nE09uDSeRkDPpBcPcgStyB1dOet2o_G/view?usp=sharing
