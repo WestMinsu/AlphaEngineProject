@@ -165,7 +165,7 @@ void MainGameState::Update(f32 dt)
 		m_Bosses[0]->AttackMelee(m_Player);
 		m_Bosses[0]->AttackRange(m_Player, m_enemyProjectiles);
 		m_Bosses[0]->AttackLaser(m_Player);
-
+		m_isShowingBossTutorial = true;
 	}
 	for (auto& stone : m_stones)
 	{
@@ -620,7 +620,6 @@ void MainGameState::Draw()
 	if ( m_Bosses.size() > 0 && !m_Bosses[0]->IsCompletelyDead())
 	{
 		m_Bosses[0]->Draw();
-		m_isShowingBossTutorial = true;
 	}
 
 	m_Player.Draw();
