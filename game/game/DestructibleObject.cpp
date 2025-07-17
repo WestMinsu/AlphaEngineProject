@@ -6,7 +6,7 @@
 DestructibleObject::DestructibleObject()
 {
 	m_position = { 0,0 };
-	m_size = { 100.f, 100.f };
+	m_size = { 50.f, 100.f };
 	m_health = 10;
 	m_pTexture = nullptr;
 	m_isActive = true;
