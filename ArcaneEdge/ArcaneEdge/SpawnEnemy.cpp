@@ -93,7 +93,7 @@ void SpawnEnemy::Reset()
 	{
 		m_position.x += 2 * 1856;
 		m_resetCount++;
-		m_spawnTimes = 2*m_resetCount;
+		m_spawnTimes = 2;
 		m_spawnCurrentTime = 0.f;
 		
 	}
